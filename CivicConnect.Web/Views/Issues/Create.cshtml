@@ -1,0 +1,181 @@
+@model CivicConnect.Web.Models.Issues.IssueCreateViewModel
+@using CivicConnect.Core.Enums
+@{
+    ViewData["Title"] = "Gửi phản ánh";
+}
+
+@section Styles {
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map-selector {
+            width: 100%;
+            height: 100%;
+            min-height: 320px;
+            background-color: var(--bg-main);
+        }
+        .leaflet-container {
+            font-family: inherit;
+        }
+        /* Custom styled draggable pin on selection map */
+        .selector-pin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--primary-color, #da251d);
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            border: 2px solid white;
+            width: 38px !important;
+            height: 38px !important;
+            margin-left: -19px !important;
+            margin-top: -19px !important;
+        }
+        .selector-pin i {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .selector-pin.marker-traffic { background-color: var(--primary-color, #da251d); }
+        .selector-pin.marker-environment { background-color: var(--success-color, #198754); }
+        .selector-pin.marker-security { background-color: var(--warning-color, #ffc107); color: #0f172a !important; }
+        .selector-pin.marker-infrastructure { background-color: #8b5cf6; }
+        .selector-pin.marker-administration { background-color: #06b6d4; }
+        .selector-pin.marker-other { background-color: #64748b; }
+
+        /* Segmented control buttons for map style selector */
+        .btn-glass {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 0.3rem 0.75rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.725rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-glass:hover {
+            background-color: var(--bg-glass-hover);
+            color: var(--primary-color);
+        }
+        .btn-glass.active {
+            background-color: var(--primary-color);
+            color: white !important;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-10">
+        <div class="glass-card p-4 p-md-5">
+            <h4 class="fw-bold mb-4 text-primary"><i class="bi bi-send-fill me-2"></i> Gửi phản ánh đời sống dân sinh</h4>
+            
+            <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+
+                <div class="row g-4">
+                    <!-- Left Column: Form Fields -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                            <input asp-for="Title" class="form-control rounded-3" placeholder="Ví dụ: Nắp hố ga bị hỏng gây nguy hiểm..." required />
+                            <span asp-validation-for="Title" class="text-danger" style="font-size: 0.75rem;"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                            <textarea asp-for="Description" class="form-control rounded-3" rows="5" placeholder="Mô tả chi tiết sự việc, vị trí cụ thể, ảnh hưởng..." required></textarea>
+                            <span asp-validation-for="Description" class="text-danger" style="font-size: 0.75rem;"></span>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label asp-for="Category" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                                <select asp-for="Category" class="form-select rounded-3" required>
+                                    <option value="">Chọn danh mục</option>
+                                    <option value="1">Giao thông</option>
+                                    <option value="2">Môi trường</option>
+                                    <option value="3">An ninh trật tự</option>
+                                    <option value="4">Hạ tầng công cộng</option>
+                                    <option value="5">Hành chính</option>
+                                    <option value="99">Khác</option>
+                                </select>
+                                <span asp-validation-for="Category" class="text-danger" style="font-size: 0.75rem;"></span>
+                            </div>
+                            <div class="col-6">
+                                <label asp-for="Priority" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                                <select asp-for="Priority" class="form-select rounded-3" required>
+                                    <option value="">Đề xuất mức ưu tiên</option>
+                                    <option value="1">Thấp (Low)</option>
+                                    <option value="2">Trung bình (Medium)</option>
+                                    <option value="3">Cao (High)</option>
+                                    <option value="4">Khẩn cấp (Critical)</option>
+                                </select>
+                                <span asp-validation-for="Priority" class="text-danger" style="font-size: 0.75rem;"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageFiles" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                            <input type="file" asp-for="ImageFiles" class="form-control rounded-3" multiple accept="image/*" id="image-upload-input" />
+                            <span asp-validation-for="ImageFiles" class="text-danger" style="font-size: 0.75rem;"></span>
+                            <div class="d-flex flex-wrap gap-2 mt-2" id="image-previews-container"></div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="IsAnonymous" class="form-check-input" />
+                            <label asp-for="IsAnonymous" class="form-check-label text-muted" style="font-size: 0.85rem;"></label>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Map Selector -->
+                    <div class="col-md-6 d-flex flex-column">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 0.85rem;">Chọn vị trí sự cố trên bản đồ</label>
+                            <input asp-for="Address" id="address-input" class="form-control rounded-3 mb-2" placeholder="Nhập địa chỉ hoặc click/kéo ghim trên bản đồ..." required />
+                            <span asp-validation-for="Address" class="text-danger" style="font-size: 0.75rem;"></span>
+                        </div>
+
+                        <!-- Map Display Panel -->
+                        <div class="flex-grow-1 border rounded-3 position-relative" style="min-height: 320px; border: 1px solid var(--border-glass) !important; overflow: hidden;" id="map-container">
+                            <div id="map-selector"></div>
+                            
+                            <!-- Map Style Selector overlay -->
+                            <div id="style-panel" class="map-overlay top-right glass-panel p-1 d-flex gap-1" style="position: absolute; right: 0.5rem; top: 0.5rem; z-index: 1000; border-radius: var(--border-radius-md);">
+                                <button type="button" class="btn-glass active" data-style="current">Mặc định</button>
+                                <button type="button" class="btn-glass" data-style="terrain">Địa hình</button>
+                                <button type="button" class="btn-glass" data-style="satellite">Vệ tinh</button>
+                            </div>
+                        </div>
+
+                        <!-- Hidden Inputs for Geolocation properties -->
+                        <input type="hidden" asp-for="Latitude" id="lat-input" value="10.7769" />
+                        <input type="hidden" asp-for="Longitude" id="lng-input" value="106.7009" />
+                        <input type="hidden" asp-for="ProvinceCode" id="prov-code" value="79" />
+                        <input type="hidden" asp-for="ProvinceName" id="prov-name" value="TP. Hồ Chí Minh" />
+                        <input type="hidden" asp-for="DistrictCode" id="dist-code" value="760" />
+                        <input type="hidden" asp-for="DistrictName" id="dist-name" value="Quận 1" />
+                        <input type="hidden" asp-for="WardCode" id="ward-code" value="26734" />
+                        <input type="hidden" asp-for="WardName" id="ward-name" value="Phường Bến Nghé" />
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-light d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Hủy Bỏ</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Gửi Phản Ánh</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Map selection logic script -->
+    <script src="~/js/issue-create.js" asp-append-version="true"></script>
+}

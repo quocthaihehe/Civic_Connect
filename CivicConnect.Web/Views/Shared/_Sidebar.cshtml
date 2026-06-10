@@ -1,0 +1,81 @@
+@using Microsoft.AspNetCore.Identity
+@using CivicConnect.Core.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var activeController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var activeAction = ViewContext.RouteData.Values["Action"]?.ToString();
+    
+    var user = SignInManager.IsSignedIn(User) ? UserManager.GetUserAsync(User).Result : null;
+    var userName = user?.FullName ?? "Khách";
+    var userAvatar = user?.AvatarUrl ?? "/images/default-avatar.png";
+}
+
+<!-- Sidebar — Views/Shared/_Sidebar.cshtml -->
+<aside class="sidebar" id="sidebar">
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="logo-name">CivicConnect</span>
+      <span class="logo-tagline">Cổng dịch vụ công</span>
+    </div>
+  </div>
+
+  <!-- Nav items -->
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Chính</div>
+    <a asp-controller="Home" asp-action="Index" class="nav-item @(activeController == "Home" && activeAction == "Index" ? "active" : "")">
+      <span class="nav-icon"><i class="bi bi-house-door"></i></span>
+      <span class="nav-label">Trang chủ</span>
+    </a>
+    <a asp-controller="Issues" asp-action="Index" class="nav-item @(activeController == "Issues" && activeAction == "Index" ? "active" : "")">
+      <span class="nav-icon"><i class="bi bi-megaphone"></i></span>
+      <span class="nav-label">Phản ánh</span>
+    </a>
+    <a asp-controller="Map" asp-action="Index" class="nav-item @(activeController == "Map" && activeAction == "Index" ? "active" : "")">
+      <span class="nav-icon"><i class="bi bi-map"></i></span>
+      <span class="nav-label">Bản đồ</span>
+    </a>
+    <a asp-controller="Policy" asp-action="Index" class="nav-item @(activeController == "Policy" ? "active" : "")">
+      <span class="nav-icon"><i class="bi bi-file-text"></i></span>
+      <span class="nav-label">Chính sách</span>
+    </a>
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div class="nav-section-label" style="margin-top:16px">Cá nhân</div>
+        <a asp-controller="Issues" asp-action="MyIssues" class="nav-item @(activeController == "Issues" && activeAction == "MyIssues" ? "active" : "")">
+          <span class="nav-icon"><i class="bi bi-collection"></i></span>
+          <span class="nav-label">Phản ánh của tôi</span>
+        </a>
+        <a asp-controller="Account" asp-action="Profile" class="nav-item @(activeController == "Account" && activeAction == "Profile" ? "active" : "")">
+          <span class="nav-icon"><i class="bi bi-person-circle"></i></span>
+          <span class="nav-label">Hồ sơ</span>
+        </a>
+    }
+  </nav>
+
+  @if (SignInManager.IsSignedIn(User))
+  {
+      <!-- User info bottom -->
+      <div class="sidebar-user">
+        <img src="@userAvatar" onerror="this.src='https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/avatar.png'" alt="avatar" class="user-avatar" />
+        <div class="user-info">
+          <span class="user-name">@userName</span>
+          <span class="user-role">Công dân</span>
+        </div>
+        <form asp-controller="Account" asp-action="Logout" method="post" id="sidebarLogoutForm" class="d-inline ms-auto">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn p-0 border-0 btn-logout" title="Đăng xuất" style="background: none; outline: none; box-shadow: none;">
+              <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </form>
+      </div>
+  }
+</aside>

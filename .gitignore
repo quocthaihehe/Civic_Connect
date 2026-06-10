@@ -1,0 +1,10 @@
+# Bỏ qua các file cấu hình chứa thông tin nhạy cảm (API Key, Connection String)
+appsettings.json
+appsettings.Development.json
+
+# Bỏ qua các file và thư mục build của hệ thống .NET
+bin/
+obj/
+
+# Bỏ qua thư mục hệ thống của Visual Studio (tránh lỗi file bị khóa)
+.vs/

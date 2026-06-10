@@ -1,0 +1,244 @@
+@model CivicConnect.Core.Entities.Issue
+@using CivicConnect.Core.Enums
+@{
+    ViewData["Title"] = "Xử lý phản ánh #" + Model.Id;
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+    var errorMsg = TempData["ErrorMessage"]?.ToString();
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-10">
+        @if (!string.IsNullOrEmpty(successMsg))
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @successMsg
+                <button type="button" class="btn-close" data-bs-dismiss="close" aria-label="Close"></button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(errorMsg))
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @errorMsg
+                <button type="button" class="btn-close" data-bs-dismiss="close" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="d-flex flex-column gap-4">
+            <!-- Back to Dashboard -->
+            <div>
+                <a asp-action="Dashboard" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="bi bi-arrow-left me-1"></i> Quay lại bàn làm việc</a>
+            </div>
+
+            <!-- Issue details & handling form -->
+            <div class="glass-card p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <span class="badge @GetStatusClass(Model.Status) rounded-pill px-3 py-2" style="font-size: 0.85rem;">@GetStatusName(Model.Status)</span>
+                    <span class="text-muted" style="font-size: 0.85rem;">Gửi bởi: <strong>@(Model.IsAnonymous ? "Nặc danh" : Model.Author?.FullName)</strong> | Lúc: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+
+                <h3 class="fw-bold text-white mb-4">@Model.Title</h3>
+
+                <div class="row g-4 mb-4 border-bottom border-light pb-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-file-earmark-text me-1"></i> Mô tả chi tiết</h6>
+                        <p class="text-secondary" style="white-space: pre-line; font-size: 0.9rem;">@Model.Description</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-geo-alt me-1"></i> Địa điểm & Phân cấp</h6>
+                        <p class="text-secondary mb-1" style="font-size: 0.9rem;">@Model.Address</p>
+                        <div class="p-2 rounded" style="font-size: 0.8rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass);">
+                            <strong>Phường:</strong> @Model.WardName (Mã: @Model.WardCode)<br/>
+                            <strong>Quận:</strong> @Model.DistrictName (Mã: @Model.DistrictCode)<br/>
+                            <strong>Độ ưu tiên đề xuất:</strong> @GetPriorityName(Model.Priority)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images Gallery -->
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-images me-1"></i> Hình ảnh hiện trường</h6>
+                        <div class="d-flex flex-wrap gap-3">
+                            @foreach (var img in Model.Images.OrderBy(i => i.OrderIndex))
+                            {
+                                <a href="@img.Url" target="_blank" class="hover-scale">
+                                    <img src="@img.ThumbnailUrl" class="rounded border shadow-sm" style="width: 120px; height: 90px; object-fit: cover;" />
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- ADMINISTRATIVE ACTIONS PANEL -->
+                <div class="border-top pt-4">
+                    <h5 class="fw-bold mb-3 text-white"><i class="bi bi-shield-lock me-1"></i> Thẩm quyền & Hành động hành chính</h5>
+                    
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (Model.Status == IssueStatus.Pending)
+                        {
+                            <!-- Accept action -->
+                            <form asp-action="Accept" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-hand-thumbs-up me-1"></i> Tiếp nhận phản ánh</button>
+                            </form>
+
+                            <!-- Reject action trigger modal -->
+                            <button type="button" class="btn btn-outline-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="bi bi-x-circle me-1"></i> Từ chối giải quyết
+                            </button>
+                        }
+                        else if (Model.Status == IssueStatus.Assigned)
+                        {
+                            <!-- Start processing action -->
+                            <form asp-action="Process" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-play-fill me-1"></i> Bắt đầu xử lý</button>
+                            </form>
+
+                            <!-- Reject action trigger modal -->
+                            <button type="button" class="btn btn-outline-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="bi bi-x-circle me-1"></i> Từ chối giải quyết
+                            </button>
+                        }
+                        else if (Model.Status == IssueStatus.Processing)
+                        {
+                            <!-- Resolve action trigger modal -->
+                            <button type="button" class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#resolveModal">
+                                <i class="bi bi-check-circle-fill me-1"></i> Đánh dấu Hoàn thành
+                            </button>
+
+                            <!-- Escalate (Phường lên Quận) -->
+                            @if (User.IsInRole("OfficialWard"))
+                            {
+                                <button type="button" class="btn btn-warning rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#escalateModal">
+                                    <i class="bi bi-arrow-up-circle-fill me-1"></i> Chuyển cấp lên Quận
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary py-2 mb-0" style="font-size: 0.85rem;">
+                                <i class="bi bi-info-circle me-1"></i> Phản ánh này đã được đóng hoặc xử lý xong. Không cần thao tác nghiệp vụ thêm.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Từ Chối -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: var(--border-radius-md);">
+            <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="rejectModalLabel">Từ chối giải quyết phản ánh</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label fw-semibold text-white" style="font-size: 0.85rem;">Lý do từ chối (bắt buộc):</label>
+                        <textarea class="form-control rounded-3" name="reason" id="reason" rows="4" placeholder="Nêu rõ lý do phản ánh không hợp lệ hoặc không đúng thẩm quyền..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-danger rounded-pill px-4">Xác Nhận Từ Chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Giải Quyết Xong -->
+<div class="modal fade" id="resolveModal" tabindex="-1" aria-labelledby="resolveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: var(--border-radius-md);">
+            <form asp-action="Resolve" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="resolveModalLabel">Báo cáo kết quả giải quyết</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="note" class="form-label fw-semibold text-white" style="font-size: 0.85rem;">Báo cáo kết quả xử lý (ghi chú):</label>
+                        <textarea class="form-control rounded-3" name="note" id="note" rows="3" placeholder="Mô tả tóm tắt kết quả xử lý tại hiện trường..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="attachmentUrl" class="form-label fw-semibold text-white" style="font-size: 0.85rem;">Link văn bản/ảnh kết quả xử lý (Cloudinary/URL):</label>
+                        <input class="form-control rounded-3" type="text" name="attachmentUrl" id="attachmentUrl" placeholder="https://res.cloudinary.com/..." />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-4">Giải Quyết Xong</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chuyển Cấp Lên Quận -->
+<div class="modal fade" id="escalateModal" tabindex="-1" aria-labelledby="escalateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: var(--border-radius-md);">
+            <form asp-action="Escalate" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold" id="escalateModalLabel">Chuyển lên cấp Quận (Escalation)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning" style="font-size: 0.8rem;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Việc chuyển cấp sẽ tạo một phản ánh sao chép ở cấp cơ quan Quận 1 và gán trạng thái bàn giao xử lý.
+                    </div>
+                    <div class="mb-3">
+                        <label for="escalationNote" class="form-label fw-semibold text-white" style="font-size: 0.85rem;">Ghi chú lý do chuyển cấp (vượt thẩm quyền):</label>
+                        <textarea class="form-control rounded-3" name="note" id="escalationNote" rows="4" placeholder="Nêu rõ lý do sự việc vượt thẩm quyền của Phường (cần thiết bị chuyên dụng, dự toán lớn...)" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-warning rounded-pill px-4">Xác Nhận Chuyển Cấp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetStatusName(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "Chờ tiếp nhận",
+        IssueStatus.Assigned => "Đã phân công",
+        IssueStatus.Processing => "Đang xử lý",
+        IssueStatus.Resolved => "Đã giải quyết",
+        IssueStatus.Rejected => "Từ chối",
+        IssueStatus.Closed => "Đóng tự động",
+        _ => "Không xác định"
+    };
+
+    public string GetStatusClass(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "bg-warning text-dark",
+        IssueStatus.Assigned => "bg-info text-white",
+        IssueStatus.Processing => "bg-primary text-white",
+        IssueStatus.Resolved => "bg-success text-white",
+        IssueStatus.Rejected => "bg-danger text-white",
+        _ => "bg-secondary text-white"
+    };
+
+    public string GetPriorityName(IssuePriority priority) => priority switch
+    {
+        IssuePriority.Low => "Thấp (Low)",
+        IssuePriority.Medium => "Trung bình (Medium)",
+        IssuePriority.High => "Cao (High)",
+        IssuePriority.Critical => "Khẩn cấp (Critical)",
+        _ => "Thường"
+    };
+}

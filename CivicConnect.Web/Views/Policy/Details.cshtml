@@ -1,0 +1,23 @@
+@model CivicConnect.Core.Entities.Policy
+@{
+    ViewData["Title"] = Model.Title;
+}
+<div class="section-block fade-in-up">
+    <div class="mb-4">
+        <a href="/Policy" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="bi bi-arrow-left me-1"></i> Quay lại danh sách</a>
+    </div>
+    
+    <div class="news-tag @Model.TagClass mb-3">@Model.Tag</div>
+    <h1 class="fw-bold mb-3" style="font-family: var(--font-display); font-size: 2rem; color: var(--gray-800);">@Model.Title</h1>
+    
+    <div class="news-meta mb-4 pb-3 border-bottom" style="font-size: 0.85rem; color: var(--gray-400);">
+        <span class="me-3"><i class="bi bi-building"></i> @Model.IssuingUnit</span>
+        <span><i class="bi bi-calendar3"></i> @Model.PublishedDate.ToString("dd/MM/yyyy HH:mm")</span>
+    </div>
+    
+    <div class="news-content text-secondary" style="font-size: 1.05rem; line-height: 1.8; white-space: pre-line;">
+        @Model.Excerpt
+        
+        @Model.Content
+    </div>
+</div>

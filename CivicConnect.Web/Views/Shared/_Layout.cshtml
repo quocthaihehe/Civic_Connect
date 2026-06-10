@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] - CivicConnect</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="~/css/variables.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/animations.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/sidebar.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/topbar.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/forms.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  
+  <script>
+      (function () {
+          const savedTheme = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', savedTheme);
+      })();
+  </script>
+  @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    @await Html.PartialAsync("_Sidebar")
+
+    <!-- Main area -->
+    <div class="main-area">
+      @await Html.PartialAsync("_Navbar")
+      
+      <main class="main-content">
+        @RenderBody()
+      </main>
+    </div>
+  </div>
+
+  <!-- Overlay mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- JQuery, Bootstrap and dependencies -->
+  <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- SignalR Client Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+  
+  <!-- Realtime Notifications Script -->
+  <script src="~/js/notifications.js" asp-append-version="true"></script>
+  
+  <!-- Layout interactions -->
+  <script src="~/js/layout.js" asp-append-version="true"></script>
+  
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

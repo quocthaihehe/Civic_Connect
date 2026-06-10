@@ -1,0 +1,182 @@
+@model CivicConnect.Web.Models.Account.ProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        @if (!string.IsNullOrEmpty(successMsg))
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @successMsg
+                <button type="button" class="btn-close" data-bs-dismiss="close" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="glass-card p-4 p-md-5">
+            <h4 class="fw-bold mb-4 text-primary"><i class="bi bi-person-gear me-2"></i> Cài đặt hồ sơ cá nhân</h4>
+            
+            <form asp-action="Profile" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+
+                <div class="row g-4 align-items-center mb-4 pb-3" style="border-bottom: 1px solid var(--border-glass) !important;">
+                    <div class="col-md-3 text-center">
+                        <div class="position-relative d-inline-block">
+                            <img src="@(Model.AvatarUrl ?? "/images/default-avatar.png")" onerror="this.src='https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/avatar.png'" class="rounded-circle border border-warning border-3" style="width: 110px; height: 110px; object-fit: cover; box-shadow: 0 0 15px rgba(255,199,44,0.4);" id="avatar-preview" />
+                            <label for="AvatarFile" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow cursor-pointer hover-scale" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <i class="bi bi-camera-fill"></i>
+                            </label>
+                            <input type="file" asp-for="AvatarFile" id="AvatarFile" class="d-none" accept="image/*" />
+                        </div>
+                        <div class="text-muted mt-2" style="font-size: 0.75rem;">Chấp nhận JPG, PNG, WebP tối đa 5MB</div>
+                    </div>
+                    <div class="col-md-9">
+                        <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                        <p class="text-muted mb-0" style="font-size: 0.85rem;">Cập nhật ảnh đại diện và thông tin cá nhân của bạn dưới đây.</p>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                        <input asp-for="FullName" class="form-control rounded-3" placeholder="Nguyễn Văn A" required />
+                        <span asp-validation-for="FullName" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CitizenId" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                        <input asp-for="CitizenId" class="form-control rounded-3" placeholder="001099123456" />
+                        <span asp-validation-for="CitizenId" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                        <input asp-for="PhoneNumber" class="form-control rounded-3" placeholder="0901234567" required />
+                        <span asp-validation-for="PhoneNumber" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Khu vực đăng ký</label>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <select asp-for="ProvinceCode" id="province-select" class="form-select rounded-3" style="font-size: 0.85rem;" required>
+                                    <option value="">Tỉnh/TP</option>
+                                    <option value="79" selected="@(Model.ProvinceCode == "79")">TP. Hồ Chí Minh</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <select asp-for="DistrictCode" id="district-select" class="form-select rounded-3" style="font-size: 0.85rem;" required>
+                                    <option value="">Quận/Huyện</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <select asp-for="WardCode" id="ward-select" class="form-select rounded-3" style="font-size: 0.85rem;" required>
+                                    <option value="">Phường/Xã</option>
+                                </select>
+                            </div>
+                        </div>
+                        <span asp-validation-for="WardCode" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 d-flex justify-content-end gap-2" style="border-top: 1px solid var(--border-glass) !important;">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Hủy Bỏ</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Lưu Thay Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Preview ảnh đại diện khi chọn tệp
+            $('#AvatarFile').change(function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#avatar-preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Cascading dropdown logic
+            const districts = {
+                "79": [
+                    { code: "760", name: "Quận 1" },
+                    { code: "770", name: "Quận 3" },
+                    { code: "774", name: "Quận Bình Thạnh" }
+                ]
+            };
+
+            const wards = {
+                "760": [
+                    { code: "26734", name: "Phường Bến Nghé" },
+                    { code: "26737", name: "Phường Bến Thành" },
+                    { code: "26731", name: "Phường Đa Kao" }
+                ],
+                "770": [
+                    { code: "26797", name: "Phường Võ Thị Sáu" },
+                    { code: "26809", name: "Phường 12" }
+                ],
+                "774": [
+                    { code: "27157", name: "Phường 19" },
+                    { code: "27159", name: "Phường 22" }
+                ]
+            };
+
+            const selectedProvince = "@Model.ProvinceCode";
+            const selectedDistrict = "@Model.DistrictCode";
+            const selectedWard = "@Model.WardCode";
+
+            // Khởi tạo quận
+            if (selectedProvince && districts[selectedProvince]) {
+                districts[selectedProvince].forEach(d => {
+                    const isSel = d.code === selectedDistrict ? "selected" : "";
+                    $('#district-select').append(`<option value="${d.code}" ${isSel}>${d.name}</option>`);
+                });
+            }
+
+            // Khởi tạo phường
+            if (selectedDistrict && wards[selectedDistrict]) {
+                wards[selectedDistrict].forEach(w => {
+                    const isSel = w.code === selectedWard ? "selected" : "";
+                    $('#ward-select').append(`<option value="${w.code}" ${isSel}>${w.name}</option>`);
+                });
+            }
+
+            $('#province-select').change(function() {
+                const provId = $(this).val();
+                const distSelect = $('#district-select');
+                const wardSelect = $('#ward-select');
+
+                distSelect.empty().append('<option value="">Quận/Huyện</option>');
+                wardSelect.empty().append('<option value="">Phường/Xã</option>');
+
+                if (districts[provId]) {
+                    districts[provId].forEach(d => {
+                        distSelect.append(`<option value="${d.code}">${d.name}</option>`);
+                    });
+                }
+            });
+
+            $('#district-select').change(function() {
+                const distId = $(this).val();
+                const wardSelect = $('#ward-select');
+
+                wardSelect.empty().append('<option value="">Phường/Xã</option>');
+
+                if (wards[distId]) {
+                    wards[distId].forEach(w => {
+                        wardSelect.append(`<option value="${w.code}">${w.name}</option>`);
+                    });
+                }
+            });
+        });
+    </script>
+}

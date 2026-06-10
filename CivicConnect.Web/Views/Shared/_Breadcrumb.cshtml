@@ -1,0 +1,7 @@
+<ol class="breadcrumb mb-0" style="font-size: 0.8rem; --bs-breadcrumb-divider: '>';">
+    <li class="breadcrumb-item"><a href="/" style="text-decoration: none; color: var(--primary-500);">Trang chủ</a></li>
+    @if (ViewData["Title"]?.ToString() != "Trang chủ" && ViewData["Title"] != null)
+    {
+        <li class="breadcrumb-item active" aria-current="page" style="color: var(--gray-400);">@ViewData["Title"]</li>
+    }
+</ol>

@@ -1,0 +1,93 @@
+@using Microsoft.AspNetCore.Identity
+@using CivicConnect.Core.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = SignInManager.IsSignedIn(User) ? UserManager.GetUserAsync(User).Result : null;
+    var userName = user?.FullName ?? "Khách";
+    var userAvatar = user?.AvatarUrl ?? "/images/default-avatar.png";
+    var unreadCount = 0; // Loaded dynamically via AJAX or from DB
+}
+
+<header class="topbar">
+  <!-- Mobile menu toggle -->
+  <button class="topbar-menu-btn d-lg-none btn border-0 p-0 me-2" onclick="toggleSidebar()" style="font-size: 1.5rem; color: var(--gray-600);">
+    <i class="bi bi-list"></i>
+  </button>
+
+  <!-- Page title (dynamic) -->
+  <div class="topbar-title d-none d-sm-block">
+    <h1 class="page-title mb-0">@ViewData["Title"]</h1>
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      @await Html.PartialAsync("_Breadcrumb")
+    </nav>
+  </div>
+
+  <!-- Right actions -->
+  <div class="topbar-actions ms-auto d-flex align-items-center gap-2">
+    <!-- Search -->
+    <div class="topbar-search d-none d-md-flex">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" placeholder="Tìm kiếm phản ánh..." class="search-input" />
+    </div>
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="icon-btn" type="button" title="Chuyển chế độ sáng/tối" style="border: none; outline: none; cursor: pointer;">
+        <i class="bi bi-moon" id="theme-toggle-icon"></i>
+    </button>
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <!-- Notifications -->
+        <div class="notif-btn-wrap" id="notifWrap" style="position: relative;">
+          <button class="icon-btn" onclick="toggleNotifPanel()" style="border: none; outline: none; cursor: pointer;">
+            <i class="bi bi-bell"></i>
+            <span class="icon-btn-badge d-none" id="notif-counter">0</span>
+          </button>
+          
+          <!-- Dropdown panel -->
+          <div class="notif-panel" id="notifPanel" style="display:none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--bg-card); min-width: 320px; border-radius: var(--radius-lg); border: 1px solid var(--gray-100); box-shadow: var(--shadow-lg); z-index: 200;">
+            <div class="notif-header p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--gray-100) !important;">
+              <span class="fw-bold text-dark" style="color: var(--gray-800) !important;">Thông báo</span>
+              <a href="javascript:void(0)" class="notif-read-all text-decoration-none" style="font-size: 0.75rem; color: var(--primary-600);" id="mark-all-read">Đọc tất cả</a>
+            </div>
+            <div id="notif-container" style="max-height: 280px; overflow-y: auto;">
+              <!-- Load via AJAX from /api/notifications -->
+              <div class="text-center text-muted py-4" id="notif-empty-state">
+                  <i class="bi bi-bell-slash fs-3 d-block mb-1"></i>
+                  <span style="font-size: 0.85rem;">Không có thông báo mới</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avatar dropdown -->
+        <div class="avatar-dropdown" id="avatarWrap" style="position: relative;">
+          <button class="avatar-btn" onclick="toggleAvatarMenu()" style="border: none; outline: none; background: transparent; cursor: pointer;">
+            <img src="@userAvatar" onerror="this.src='https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/avatar.png'" alt="avatar" />
+            <span class="avatar-name d-none d-md-inline text-dark" style="color: var(--gray-700) !important;">@userName</span>
+            <i class="bi bi-chevron-down avatar-chevron"></i>
+          </button>
+          <div class="avatar-menu" id="avatarMenu" style="display:none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--bg-card); min-width: 220px; border-radius: var(--radius-lg); border: 1px solid var(--gray-100); box-shadow: var(--shadow-lg); z-index: 200;">
+            <a href="/Account/Profile"><i class="bi bi-person me-2"></i> Hồ sơ cá nhân</a>
+            <a href="/Issues/MyIssues"><i class="bi bi-collection me-2"></i> Phản ánh của tôi</a>
+            <div class="avatar-menu-divider" style="height: 1px; background: var(--gray-100); margin: 4px 0;"></div>
+            <form asp-controller="Account" asp-action="Logout" method="post" id="navbarLogoutForm" class="d-block w-100">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="dropdown-item text-danger border-0 text-start w-100 px-3 py-2" style="background: none; font-size: 14px; display: flex; align-items: center; gap: 10px;">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+            </form>
+          </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex gap-2">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="border-radius: var(--radius-full);">Đăng Nhập</a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-sm btn-primary rounded-pill px-3" style="border-radius: var(--radius-full);">Đăng Ký</a>
+        </div>
+    }
+  </div>
+</header>

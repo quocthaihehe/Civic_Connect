@@ -1,0 +1,204 @@
+@* Views/Home/Index.cshtml *@
+@model CivicConnect.Web.Models.Home.HomeViewModel
+@using CivicConnect.Core.Enums
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="home-page">
+
+  @* ── SECTION 1: HERO GREETING ── *@
+  <div class="hero-greeting fade-in-up">
+    <div class="hero-greeting-inner">
+      <div class="hero-text">
+        <p class="hero-time-greeting text-primary">@Model.TimeGreeting, 👋</p>
+        <h1 class="hero-name">@Model.UserFullName</h1>
+        <p class="hero-subtitle">
+          Cùng xây dựng <strong>@Model.WardName, @Model.DistrictName</strong> tốt đẹp hơn.
+          Bạn có <strong class="text-primary">@Model.MyPendingCount phản ánh</strong> đang chờ xử lý.
+        </p>
+      </div>
+      <div class="hero-illustration d-none d-md-block" style="width: 160px;">
+        <img src="~/images/hero-city.svg" alt="" aria-hidden="true" style="width: 100%; opacity: 0.85;" />
+      </div>
+    </div>
+  </div>
+
+  @* ── SECTION 2: QUICK ACTIONS ── *@
+  <div class="quick-actions fade-in-up">
+    <a href="/Issues/Create" class="quick-action-card action-primary text-decoration-none">
+      <div class="qa-icon"><i class="bi bi-plus-circle-fill"></i></div>
+      <div class="qa-text">
+        <span class="qa-title">Gửi phản ánh mới</span>
+        <span class="qa-desc">Báo cáo sự cố trong khu vực của bạn</span>
+      </div>
+      <i class="bi bi-arrow-right qa-arrow"></i>
+    </a>
+    <a href="/Issues/MyIssues" class="quick-action-card action-teal text-decoration-none">
+      <div class="qa-icon"><i class="bi bi-clock-history"></i></div>
+      <div class="qa-text">
+        <span class="qa-title">Theo dõi phản ánh</span>
+        <span class="qa-desc">Xem tiến độ xử lý của bạn</span>
+      </div>
+      <i class="bi bi-arrow-right qa-arrow"></i>
+    </a>
+    <a href="/Map" class="quick-action-card action-amber text-decoration-none">
+      <div class="qa-icon"><i class="bi bi-map-fill"></i></div>
+      <div class="qa-text">
+        <span class="qa-title">Bản đồ khu vực</span>
+        <span class="qa-desc">Xem các vấn đề đang xảy ra</span>
+      </div>
+      <i class="bi bi-arrow-right qa-arrow"></i>
+    </a>
+  </div>
+
+  @* ── SECTION 3: TIN TỨC & CHÍNH SÁCH ── *@
+  <div class="section-block fade-in-up">
+    <div class="section-header">
+      <div class="section-title-wrap">
+        <span class="section-icon bg-blue"><i class="bi bi-newspaper"></i></span>
+        <h2 class="section-title">Tin tức & Chính sách mới</h2>
+      </div>
+      <a href="/Policy" class="section-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="news-grid">
+      @if (Model.LatestPolicies == null || !Model.LatestPolicies.Any())
+      {
+         <div class="col-12 text-center text-muted py-4">Không có tin tức hay chính sách mới.</div>
+      }
+      else
+      {
+          @foreach (var news in Model.LatestPolicies)
+          {
+            <a href="/Policy/Details/@news.Id" class="news-card card-hover text-decoration-none">
+              <div class="news-tag @news.TagClass">@news.Tag</div>
+              <h3 class="news-title">@news.Title</h3>
+              <p class="news-excerpt">@news.Excerpt</p>
+              <div class="news-meta">
+                <span><i class="bi bi-building"></i> @news.IssuingUnit</span>
+                <span><i class="bi bi-calendar3"></i> @news.PublishedDate.ToString("dd/MM/yyyy")</span>
+              </div>
+            </a>
+          }
+      }
+    </div>
+  </div>
+
+  @* ── SECTION 4: PHẢN ÁNH NỔI BẬT (đã duyệt) ── *@
+  <div class="section-block fade-in-up">
+    <div class="section-header">
+      <div class="section-title-wrap">
+        <span class="section-icon bg-teal"><i class="bi bi-megaphone"></i></span>
+        <h2 class="section-title">Phản ánh nổi bật gần đây</h2>
+      </div>
+      <a href="/Issues" class="section-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="issues-feed">
+      @if (Model.FeaturedIssues == null || !Model.FeaturedIssues.Any())
+      {
+         <div class="col-12 text-center text-muted py-4">Chưa có phản ánh nổi bật nào được duyệt.</div>
+      }
+      else
+      {
+          @foreach (var issue in Model.FeaturedIssues)
+          {
+            <div class="issue-feed-card card-hover fade-in-up">
+              <div class="issue-feed-img">
+                @if (issue.ThumbnailUrl != null)
+                {
+                  <img src="@issue.ThumbnailUrl" alt="@issue.Title" loading="lazy" />
+                }
+                else
+                {
+                  <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted" style="background: var(--gray-100); height: 140px;">
+                     <i class="bi bi-image fs-3"></i>
+                  </div>
+                }
+                <span class="issue-feed-category @issue.CategoryClass">@issue.CategoryLabel</span>
+              </div>
+              <div class="issue-feed-body">
+                <div class="issue-feed-meta">
+                  <span class="issue-status-badge status-@issue.StatusClass">
+                    <span class="status-dot"></span>@issue.StatusLabel
+                  </span>
+                  <span class="issue-date">@issue.CreatedAt.ToString("dd/MM")</span>
+                </div>
+                <h3 class="issue-feed-title">
+                  <a href="/Issues/Details/@issue.Id" class="text-decoration-none">@issue.Title</a>
+                </h3>
+                <p class="issue-feed-address">
+                  <i class="bi bi-geo-alt"></i> @issue.Address
+                </p>
+                <div class="issue-feed-footer">
+                  <div class="issue-stats">
+                    <span><i class="bi bi-hand-thumbs-up"></i> @issue.VoteCount</span>
+                    <span><i class="bi bi-chat"></i> @issue.CommentCount</span>
+                  </div>
+                  <div class="issue-author">
+                    <img src="@issue.AuthorAvatar" onerror="this.src='https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/avatar.png'" alt="" class="author-mini-avatar" />
+                    <span>@issue.AuthorName</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+      }
+    </div>
+  </div>
+
+  @* ── SECTION 5: PHẢN ÁNH CỦA TÔI ── *@
+  @if (Model.MyRecentIssues != null && Model.MyRecentIssues.Any())
+  {
+    <div class="section-block fade-in-up">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-icon bg-amber"><i class="bi bi-person-lines-fill"></i></span>
+          <h2 class="section-title">Phản ánh gần đây của tôi</h2>
+        </div>
+        <a href="/Issues/MyIssues" class="section-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="my-issues-list">
+        @foreach (var issue in Model.MyRecentIssues)
+        {
+          <div class="my-issue-row card-hover">
+            <div class="my-issue-status">
+              <div class="status-circle status-@issue.StatusClass"></div>
+            </div>
+            <div class="my-issue-info">
+              <a href="/Issues/Details/@issue.Id" class="my-issue-title text-decoration-none">@issue.Title</a>
+              <span class="my-issue-meta">@issue.CategoryLabel · @issue.CreatedAt.ToString("dd/MM/yyyy")</span>
+            </div>
+            <div class="my-issue-badge ms-auto">
+              <span class="issue-status-badge status-@issue.StatusClass">@issue.StatusLabel</span>
+            </div>
+            @if (issue.DueDate.HasValue && issue.Status != IssueStatus.Resolved)
+            {
+              <div class="my-issue-due @(issue.IsOverdue ? "overdue" : "")">
+                <i class="bi bi-clock"></i>
+                <span>@(issue.IsOverdue ? "Quá hạn" : $"Còn {issue.DaysLeft} ngày")</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+  else
+  {
+    <div class="section-block fade-in-up">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-icon bg-amber"><i class="bi bi-person-lines-fill"></i></span>
+          <h2 class="section-title">Phản ánh gần đây của tôi</h2>
+        </div>
+      </div>
+      <div class="empty-state fade-in-up">
+        <div class="empty-icon bg-blue"><i class="bi bi-inbox"></i></div>
+        <h3 class="empty-title">Chưa có phản ánh nào</h3>
+        <p class="empty-desc">Bạn chưa gửi phản ánh nào lên hệ thống. Hãy gửi phản ánh nếu bạn phát hiện sự cố trong khu vực nhé!</p>
+        <a href="/Issues/Create" class="btn btn-primary mt-3 text-decoration-none">Gửi phản ánh ngay</a>
+      </div>
+    </div>
+  }
+
+</div>

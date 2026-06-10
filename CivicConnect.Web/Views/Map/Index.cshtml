@@ -1,0 +1,473 @@
+@{
+    ViewData["Title"] = "Bản đồ phản ánh";
+}
+
+@section Styles {
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background-color: var(--bg-main);
+        }
+
+        .custom-leaflet-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+            border: 2px solid white;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 36px !important;
+            height: 36px !important;
+            margin-left: -18px !important;
+            margin-top: -18px !important;
+            position: relative;
+        }
+
+        .custom-leaflet-marker:hover {
+            transform: scale(1.2) translateY(-2px);
+            z-index: 9999 !important;
+        }
+
+        .custom-leaflet-marker i {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Category marker colors */
+        .marker-traffic { background-color: var(--primary-color, #da251d); }
+        .marker-environment { background-color: var(--success-color, #198754); }
+        .marker-security { background-color: var(--warning-color, #ffc107); color: #0f172a !important; }
+        .marker-infrastructure { background-color: #8b5cf6; } /* Purple */
+        .marker-administration { background-color: #06b6d4; } /* Cyan */
+        .marker-other { background-color: #64748b; }
+
+        /* Pulsing ripple animation for markers */
+        .marker-pulse::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0.8;
+            animation: marker-ripple 1.6s infinite ease-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @@keyframes marker-ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        /* Adjust Leaflet controls to look premium and match glassmorphism */
+        .leaflet-control-zoom {
+            border: 1px solid var(--border-glass) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            border-radius: var(--border-radius-md) !important;
+            overflow: hidden;
+        }
+        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+            background-color: var(--bg-glass) !important;
+            color: var(--text-main) !important;
+            border: none !important;
+            border-bottom: 1px solid var(--border-glass) !important;
+        }
+        .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
+            background-color: var(--bg-glass-hover) !important;
+            color: var(--primary-color) !important;
+        }
+        .leaflet-bar {
+            border: none !important;
+        }
+        .leaflet-container {
+            font-family: inherit;
+        }
+
+        /* Segmented control buttons for map style selector */
+        .btn-glass {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 0.35rem 0.85rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.775rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-glass:hover {
+            background-color: var(--bg-glass-hover);
+            color: var(--primary-color);
+        }
+        .btn-glass.active {
+            background-color: var(--primary-color);
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+}
+
+<div id="map-container" class="position-relative w-100 rounded-3 shadow-sm" style="height: calc(100vh - 120px); border: 1px solid var(--border-glass); overflow: hidden; background-color: var(--bg-glass);">
+    <!-- Leaflet Map Container -->
+    <div id="map"></div>
+
+    <!-- Map Style Selector overlay -->
+    <div id="style-panel" class="map-overlay top-right glass-panel p-1 d-flex gap-1" style="position: absolute; right: 1rem; top: 1rem; z-index: 1000; border-radius: var(--border-radius-md);">
+        <button type="button" class="btn-glass active" data-style="current">Mặc định</button>
+        <button type="button" class="btn-glass" data-style="terrain">Địa hình</button>
+        <button type="button" class="btn-glass" data-style="satellite">Vệ tinh</button>
+    </div>
+
+    <!-- Filter Panel overlay -->
+    <div id="filter-panel" class="map-overlay top-left glass-panel p-2 d-flex gap-2 align-items-center" style="position: absolute; left: 1rem; top: 1rem; z-index: 1000; border-radius: var(--border-radius-md);">
+        <select id="category-filter" class="form-select form-select-sm" style="width: 150px; background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-glass);">
+            <option value="">Tất cả danh mục</option>
+            <option value="1">Giao thông</option>
+            <option value="2">Môi trường</option>
+            <option value="3">An ninh trật tự</option>
+            <option value="4">Hạ tầng công cộng</option>
+            <option value="5">Hành chính</option>
+            <option value="99">Khác</option>
+        </select>
+        
+        <select id="status-filter" class="form-select form-select-sm" style="width: 150px; background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-glass);">
+            <option value="">Tất cả trạng thái</option>
+            <option value="0">Chờ tiếp nhận</option>
+            <option value="1">Đã phân công</option>
+            <option value="2">Đang xử lý</option>
+            <option value="3">Đã giải quyết</option>
+            <option value="4">Từ chối / Không hợp lệ</option>
+            <option value="5">Đóng</option>
+        </select>
+        
+        <button id="btn-heatmap" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+            <i class="bi bi-fire me-1"></i>Bản đồ nhiệt (Heatmap)
+        </button>
+    </div>
+
+    <!-- Detail panel overlay (hidden by default) -->
+    <div id="issue-panel" class="map-overlay right-panel glass-panel p-4 d-none" style="position: absolute; right: 1rem; top: 1rem; bottom: 1rem; width: 340px; overflow-y: auto; border-radius: var(--border-radius-lg); z-index: 1000; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-primary mb-0"><i class="bi bi-info-circle me-1"></i> Tóm tắt phản ánh</h6>
+            <button type="button" class="btn-close" id="close-panel-btn" style="filter: var(--close-btn-filter, invert(1));"></button>
+        </div>
+        <div class="border-top pt-3" style="border-top: 1px solid var(--border-glass) !important;">
+            <h6 class="fw-bold text-main mb-1" id="panel-title">Tiêu đề</h6>
+            <div class="mb-3">
+                <span class="badge" id="panel-category" style="background-color: var(--primary-color);">Danh mục</span>
+                <span class="badge bg-secondary" id="panel-status">Trạng thái</span>
+            </div>
+            
+            <p class="text-muted mb-3" style="font-size: 0.8rem; line-height: 1.4;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span id="panel-address">Địa chỉ</span></p>
+            
+            <p class="text-secondary mb-4" id="panel-description" style="font-size: 0.825rem; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;">Mô tả phản ánh...</p>
+            
+            <div class="d-grid gap-2">
+                <a href="#" id="panel-link" class="btn btn-primary btn-sm rounded-pill py-2 fw-semibold">Chi tiết phản ánh</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet Heatmap Plugin -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            let map;
+            let currentTileLayer;
+            let markersGroup;
+            let heatLayer = null;
+            let allIssues = [];
+            let heatmapActive = false;
+            let activeStyle = 'current'; // Trạng thái style bản đồ đang chọn
+
+            const tileUrls = {
+                light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            };
+            const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+            // 1. Initialize Map
+            function initMap() {
+                // Default center of Vietnam (Da Nang coordinates) for nationwide overview
+                map = L.map('map', {
+                    zoomControl: true,
+                    attributionControl: true
+                }).setView([16.047079, 108.206230], 6);
+
+                markersGroup = L.featureGroup().addTo(map);
+
+                // Set initial map theme
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                updateMapStyle(activeStyle, currentTheme);
+
+                // Load real issues from DB
+                loadIssuesData();
+            }
+
+            // 2. Update Map Layer Theme/Style
+            function updateMapStyle(style, theme) {
+                if (currentTileLayer) {
+                    map.removeLayer(currentTileLayer);
+                }
+                
+                activeStyle = style;
+
+                if (style === 'current') {
+                    const url = tileUrls[theme] || tileUrls.light;
+                    currentTileLayer = L.tileLayer(url, {
+                        attribution: attribution,
+                        maxZoom: 20
+                    }).addTo(map);
+                } 
+                else if (style === 'terrain') {
+                    currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 19
+                    }).addTo(map);
+                } 
+                else if (style === 'satellite') {
+                    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                        maxZoom: 19
+                    });
+                    const labelLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+                        attribution: ''
+                    });
+                    currentTileLayer = L.layerGroup([satelliteLayer, labelLayer]).addTo(map);
+                }
+            }
+
+            // 3. MutationObserver to watch layout theme changes
+            const themeObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'data-theme') {
+                        const newTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                        updateMapStyle(activeStyle, newTheme);
+                    }
+                });
+            });
+            themeObserver.observe(document.documentElement, { attributes: true });
+
+            // Helper mapping for styles
+            function getCategoryClass(catVal) {
+                switch(catVal) {
+                    case 1: return 'marker-traffic';
+                    case 2: return 'marker-environment';
+                    case 3: return 'marker-security';
+                    case 4: return 'marker-infrastructure';
+                    case 5: return 'marker-administration';
+                    default: return 'marker-other';
+                }
+            }
+
+            function getCategoryIcon(catVal) {
+                switch(catVal) {
+                    case 1: return 'bi-car-front-fill';
+                    case 2: return 'bi-trash3-fill';
+                    case 3: return 'bi-shield-fill-exclamation';
+                    case 4: return 'bi-wrench-adjustable-circle-fill';
+                    case 5: return 'bi-file-earmark-text-fill';
+                    default: return 'bi-geo-alt-fill';
+                }
+            }
+
+            // 4. Load Data from Backend
+            function loadIssuesData() {
+                $.ajax({
+                    url: '/Map/GetIssues',
+                    type: 'GET',
+                    success: function(data) {
+                        allIssues = data;
+                        renderMarkers();
+                        
+                        // Fit bounds to show all markers dynamically if they exist
+                        if (markersGroup.getLayers().length > 0) {
+                            map.fitBounds(markersGroup.getBounds(), { padding: [50, 50], maxZoom: 15 });
+                        } else {
+                            // Default location detector if no markers
+                            if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(
+                                    (pos) => {
+                                        map.setView([pos.coords.latitude, pos.coords.longitude], 12);
+                                    },
+                                    () => {
+                                        // HCM City default fallback
+                                        map.setView([10.7769, 106.7009], 12);
+                                    }
+                                );
+                            } else {
+                                map.setView([10.7769, 106.7009], 12);
+                            }
+                        }
+                    },
+                    error: function(err) {
+                        console.error("Lỗi khi tải dữ liệu bản đồ:", err);
+                    }
+                });
+            }
+
+            // 5. Render markers
+            function renderMarkers() {
+                markersGroup.clearLayers();
+                
+                const catFilter = $('#category-filter').val();
+                const statFilter = $('#status-filter').val();
+
+                allIssues.forEach(function(issue) {
+                    // Filter
+                    if (catFilter !== "" && issue.categoryVal.toString() !== catFilter) return;
+                    if (statFilter !== "" && issue.statusVal.toString() !== statFilter) return;
+
+                    const catClass = getCategoryClass(issue.categoryVal);
+                    const catIcon = getCategoryIcon(issue.categoryVal);
+                    
+                    // Custom pulsating HTML marker
+                    const pulseClass = (issue.statusVal === 0 || issue.statusVal === 2) ? 'marker-pulse' : ''; // pending or processing pulses
+                    
+                    const markerHtml = `
+                        <div class="custom-leaflet-marker ${catClass} ${pulseClass}">
+                            <i class="${catIcon}"></i>
+                        </div>
+                    `;
+
+                    const customIcon = L.divIcon({
+                        html: markerHtml,
+                        className: 'custom-marker-wrapper',
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    });
+
+                    const marker = L.marker([issue.latitude, issue.longitude], { icon: customIcon });
+                    
+                    // Click listener
+                    marker.on('click', function(e) {
+                        L.DomEvent.stopPropagation(e);
+                        
+                        $('#panel-title').text(issue.title);
+                        $('#panel-address').text(issue.address);
+                        $('#panel-description').text(issue.description || 'Không có mô tả chi tiết.');
+                        
+                        // Set Category tag text and color
+                        $('#panel-category')
+                            .text(issue.categoryName)
+                            .removeClass()
+                            .addClass(`badge ${catClass}`);
+                        
+                        // Set status tag
+                        $('#panel-status').text(issue.statusName);
+                        
+                        // Set detail URL
+                        $('#panel-link').attr('href', `/Issues/Details/${issue.id}`);
+                        
+                        $('#issue-panel').removeClass('d-none');
+                        
+                        // Pan to marker
+                        map.panTo([issue.latitude, issue.longitude]);
+                    });
+
+                    markersGroup.addLayer(marker);
+                });
+            }
+
+            // 6. Draw Heatmap
+            function drawHeatmap(active) {
+                if (active) {
+                    const catFilter = $('#category-filter').val();
+                    const statFilter = $('#status-filter').val();
+
+                    const heatPoints = allIssues
+                        .filter(issue => {
+                            if (catFilter !== "" && issue.categoryVal.toString() !== catFilter) return false;
+                            if (statFilter !== "" && issue.statusVal.toString() !== statFilter) return false;
+                            return true;
+                        })
+                        .map(issue => [issue.latitude, issue.longitude, 0.6]);
+
+                    if (heatLayer) {
+                        map.removeLayer(heatLayer);
+                    }
+
+                    heatLayer = L.heatLayer(heatPoints, {
+                        radius: 25,
+                        blur: 15,
+                        maxZoom: 15,
+                        gradient: { 0.4: '#3b82f6', 0.65: '#10b981', 0.85: '#f59e0b', 1.0: '#ef4444' }
+                    }).addTo(map);
+
+                    markersGroup.clearLayers();
+                } else {
+                    if (heatLayer) {
+                        map.removeLayer(heatLayer);
+                        heatLayer = null;
+                    }
+                    renderMarkers();
+                }
+            }
+
+            // Initialize
+            initMap();
+
+            // Toggle Panel Close
+            $('#close-panel-btn').on('click', function() {
+                $('#issue-panel').addClass('d-none');
+            });
+
+            // Map click -> Close panel
+            map.on('click', function() {
+                $('#issue-panel').addClass('d-none');
+            });
+
+            // Filters Change
+            $('#category-filter, #status-filter').change(function() {
+                if (heatmapActive) {
+                    drawHeatmap(true);
+                } else {
+                    renderMarkers();
+                }
+            });
+
+            // Heatmap Button Toggle
+            $('#btn-heatmap').on('click', function() {
+                heatmapActive = !heatmapActive;
+                if (heatmapActive) {
+                    $(this).addClass('active btn-primary').removeClass('btn-outline-primary');
+                    drawHeatmap(true);
+                } else {
+                    $(this).removeClass('active btn-primary').addClass('btn-outline-primary');
+                    drawHeatmap(false);
+                }
+            });
+
+            // Map Style Switcher click handler
+            $('#style-panel .btn-glass').on('click', function() {
+                $('#style-panel .btn-glass').removeClass('active');
+                $(this).addClass('active');
+                const style = $(this).data('style');
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                updateMapStyle(style, currentTheme);
+            });
+        });
+    </script>
+}

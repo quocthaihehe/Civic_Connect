@@ -1,0 +1,172 @@
+@model IEnumerable<CivicConnect.Core.Entities.Issue>
+@using CivicConnect.Core.Enums
+@{
+    ViewData["Title"] = "Danh sách phản ánh";
+    var currentCategory = ViewData["CurrentCategory"] as IssueCategory?;
+    var currentStatus = ViewData["CurrentStatus"] as IssueStatus?;
+    var currentSearch = ViewData["CurrentSearch"]?.ToString();
+    var currentSort = ViewData["CurrentSort"]?.ToString();
+}
+
+<div class="d-flex flex-column gap-4">
+    <!-- Filter Panel Card -->
+    <div class="glass-card p-4">
+        <form asp-action="Index" method="get" class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search text-warning"></i></span>
+                    <input type="text" name="search" value="@currentSearch" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm tiêu đề, nội dung, địa chỉ..." />
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <select name="category" class="form-select" onchange="this.form.submit()">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (IssueCategory cat in Enum.GetValues(typeof(IssueCategory)))
+                    {
+                        var isSelected = currentCategory == cat ? "selected" : "";
+                        <!option value="@((int)cat)" @isSelected>@GetCategoryName(cat)</!option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">Tất cả trạng thái</option>
+                    @foreach (IssueStatus stat in Enum.GetValues(typeof(IssueStatus)))
+                    {
+                        var isSelected = currentStatus == stat ? "selected" : "";
+                        <!option value="@((int)stat)" @isSelected>@GetStatusName(stat)</!option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary rounded-pill"><i class="bi bi-search me-1"></i> Tìm Kiếm</button>
+            </div>
+
+            <input type="hidden" name="sort" value="@currentSort" />
+        </form>
+    </div>
+
+    <!-- Toolbar: Sort + Submit -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex gap-2">
+            <a asp-action="Index" asp-route-category="@((int?)currentCategory)" asp-route-status="@((int?)currentStatus)" asp-route-search="@currentSearch" asp-route-sort="latest" class="btn btn-sm @(string.IsNullOrEmpty(currentSort) || currentSort == "latest" ? "btn-primary" : "btn-outline-primary") rounded-pill px-3">Mới nhất</a>
+            <a asp-action="Index" asp-route-category="@((int?)currentCategory)" asp-route-status="@((int?)currentStatus)" asp-route-search="@currentSearch" asp-route-sort="priority" class="btn btn-sm @(currentSort == "priority" ? "btn-primary" : "btn-outline-primary") rounded-pill px-3">Độ ưu tiên</a>
+            <a asp-action="Index" asp-route-category="@((int?)currentCategory)" asp-route-status="@((int?)currentStatus)" asp-route-search="@currentSearch" asp-route-sort="oldest" class="btn btn-sm @(currentSort == "oldest" ? "btn-primary" : "btn-outline-primary") rounded-pill px-3">Cũ nhất</a>
+        </div>
+        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow hover-scale"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh mới</a>
+    </div>
+
+    <!-- Feed Cards -->
+    @if (!Model.Any())
+    {
+        <div class="glass-card text-center py-5">
+            <i class="bi bi-file-earmark-x text-muted fs-1 d-block mb-3"></i>
+            <h5 class="fw-semibold text-white">Không tìm thấy phản ánh nào</h5>
+            <p class="text-muted">Hãy thay đổi bộ lọc tìm kiếm hoặc gửi phản ánh mới để mở rộng dữ liệu.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var issue in Model)
+            {
+                <div class="col-md-6 col-xl-4">
+                    <div class="glass-card h-100 d-flex flex-column" style="overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                        <!-- Image Container -->
+                        <div class="position-relative" style="height: 190px; background-color: #111827;">
+                            @if (issue.Images != null && issue.Images.Any())
+                            {
+                                <img src="@issue.Images.OrderBy(img => img.OrderIndex).First().Url" class="w-100 h-100" style="object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted" style="background: rgba(255,255,255,0.02);">
+                                    <i class="bi bi-image fs-1 mb-1"></i>
+                                    <span style="font-size: 0.8rem;">Không có hình ảnh đính kèm</span>
+                                </div>
+                            }
+                            <!-- Category Badge -->
+                            <span class="position-absolute badge bg-dark text-white shadow-sm d-flex align-items-center gap-1 border border-light" style="top: 12px; left: 12px; font-size: 0.75rem; background: rgba(0,0,0,0.7) !important;">
+                                <i class="bi @GetCategoryIcon(issue.Category) text-warning"></i> @GetCategoryName(issue.Category)
+                            </span>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h6 class="fw-bold text-truncate mb-0" style="max-width: 75%; font-size: 0.95rem;">
+                                    <a asp-action="Details" asp-route-id="@issue.Id" class="text-decoration-none text-white hover-lift">@issue.Title</a>
+                                </h6>
+                                <span class="badge @GetStatusClass(issue.Status) rounded-pill" style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;">@GetStatusName(issue.Status)</span>
+                            </div>
+
+                            <p class="text-secondary mb-3 flex-grow-1 text-clamp" style="font-size: 0.85rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; height: 4.5em;">
+                                @issue.Description
+                            </p>
+
+                            <div class="d-flex align-items-center gap-2 mb-3 text-muted" style="font-size: 0.75rem;">
+                                <i class="bi bi-geo-alt-fill text-danger"></i>
+                                <span class="text-truncate text-secondary" style="max-width: 250px;">@issue.Address</span>
+                            </div>
+
+                            <!-- Footer Indicators -->
+                            <div class="border-top pt-3 mt-auto d-flex justify-content-between align-items-center" style="font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.05) !important;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-secondary"><i class="bi bi-hand-thumbs-up-fill text-warning me-1"></i> @issue.Votes.Count(v => v.Type == VoteType.Up)</span>
+                                    <span class="text-secondary"><i class="bi bi-chat-left-text-fill text-primary me-1"></i> @issue.Comments.Count</span>
+                                </div>
+                                <span class="text-muted" style="font-size: 0.75rem;">@issue.CreatedAt.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@functions {
+    public string GetCategoryName(IssueCategory category) => category switch
+    {
+        IssueCategory.Traffic => "Giao thông",
+        IssueCategory.Environment => "Môi trường",
+        IssueCategory.Security => "An ninh trật tự",
+        IssueCategory.Infrastructure => "Hạ tầng công cộng",
+        IssueCategory.Administration => "Hành chính",
+        _ => "Khác"
+    };
+
+    public string GetCategoryIcon(IssueCategory category) => category switch
+    {
+        IssueCategory.Traffic => "bi-car-front-fill",
+        IssueCategory.Environment => "bi-tree-fill",
+        IssueCategory.Security => "bi-shield-fill-exclamation",
+        IssueCategory.Infrastructure => "bi-cone-striped",
+        IssueCategory.Administration => "bi-file-earmark-person",
+        _ => "bi-question-circle-fill"
+    };
+
+    public string GetStatusName(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "Chờ tiếp nhận",
+        IssueStatus.Assigned => "Đã phân công",
+        IssueStatus.Processing => "Đang xử lý",
+        IssueStatus.Resolved => "Đã giải quyết",
+        IssueStatus.Rejected => "Từ chối",
+        IssueStatus.Closed => "Đóng tự động",
+        _ => "Không xác định"
+    };
+
+    public string GetStatusClass(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "bg-warning-light text-warning",
+        IssueStatus.Assigned => "bg-primary-light text-primary",
+        IssueStatus.Processing => "bg-primary text-white",
+        IssueStatus.Resolved => "bg-success-light text-success",
+        IssueStatus.Rejected => "bg-danger-light text-danger",
+        _ => "bg-secondary text-white"
+    };
+}

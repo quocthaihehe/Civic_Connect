@@ -1,0 +1,153 @@
+@model IEnumerable<CivicConnect.Core.Entities.Issue>
+@using CivicConnect.Core.Enums
+@{
+    ViewData["Title"] = "Cán bộ Dashboard";
+    var pendingCount = Model.Count(i => i.Status == IssueStatus.Pending);
+    var processingCount = Model.Count(i => i.Status == IssueStatus.Processing || i.Status == IssueStatus.Assigned);
+    var resolvedCount = Model.Count(i => i.Status == IssueStatus.Resolved);
+}
+
+<div class="d-flex flex-column gap-4">
+    <!-- Stats Cards -->
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="glass-card p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85rem;">Phản ánh chờ xử lý</span>
+                    <h2 class="fw-bold mt-1 text-warning mb-0">@pendingCount</h2>
+                </div>
+                <div class="bg-warning-light text-warning rounded-3 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background: rgba(245,158,11,0.08);">
+                    <i class="bi bi-clock-history fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="glass-card p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85rem;">Đang giải quyết</span>
+                    <h2 class="fw-bold mt-1 text-primary mb-0">@processingCount</h2>
+                </div>
+                <div class="bg-primary-light text-primary rounded-3 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background: rgba(37,99,235,0.08);">
+                    <i class="bi bi-gear-wide-connected fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="glass-card p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85rem;">Đã hoàn thành</span>
+                    <h2 class="fw-bold mt-1 text-success mb-0">@resolvedCount</h2>
+                </div>
+                <div class="bg-success-light text-success rounded-3 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background: rgba(16,185,129,0.08);">
+                    <i class="bi bi-check-circle fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issues Table -->
+    <div class="glass-card p-4 p-md-5">
+        <h5 class="fw-bold mb-4 text-white"><i class="bi bi-table text-primary me-2"></i> Danh sách quản lý phản ánh địa bàn</h5>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-inbox fs-2 mb-1 d-block"></i>
+                <span>Không có phản ánh nào thuộc địa bàn được phân công của bạn.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead class="table-light">
+                        <tr style="font-size: 0.85rem;">
+                            <th scope="col">ID</th>
+                            <th scope="col">Tiêu đề</th>
+                            <th scope="col">Danh mục</th>
+                            <th scope="col">Địa chỉ</th>
+                            <th scope="col">Độ ưu tiên</th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col" class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.85rem;">
+                        @foreach (var issue in Model)
+                        {
+                            <tr>
+                                <td>#@issue.Id</td>
+                                <td class="fw-bold text-white text-truncate" style="max-width: 200px;">
+                                    <a asp-action="Details" asp-route-id="@issue.Id" class="text-decoration-none text-white hover-lift">@issue.Title</a>
+                                </td>
+                                <td>@GetCategoryName(issue.Category)</td>
+                                <td class="text-secondary text-truncate" style="max-width: 200px;">@issue.Address</td>
+                                <td>
+                                    <span class="badge @GetPriorityClass(issue.Priority) rounded-pill">@GetPriorityName(issue.Priority)</span>
+                                </td>
+                                <td>
+                                    <span class="badge @GetStatusClass(issue.Status) rounded-pill">@GetStatusName(issue.Status)</span>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@issue.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">Xử lý</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    public string GetCategoryName(IssueCategory category) => category switch
+    {
+        IssueCategory.Traffic => "Giao thông",
+        IssueCategory.Environment => "Môi trường",
+        IssueCategory.Security => "An ninh trật tự",
+        IssueCategory.Infrastructure => "Hạ tầng công cộng",
+        IssueCategory.Administration => "Hành chính",
+        _ => "Khác"
+    };
+
+    public string GetStatusName(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "Chờ tiếp nhận",
+        IssueStatus.Assigned => "Đã phân công",
+        IssueStatus.Processing => "Đang xử lý",
+        IssueStatus.Resolved => "Đã giải quyết",
+        IssueStatus.Rejected => "Từ chối",
+        IssueStatus.Closed => "Đóng tự động",
+        _ => "Không xác định"
+    };
+
+    public string GetStatusClass(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "bg-warning text-dark",
+        IssueStatus.Assigned => "bg-info text-white",
+        IssueStatus.Processing => "bg-primary text-white",
+        IssueStatus.Resolved => "bg-success text-white",
+        IssueStatus.Rejected => "bg-danger text-white",
+        _ => "bg-secondary text-white"
+    };
+
+    public string GetPriorityName(IssuePriority priority) => priority switch
+    {
+        IssuePriority.Low => "Thấp",
+        IssuePriority.Medium => "Trung bình",
+        IssuePriority.High => "Cao",
+        IssuePriority.Critical => "Khẩn cấp",
+        _ => "Thường"
+    };
+
+    public string GetPriorityClass(IssuePriority priority) => priority switch
+    {
+        IssuePriority.Low => "bg-secondary text-white",
+        IssuePriority.Medium => "bg-primary text-white",
+        IssuePriority.High => "bg-warning text-dark",
+        IssuePriority.Critical => "bg-danger text-white",
+        _ => "bg-secondary text-white"
+    };
+}

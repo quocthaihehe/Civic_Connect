@@ -1,0 +1,314 @@
+@model CivicConnect.Core.Entities.Issue
+@using CivicConnect.Core.Enums
+@using Microsoft.AspNetCore.Identity
+@using CivicConnect.Core.Entities
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUserId = UserManager.GetUserId(User);
+}
+
+<div class="row g-4">
+    <!-- Left Column: Issue Content, Images & Comments -->
+    <div class="col-lg-8">
+        <div class="d-flex flex-column gap-4">
+            <!-- Issue Details Card -->
+            <div class="glass-card p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                    <span class="badge @GetStatusClass(Model.Status) rounded-pill px-3 py-2" style="font-size: 0.85rem;">@GetStatusName(Model.Status)</span>
+                    <span class="text-muted" style="font-size: 0.8rem;">Gửi ngày @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+
+                <h3 class="fw-bold mb-3 text-white">@Model.Title</h3>
+
+                <div class="d-flex align-items-center gap-3 mb-4 text-muted" style="font-size: 0.85rem;">
+                    <span><i class="bi bi-person-fill text-primary"></i> @(Model.IsAnonymous ? "Ẩn danh" : Model.Author?.FullName ?? "Công dân")</span>
+                    <span>•</span>
+                    <span><i class="bi bi-tag-fill text-primary"></i> @GetCategoryName(Model.Category)</span>
+                    <span>•</span>
+                    <span><i class="bi bi-eye-fill"></i> @Model.ViewCount lượt xem</span>
+                </div>
+
+                <!-- Images Carousel -->
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    <div id="imagesCarousel" class="carousel slide rounded-3 mb-4 shadow-sm" data-bs-ride="carousel" style="overflow: hidden; max-height: 400px; background-color: #000;">
+                        <div class="carousel-inner h-100">
+                            @{ var first = true; }
+                            @foreach (var img in Model.Images.OrderBy(i => i.OrderIndex))
+                            {
+                                <div class="carousel-item h-100 @(first ? "active" : "")">
+                                    <img src="@img.Url" class="d-block w-100 h-100" style="object-fit: contain; max-height: 400px;" />
+                                </div>
+                                first = false;
+                            }
+                        </div>
+                        @if (Model.Images.Count > 1)
+                        {
+                            <button class="carousel-control-prev" type="button" data-bs-target="#imagesCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#imagesCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        }
+                    </div>
+                }
+
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-2 text-white"><i class="bi bi-card-text text-primary me-2"></i> Nội dung phản ánh</h6>
+                    <p class="text-secondary" style="line-height: 1.6; white-space: pre-line;">@Model.Description</p>
+                </div>
+
+                <div class="mb-4 border-top pt-3">
+                    <h6 class="fw-bold mb-2 text-white"><i class="bi bi-geo-alt-fill text-danger me-2"></i> Địa điểm sự việc</h6>
+                    <p class="text-secondary mb-0">@Model.Address</p>
+                    <div class="mt-2 text-muted" style="font-size: 0.8rem;">
+                        <strong>Phường/Xã:</strong> @Model.WardName | <strong>Quận/Huyện:</strong> @Model.DistrictName
+                    </div>
+                </div>
+
+                <!-- Action Bar (Vote & Comment link) -->
+                <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill vote-btn px-3" data-id="@Model.Id" data-type="1">
+                            <i class="bi bi-hand-thumbs-up"></i> Đồng tình (<span id="upvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Up)</span>)
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill vote-btn px-3" data-id="@Model.Id" data-type="-1">
+                            <i class="bi bi-hand-thumbs-down"></i> Không đồng tình (<span id="downvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Down)</span>)
+                        </button>
+                    </div>
+                    <span class="text-muted" style="font-size: 0.8rem;"><i class="bi bi-chat-left-text me-1"></i> <span id="comments-counter">@Model.Comments.Count</span> bình luận</span>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="glass-card p-4 p-md-5">
+                <h5 class="fw-bold mb-4 text-white"><i class="bi bi-chat-square-text-fill text-primary me-2"></i> Cộng đồng bình luận</h5>
+                
+                <!-- New Comment Form -->
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="mb-4">
+                        <div class="d-flex gap-3">
+                            <img src="@(UserManager.GetUserAsync(User).Result?.AvatarUrl ?? "/images/default-avatar.png")" onerror="this.src='https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/avatar.png'" class="avatar-img shadow-sm" />
+                            <div class="w-100">
+                                <textarea id="new-comment-content" class="form-control rounded-3" rows="3" placeholder="Chia sẻ ý kiến của bạn về phản ánh này..."></textarea>
+                                <div class="d-flex justify-content-end mt-2">
+                                    <button class="btn btn-primary btn-sm rounded-pill px-4" id="submit-comment-btn" data-id="@Model.Id">Gửi bình luận</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info py-2 rounded-3 text-center" style="font-size: 0.85rem;">
+                        Vui lòng <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Issues/Details/@Model.Id" class="fw-bold">Đăng nhập</a> để tham gia thảo luận.
+                    </div>
+                }
+
+                <!-- Comments List -->
+                <div class="d-flex flex-column gap-3 mt-4" id="comments-list-container">
+                    @if (Model.Comments == null || !Model.Comments.Any())
+                    {
+                        <div class="text-center text-muted py-4" id="comments-empty-state">
+                            <i class="bi bi-chat-dots fs-3 d-block mb-1"></i>
+                            <span style="font-size: 0.85rem;">Chưa có bình luận nào. Hãy gửi ý kiến đầu tiên!</span>
+                        </div>
+                    }
+                    else
+                    {
+                        // Render top-level comments first
+                        @foreach (var comment in Model.Comments.Where(c => c.ParentCommentId == null).OrderByDescending(c => c.CreatedAt))
+                        {
+                            <div class="p-3 rounded-3 mb-2 comment-node shadow-sm" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass) !important;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="@(comment.Author?.AvatarUrl ?? "/images/default-avatar.png")" onerror="this.src='https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/avatar.png'" class="rounded-circle border" style="width: 28px; height: 28px; object-fit: cover;" />
+                                        <span class="fw-bold @(comment.IsOfficialResponse ? "text-warning" : "text-white")" style="font-size: 0.85rem;">
+                                            @comment.Author?.FullName
+                                            @if (comment.IsOfficialResponse)
+                                            {
+                                                <span class="badge bg-primary ms-1" style="font-size: 0.65rem;">Cán Bộ Phản Hồi</span>
+                                            }
+                                        </span>
+                                    </div>
+                                    <span class="text-muted" style="font-size: 0.75rem;">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                                <div class="text-secondary ps-4" style="font-size: 0.85rem;">@comment.Content</div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Map Coordinates & Timeline Status History -->
+    <div class="col-lg-4">
+        <div class="d-flex flex-column gap-4">
+            <!-- Mini Map Card -->
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3 text-white"><i class="bi bi-map-fill text-primary me-2"></i> Bản đồ sự cố</h5>
+                <div class="rounded-3 position-relative" style="height: 200px; background-color: var(--bg-glass); border: 1px solid var(--border-glass); overflow: hidden;">
+                    <!-- Static fallback map with a pin in the middle -->
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 15px 15px;">
+                        <i class="bi bi-geo-alt-fill text-danger fs-1 animate-shake" style="filter: drop-shadow(0 0 8px var(--primary-color));"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-center" style="font-size: 0.85rem;">
+                    <span class="text-muted">Tọa độ sự cố:</span><br/>
+                    <strong class="text-primary">Lat: @Model.Latitude, Lng: @Model.Longitude</strong>
+                </div>
+            </div>
+
+            <!-- Processing Timeline Audit History -->
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-4 text-white"><i class="bi bi-hourglass-split text-primary me-2"></i> Tiến độ xử lý</h5>
+                
+                <div class="timeline-flow mt-2">
+                    @if (Model.StatusHistory != null && Model.StatusHistory.Any())
+                    {
+                        @foreach (var hist in Model.StatusHistory.OrderByDescending(h => h.ChangedAt))
+                        {
+                            <div class="timeline-step active">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-white" style="font-size: 0.85rem;">@GetStatusName(hist.ToStatus)</strong>
+                                    <span class="text-muted" style="font-size: 0.7rem;">@hist.ChangedAt.ToString("dd/MM/yy HH:mm")</span>
+                                </div>
+                                <div class="text-secondary mt-1" style="font-size: 0.8rem; line-height: 1.3;">
+                                    @hist.Note
+                                </div>
+                                @if (!string.IsNullOrEmpty(hist.AttachmentUrl))
+                                {
+                                    <div class="mt-1">
+                                        <a href="@hist.AttachmentUrl" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 0.7rem;"><i class="bi bi-file-earmark-check me-1"></i> Văn bản đính kèm</a>
+                                    </div>
+                                }
+                                <div class="text-muted mt-1" style="font-size: 0.7rem;">
+                                    Bởi: @(hist.ChangedBy?.FullName ?? "Hệ thống")
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted" style="font-size: 0.85rem;">Không có thông tin lịch sử.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 1. AJAX Biểu quyết
+            $('.vote-btn').on('click', function() {
+                const issueId = $(this).data('id');
+                const voteType = $(this).data('type');
+                const btn = $(this);
+
+                $.post(`/Issues/Vote`, { id: issueId, type: voteType }, function(res) {
+                    if (res.success) {
+                        $('#upvotes-count').text(res.upvotes);
+                        $('#downvotes-count').text(res.downvotes);
+                        
+                        // Flash hiệu ứng thành công
+                        btn.addClass('active');
+                        setTimeout(() => btn.removeClass('active'), 300);
+                    }
+                }).fail(function() {
+                    alert("Có lỗi xảy ra hoặc bạn chưa đăng nhập.");
+                });
+            });
+
+            // 2. AJAX Gửi bình luận
+            $('#submit-comment-btn').on('click', function() {
+                const issueId = $(this).data('id');
+                const contentText = $('#new-comment-content').val().trim();
+
+                if (contentText === "") {
+                    alert("Vui lòng nhập nội dung bình luận.");
+                    return;
+                }
+
+                $.post(`/Issues/Comment`, { id: issueId, content: contentText }, function(res) {
+                    if (res.success) {
+                        // Clear input
+                        $('#new-comment-content').val('');
+                        
+                        // Remove empty state if present
+                        $('#comments-empty-state').remove();
+
+                        // Prepend comment card
+                        const officialBadge = res.isOfficial ? `<span class="badge bg-primary ms-1" style="font-size: 0.65rem;">Cán Bộ Phản Hồi</span>` : '';
+                        const textClass = res.isOfficial ? 'text-warning' : 'text-white';
+
+                        const commentHtml = `
+                            <div class="p-3 rounded-3 mb-2 comment-node shadow-sm" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass) !important; animation: fadeIn 0.4s ease;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="/images/default-avatar.png" class="rounded-circle border" style="width: 28px; height: 28px; object-fit: cover;" />
+                                        <span class="fw-bold ${textClass}" style="font-size: 0.85rem;">
+                                            ${res.authorName}
+                                            ${officialBadge}
+                                        </span>
+                                    </div>
+                                    <span class="text-muted" style="font-size: 0.75rem;">${res.createdAt}</span>
+                                </div>
+                                <div class="text-secondary ps-4" style="font-size: 0.85rem;">${res.content}</div>
+                            </div>
+                        `;
+                        
+                        $('#comments-list-container').prepend(commentHtml);
+
+                        // Increment comment counter
+                        let count = parseInt($('#comments-counter').text()) || 0;
+                        count++;
+                        $('#comments-counter').text(count);
+                    }
+                }).fail(function() {
+                    alert("Gửi bình luận không thành công.");
+                });
+            });
+        });
+    </script>
+}
+
+@functions {
+    public string GetCategoryName(IssueCategory category) => category switch
+    {
+        IssueCategory.Traffic => "Giao thông",
+        IssueCategory.Environment => "Môi trường",
+        IssueCategory.Security => "An ninh trật tự",
+        IssueCategory.Infrastructure => "Hạ tầng công cộng",
+        IssueCategory.Administration => "Hành chính",
+        _ => "Khác"
+    };
+
+    public string GetStatusName(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "Chờ tiếp nhận",
+        IssueStatus.Assigned => "Đã phân công",
+        IssueStatus.Processing => "Đang xử lý",
+        IssueStatus.Resolved => "Đã giải quyết",
+        IssueStatus.Rejected => "Từ chối",
+        IssueStatus.Closed => "Đóng tự động",
+        _ => "Không xác định"
+    };
+
+    public string GetStatusClass(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "bg-warning text-dark",
+        IssueStatus.Assigned => "bg-info text-white",
+        IssueStatus.Processing => "bg-primary text-white",
+        IssueStatus.Resolved => "bg-success text-white",
+        IssueStatus.Rejected => "bg-danger text-white",
+        _ => "bg-secondary text-white"
+    };
+}

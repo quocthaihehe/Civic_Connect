@@ -1,0 +1,26 @@
+@model IEnumerable<CivicConnect.Core.Entities.Policy>
+@{
+    ViewData["Title"] = "Chính sách";
+}
+<div class="section-block fade-in-up">
+    <div class="section-header">
+        <div class="section-title-wrap">
+            <span class="section-icon bg-blue"><i class="bi bi-newspaper"></i></span>
+            <h2 class="section-title">Chính sách & Tin tức mới nhất</h2>
+        </div>
+    </div>
+    <div class="news-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+        @foreach (var news in Model)
+        {
+            <a href="/Policy/Details/@news.Id" class="news-card card-hover">
+                <div class="news-tag @news.TagClass">@news.Tag</div>
+                <h3 class="news-title">@news.Title</h3>
+                <p class="news-excerpt">@news.Excerpt</p>
+                <div class="news-meta">
+                    <span><i class="bi bi-building"></i> @news.IssuingUnit</span>
+                    <span><i class="bi bi-calendar3"></i> @news.PublishedDate.ToString("dd/MM/yyyy")</span>
+                </div>
+            </a>
+        }
+    </div>
+</div>
