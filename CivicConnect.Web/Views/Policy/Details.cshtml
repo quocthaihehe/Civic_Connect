@@ -1,23 +1,524 @@
 @model CivicConnect.Core.Entities.Policy
 @{
     ViewData["Title"] = Model.Title;
+    bool isOfficialDoc = !string.IsNullOrEmpty(Model.DocumentNumber);
 }
+
+<style>
+    .policy-detail-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    @@media (max-width: 991px) {
+        .policy-detail-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    .policy-main-content {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .policy-sidebar-meta {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        align-self: start;
+    }
+    .official-seal {
+        border: 2px solid #198754;
+        border-radius: 12px;
+        padding: 16px;
+        background-color: #f4faf6;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        border-left-width: 6px;
+    }
+    .seal-icon {
+        font-size: 2.25rem;
+        color: #198754;
+    }
+    .seal-text h5 {
+        font-weight: 800;
+        margin-bottom: 2px;
+        color: #0f5132;
+        font-size: 1rem;
+    }
+    .seal-text p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #198754;
+        font-weight: 600;
+    }
+    .policy-tag-badge {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+    }
+    .policy-tag-badge.tag-law {
+        background-color: #cfe2ff;
+        color: #084298;
+        border: 1px solid #b6d4fe;
+    }
+    .policy-tag-badge.tag-policy {
+        background-color: #e2d9f3;
+        color: #563d7c;
+        border: 1px solid #d2c4ec;
+    }
+    .policy-tag-badge.tag-notice {
+        background-color: #fff3cd;
+        color: #664d03;
+        border: 1px solid #ffecb5;
+    }
+    .policy-tag-badge.tag-news {
+        background-color: #cff4fc;
+        color: #087990;
+        border: 1px solid #b6effb;
+    }
+    .document-title {
+        font-family: var(--font-display, inherit);
+        font-size: 1.75rem;
+        font-weight: 850;
+        line-height: 1.4;
+        color: var(--gray-800, #111827);
+        margin-bottom: 20px;
+    }
+    .document-body {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #374151;
+        white-space: pre-line;
+    }
+    .meta-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .meta-item {
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 8px;
+    }
+    .meta-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .meta-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 600;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        display: block;
+    }
+    .meta-value {
+        font-size: 0.925rem;
+        color: #1f2937;
+        font-weight: 700;
+        display: block;
+    }
+    .scroll-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        outline: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        transition: all 0.2s ease;
+        z-index: 1000;
+    }
+    .scroll-btn:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-4px);
+    }
+    .status-badge {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    /* Tabs styles */
+    .nav-tabs {
+        border-bottom: 2px solid var(--border-color, #e5e7eb) !important;
+        margin-bottom: 20px;
+    }
+    .nav-tabs .nav-link {
+        border: none !important;
+        color: #6b7280 !important;
+        padding: 12px 20px !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+        background: transparent !important;
+    }
+    .nav-tabs .nav-link.active {
+        color: #0d6efd !important;
+        border-bottom: 3px solid #0d6efd !important;
+        border-radius: 0;
+    }
+    .nav-tabs .nav-link:hover:not(.active) {
+        color: #1f2937 !important;
+        border-bottom: 3px solid #d1d5db !important;
+        border-radius: 0;
+    }
+    .iframe-container {
+        position: relative;
+        width: 100%;
+        height: 750px;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f9fafb;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    /* AI Chatbot Styles */
+    .ai-msg {
+        align-self: flex-start;
+        background: #f1f5f9;
+        padding: 8px 12px;
+        border-radius: 12px 12px 12px 0;
+        max-width: 90%;
+        color: #334155;
+        line-height: 1.4;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .user-msg {
+        align-self: flex-end;
+        background: #0d6efd;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 12px 12px 0 12px;
+        max-width: 90%;
+        line-height: 1.4;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .suggestion-btn {
+        transition: all 0.2s ease;
+    }
+    .suggestion-btn:hover {
+        background-color: #f1f5f9 !important;
+        color: #0d6efd !important;
+        border-color: #0d6efd !important;
+    }
+</style>
+
 <div class="section-block fade-in-up">
+    <!-- Nút quay lại -->
     <div class="mb-4">
-        <a href="/Policy" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="bi bi-arrow-left me-1"></i> Quay lại danh sách</a>
+        <a href="/Policy" class="btn btn-secondary text-decoration-none fw-semibold small">
+            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+        </a>
     </div>
-    
-    <div class="news-tag @Model.TagClass mb-3">@Model.Tag</div>
-    <h1 class="fw-bold mb-3" style="font-family: var(--font-display); font-size: 2rem; color: var(--gray-800);">@Model.Title</h1>
-    
-    <div class="news-meta mb-4 pb-3 border-bottom" style="font-size: 0.85rem; color: var(--gray-400);">
-        <span class="me-3"><i class="bi bi-building"></i> @Model.IssuingUnit</span>
-        <span><i class="bi bi-calendar3"></i> @Model.PublishedDate.ToString("dd/MM/yyyy HH:mm")</span>
-    </div>
-    
-    <div class="news-content text-secondary" style="font-size: 1.05rem; line-height: 1.8; white-space: pre-line;">
-        @Model.Excerpt
-        
-        @Model.Content
+
+    <div class="policy-detail-container">
+        <!-- Phần nội dung chính -->
+        <div class="policy-main-content">
+            <!-- Dấu chứng thực (Nếu là văn bản chính thức) -->
+            @if (isOfficialDoc)
+            {
+                <div class="official-seal">
+                    <span class="seal-icon"><i class="bi bi-patch-check-fill"></i></span>
+                    <div class="seal-text">
+                        <h5>VĂN BẢN ĐÃ ĐƯỢC CHỨNG THỰC</h5>
+                        <p><i class="bi bi-check-circle-fill"></i> Dữ liệu minh bạch từ Cổng Thông Tin Điện Tử Chính Phủ Việt Nam</p>
+                    </div>
+                </div>
+            }
+
+            <span class="policy-tag-badge @Model.TagClass">@Model.Tag</span>
+            <h1 class="document-title">@Model.Title</h1>
+
+            @if (!string.IsNullOrEmpty(Model.SourceUrl))
+            {
+                <ul class="nav nav-tabs" id="docTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-panel" type="button" role="tab" aria-controls="summary-panel" aria-selected="true">
+                            <i class="bi bi-file-text-fill me-1"></i> Tóm tắt & Nội dung
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-panel" type="button" role="tab" aria-controls="iframe-panel" aria-selected="false">
+                            <i class="bi bi-globe me-1"></i> Xem trang gốc trực tiếp
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="docTabsContent">
+                    <div class="tab-pane fade show active" id="summary-panel" role="tabpanel" aria-labelledby="summary-tab">
+                        <div class="document-body mt-3">
+                            @if (Model.Id == 0)
+                            {
+                                <p class="lead text-secondary">@Model.Excerpt</p>
+                                <hr />
+                            }
+                            @Model.Content
+                        </div>
+                        <div class="mt-4 pt-4 border-top">
+                            <button onclick="$('#iframe-tab').click();" class="btn btn-primary fw-bold me-2">
+                                <i class="bi bi-eye-fill"></i> Xem trực tiếp trang gốc tại đây
+                            </button>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="iframe-panel" role="tabpanel" aria-labelledby="iframe-tab">
+                        <div class="iframe-container mt-3">
+                            <div class="iframe-loading" id="iframe-load-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6b7280; z-index: 1;">
+                                <div class="spinner-border text-primary mb-2" role="status"></div>
+                                <div>Đang kết nối và tải trang gốc...</div>
+                            </div>
+                            <iframe src="/Policy/Proxy?url=@Uri.EscapeDataString(Model.SourceUrl)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 2; background: transparent;" onload="document.getElementById('iframe-load-spinner').style.display='none';"></iframe>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <span class="small text-muted"><i class="bi bi-info-circle"></i> Trang web được tải an toàn qua iframe. Nếu bị chặn, hãy bấm nút bên phải.</span>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trang gốc trong tab mới
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="document-body">
+                    @Model.Content
+                </div>
+            }
+        </div>
+
+        <!-- Phần thông tin văn bản bên lề (Công báo) -->
+        <div class="policy-sidebar-meta">
+            <h4 class="fw-bold border-bottom pb-2 mb-3 text-secondary" style="font-size: 1.05rem;">
+                <i class="bi bi-info-circle-fill"></i> Thuộc tính văn bản
+            </h4>
+            
+            <div class="meta-list">
+                <div class="meta-item">
+                    <span class="meta-label">Cơ quan ban hành</span>
+                    <span class="meta-value">@Model.IssuingUnit</span>
+                </div>
+                
+                @if (isOfficialDoc)
+                {
+                    <div class="meta-item">
+                        <span class="meta-label">Số hiệu văn bản</span>
+                        <span class="meta-value text-primary">@Model.DocumentNumber</span>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <span class="meta-label">Loại văn bản</span>
+                        <span class="meta-value">@Model.DocumentType</span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Signer))
+                    {
+                        <div class="meta-item">
+                            <span class="meta-label">Người ký</span>
+                            <span class="meta-value">@Model.Signer</span>
+                        </div>
+                    }
+
+                    @if (Model.EffectiveDate.HasValue)
+                    {
+                        <div class="meta-item">
+                            <span class="meta-label">Ngày có hiệu lực</span>
+                            <span class="meta-value">@Model.EffectiveDate.Value.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    }
+
+                    <div class="meta-item">
+                        <span class="meta-label">Trạng thái hiệu lực</span>
+                        <span class="meta-value">
+                            <span class="status-badge"><i class="bi bi-check-circle-fill"></i> Còn hiệu lực</span>
+                        </span>
+                    </div>
+                }
+
+                <div class="meta-item">
+                    <span class="meta-label">Ngày đăng tải công báo</span>
+                    <span class="meta-value">@Model.PublishedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trợ lý pháp luật AI -->
+        <div class="policy-sidebar-meta mt-4" style="background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
+            <h4 class="fw-bold border-bottom pb-2 mb-3 text-primary" style="font-size: 1.05rem;">
+                <i class="bi bi-robot"></i> Trợ lý Pháp luật AI
+            </h4>
+            <p class="text-muted mb-3" style="font-size: 0.825rem; line-height: 1.4;">
+                Bạn chưa rõ về điểm nào của văn bản này? Hãy đặt câu hỏi để AI giải đáp ngay lập tức!
+            </p>
+            
+            <!-- Khung chứa tin nhắn chat -->
+            <div id="aiChatHistory" style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; background: white; font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px;">
+                <div class="ai-msg">
+                    Xin chào! Tôi có thể giải đáp các vấn đề xử phạt, ngày hiệu lực hoặc nội dung cốt lõi của văn bản này. Bạn muốn hỏi gì nào?
+                </div>
+            </div>
+            
+            <!-- Gợi ý câu hỏi nhanh -->
+            <div class="mb-2 d-flex flex-wrap gap-1">
+                <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Tóm tắt nội dung chính')">Tóm tắt chính</button>
+                <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Ngày có hiệu lực của văn bản?')">Ngày hiệu lực?</button>
+                @if (isOfficialDoc || Model.Title.Contains("45/2026/NĐ-CP"))
+                {
+                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Hành vi vứt rác bừa bãi bị phạt bao nhiêu?')">Mức phạt?</button>
+                }
+            </div>
+
+            <!-- Ô nhập câu hỏi -->
+            <div class="input-group">
+                <input type="text" id="aiQuestionInput" class="form-control form-control-sm" placeholder="Nhập câu hỏi của bạn..." style="font-size: 0.85rem; border-radius: 8px 0 0 8px;" onkeypress="if(event.key === 'Enter') sendQuestion();" />
+                <button class="btn btn-primary btn-sm" type="button" id="sendAiBtn" style="border-radius: 0 8px 8px 0;" onclick="sendQuestion()">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Nút cuộn lên đầu trang (Scroll-to-top) -->
+<button class="scroll-btn" id="scrollToTopBtn" title="Cuộn lên đầu trang">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Lắng nghe sự kiện cuộn trang để hiện nút
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 300) {
+                    $('#scrollToTopBtn').fadeIn().css('display', 'flex');
+                } else {
+                    $('#scrollToTopBtn').fadeOut();
+                }
+            });
+
+            // Click cuộn lên đầu trang mượt mà
+            $('#scrollToTopBtn').click(function() {
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                return false;
+            });
+
+            // Tự động ẩn spinner sau 6 giây nếu tải quá lâu (timeout)
+            setTimeout(function() {
+                var spinner = $('#iframe-load-spinner');
+                if (spinner.length && spinner.is(':visible')) {
+                    spinner.fadeOut();
+                }
+            }, 6000);
+        });
+
+        function sendQuestion() {
+            var input = $('#aiQuestionInput');
+            var question = input.val().trim();
+            if (!question) return;
+
+            // Add user message to chat history
+            $('#aiChatHistory').append(
+                '<div class="user-msg">' + escapeHtml(question) + '</div>'
+            );
+            input.val('');
+            
+            // Auto scroll chat to bottom
+            var chatHistory = $('#aiChatHistory');
+            chatHistory.scrollTop(chatHistory[0].scrollHeight);
+
+            // Add typing indicator
+            var typingId = 'typing-' + Date.now();
+            chatHistory.append(
+                '<div class="ai-msg" id="' + typingId + '">' +
+                '<span class="spinner-grow spinner-grow-sm text-primary me-1" role="status"></span> Đang suy nghĩ...' +
+                '</div>'
+            );
+            chatHistory.scrollTop(chatHistory[0].scrollHeight);
+
+            // Send AJAX request
+            var requestData = {
+                Question: question,
+                DocTitle: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Title))",
+                DocContent: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Excerpt ?? Model.Content))",
+                IssuingUnit: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.IssuingUnit))",
+                DocNumber: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.DocumentNumber ?? ""))",
+                Signer: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Signer ?? ""))",
+                PublishedDate: "@Model.PublishedDate.ToString("o")",
+                SourceUrl: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.SourceUrl ?? ""))"
+            };
+
+            $.ajax({
+                url: '/Policy/AskAI',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(requestData),
+                success: function(response) {
+                    $('#' + typingId).remove();
+                    if (response.success) {
+                        chatHistory.append(
+                            '<div class="ai-msg">' + formatResponse(response.answer) + '</div>'
+                        );
+                    } else {
+                        chatHistory.append(
+                            '<div class="ai-msg text-danger"><i class="bi bi-exclamation-circle-fill"></i> Có lỗi xảy ra.</div>'
+                        );
+                    }
+                    chatHistory.scrollTop(chatHistory[0].scrollHeight);
+                },
+                error: function() {
+                    $('#' + typingId).remove();
+                    chatHistory.append(
+                        '<div class="ai-msg text-danger"><i class="bi bi-exclamation-circle-fill"></i> Lỗi kết nối máy chủ.</div>'
+                    );
+                    chatHistory.scrollTop(chatHistory[0].scrollHeight);
+                }
+            });
+        }
+
+        function askSuggestion(question) {
+            $('#aiQuestionInput').val(question);
+            sendQuestion();
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatResponse(text) {
+            // Convert markdown style **bold** to html
+            // Replace newlines with <br/> for readable layout
+            var formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return formatted.replace(/\n/g, '<br/>');
+        }
+    </script>
+}
