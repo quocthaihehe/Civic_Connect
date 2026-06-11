@@ -8,126 +8,98 @@
 
 <style>
     .donation-hero {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.25) 0%, rgba(var(--bs-primary-rgb), 0.1) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-lg);
         padding: 40px;
-        color: white;
+        color: var(--text-main);
         margin-bottom: 30px;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.3);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
     .donation-hero::before {
         content: '';
         position: absolute;
         top: -50%;
-        right: -20%;
+        right: -10%;
         width: 300px;
         height: 300px;
-        background: rgba(255, 255, 255, 0.1);
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
         border-radius: 50%;
-        filter: blur(50px);
     }
     .stat-badge {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.5);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-md);
         padding: 20px;
         text-align: center;
         transition: transform 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .stat-badge:hover {
-        transform: translateY(-5px);
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.7);
     }
-    .fund-card {
-        background: var(--card-bg, #ffffff);
-        border: 1px solid var(--border-color, #e5e7eb);
-        border-radius: 16px;
-        padding: 24px;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    .fund-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.1);
-        border-color: #a78bfa;
-    }
-    .progress-wrapper {
-        margin: 20px 0;
-    }
+    
     .progress-bar-custom {
-        height: 10px;
-        border-radius: 5px;
-        background-color: #f3f4f6;
+        height: 8px;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.1);
         overflow: hidden;
         position: relative;
     }
     .progress-fill {
         height: 100%;
-        border-radius: 5px;
-        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-500) 100%);
         transition: width 1s ease-in-out;
     }
-    .progress-details {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.85rem;
-        font-weight: 500;
-        margin-top: 6px;
-    }
-    .contributions-board {
-        background: var(--card-bg, #ffffff);
-        border: 1px solid var(--border-color, #e5e7eb);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
+    
     .contributor-item {
         display: flex;
         align-items: center;
         padding: 16px;
-        border-bottom: 1px dashed var(--border-color, #e5e7eb);
+        border-bottom: 1px dashed var(--border-glass);
         transition: background-color 0.2s ease;
     }
     .contributor-item:last-child {
         border-bottom: none;
     }
     .contributor-item:hover {
-        background-color: rgba(124, 58, 237, 0.03);
+        background-color: rgba(255, 255, 255, 0.03);
     }
     .contributor-avatar {
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #c084fc 0%, #818cf8 100%);
-        color: white;
+        background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.15) 0%, rgba(var(--bs-primary-rgb), 0.3) 100%);
+        color: var(--primary-color);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         margin-right: 16px;
         flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .contributor-anon {
-        background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
     }
     .amount-text {
         font-weight: 700;
-        color: #059669;
-        font-size: 1.05rem;
+        color: var(--accent-500);
+        font-size: 1.1rem;
     }
     .heart-pulse {
         animation: pulse 2s infinite;
     }
     @@keyframes pulse {
         0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
+        50% { transform: scale(1.15); }
         100% { transform: scale(1); }
     }
 </style>
@@ -135,12 +107,13 @@
 <div class="container-fluid px-0">
     <!-- Hero Header & Stats -->
     <div class="donation-hero">
-        <div class="row align-items-center">
+        <div class="row align-items-center position-relative" style="z-index: 1;">
             <div class="col-lg-7">
-                <h1 class="display-5 fw-bold mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-heart-fill heart-pulse text-danger"></i> Quỹ Cộng Đồng CivicConnect
+                <h1 class="display-5 fw-bold mb-3 d-flex align-items-center gap-3 text-dark">
+                    <i class="bi bi-heart-fill heart-pulse text-danger" style="filter: drop-shadow(0 0 10px rgba(220,53,69,0.2));"></i> 
+                    Quỹ Cộng Đồng
                 </h1>
-                <p class="lead mb-4" style="font-weight: 400; opacity: 0.95;">
+                <p class="lead mb-4 text-secondary" style="font-weight: 400; line-height: 1.6;">
                     Chung tay kiến tạo và nâng cấp hạ tầng đô thị. Mỗi đóng góp của bạn đều được quản lý công khai, minh bạch 100% phục vụ trực tiếp cho các dự án địa phương.
                 </p>
             </div>
@@ -148,14 +121,14 @@
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="stat-badge">
-                            <div class="small opacity-75 mb-1"><i class="bi bi-wallet2"></i> Tổng quyên góp</div>
-                            <h3 class="fw-bold mb-0">@totalAmount.ToString("N0") <span style="font-size: 0.8rem">đ</span></h3>
+                            <div class="small text-secondary mb-2"><i class="bi bi-wallet2"></i> TỔNG QUYÊN GÓP</div>
+                            <h3 class="fw-bold mb-0 text-primary">@totalAmount.ToString("N0") <span style="font-size: 1rem; color: var(--text-main);">đ</span></h3>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="stat-badge">
-                            <div class="small opacity-75 mb-1"><i class="bi bg-transparent bi-people-fill"></i> Lượt hảo tâm</div>
-                            <h3 class="fw-bold mb-0">@totalCount.ToString("N0")</h3>
+                            <div class="small text-secondary mb-2"><i class="bi bi-people-fill"></i> LƯỢT HẢO TÂM</div>
+                            <h3 class="fw-bold mb-0 text-primary">@totalCount.ToString("N0")</h3>
                         </div>
                     </div>
                 </div>
@@ -166,9 +139,9 @@
     <!-- Active Funds -->
     <div class="row g-4 mb-5">
         <div class="col-12">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <h3 class="fw-bold text-dark m-0"><i class="bi bi-flag-fill text-primary"></i> Các Quỹ Đang Huy Động</h3>
-                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">Đang hoạt động</span>
+            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-25 pb-3">
+                <h3 class="fw-bold text-white m-0"><i class="bi bi-flag-fill text-primary me-2"></i> Các Quỹ Đang Huy Động</h3>
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill">Đang hoạt động</span>
             </div>
         </div>
 
@@ -178,33 +151,30 @@
             var displayPercent = percent > 100 ? 100 : percent;
 
             <div class="col-md-6 col-lg-4">
-                <div class="fund-card">
+                <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between transition-hover" style="border-top: 3px solid var(--primary-500);">
                     <div>
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h4 class="fw-bold text-dark m-0" style="font-size: 1.15rem; line-height: 1.4;">@fund.Name</h4>
-                        </div>
-                        <p class="text-secondary small" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; height: 60px;">
+                        <h4 class="fw-bold text-white mb-3" style="font-size: 1.2rem; line-height: 1.4;">@fund.Name</h4>
+                        <p class="text-secondary" style="font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">
                             @fund.Description
                         </p>
                     </div>
 
-                    <div>
-                        <div class="progress-wrapper">
-                            <div class="progress-bar-custom">
-                                <div class="progress-fill" style="width: @displayPercent.ToString("F0")%"></div>
-                            </div>
-                            <div class="progress-details">
-                                <span class="text-primary fw-bold">@percent.ToString("F1")% đã hoàn thành</span>
-                                <span class="text-secondary">Mục tiêu: @fund.TargetAmount.ToString("N0") đ</span>
-                            </div>
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-between align-items-end mb-2">
+                            <span class="text-primary fw-bold" style="font-size: 0.9rem;">@percent.ToString("F1")%</span>
+                            <span class="text-muted" style="font-size: 0.8rem;">Mục tiêu: @fund.TargetAmount.ToString("N0") đ</span>
+                        </div>
+                        
+                        <div class="progress-bar-custom mb-3 shadow-inner">
+                            <div class="progress-fill" style="width: @displayPercent.ToString("F0")%"></div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center pt-2">
+                        <div class="d-flex justify-content-between align-items-center mt-3">
                             <div>
-                                <span class="text-secondary small d-block">Đã huy động</span>
-                                <span class="fw-bold text-success" style="font-size: 1.15rem;">@fund.CurrentAmount.ToString("N0") đ</span>
+                                <span class="text-secondary d-block" style="font-size: 0.8rem;">Đã huy động</span>
+                                <span class="fw-bold text-success" style="font-size: 1.2rem;">@fund.CurrentAmount.ToString("N0") đ</span>
                             </div>
-                            <a asp-action="Donate" asp-route-id="@fund.Id" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+                            <a asp-action="Donate" asp-route-id="@fund.Id" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
                                 Quyên góp <i class="bi bi-arrow-right-short"></i>
                             </a>
                         </div>
@@ -217,16 +187,16 @@
     <!-- Contributions Board -->
     <div class="row">
         <div class="col-lg-8 mx-auto">
-            <div class="contributions-board">
-                <h3 class="fw-bold text-dark mb-4 pb-2 border-bottom d-flex align-items-center gap-2">
-                    <i class="bi bi-bookmark-star-fill text-warning"></i> Bảng Vinh Danh Nhà Hảo Tâm Gần Đây
+            <div class="glass-card p-4 p-md-5">
+                <h3 class="fw-bold text-white mb-4 pb-3 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
+                    <i class="bi bi-bookmark-star-fill text-warning"></i> Bảng Vinh Danh Nhà Hảo Tâm
                 </h3>
 
                 @if (recentDonations.Count == 0)
                 {
                     <div class="text-center py-5">
-                        <i class="bi bi-chat-heart text-muted display-4"></i>
-                        <p class="text-muted mt-3">Chưa có lượt quyên góp nào. Hãy là nhà hảo tâm đầu tiên!</p>
+                        <i class="bi bi-gift text-muted opacity-50 display-1 mb-3"></i>
+                        <p class="text-secondary fs-5">Chưa có lượt quyên góp nào. Hãy là người mở bát đầu tiên!</p>
                     </div>
                 }
                 else
@@ -240,25 +210,27 @@
                                     @initial
                                 </div>
                                 <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="fw-bold text-dark">@(item.IsAnonymous ? "Nhà hảo tâm ẩn danh" : item.DonorName)</span>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-1 gap-2">
+                                        <span class="fw-bold text-white" style="font-size: 1.05rem;">@(item.IsAnonymous ? "Nhà hảo tâm ẩn danh" : item.DonorName)</span>
                                         <span class="amount-text">+@item.Amount.ToString("N0") đ</span>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center small">
-                                        <span class="text-secondary font-italic">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center mt-1">
+                                        <span class="text-secondary font-italic" style="font-size: 0.9rem;">
                                             @if (!string.IsNullOrEmpty(item.OrderInfo))
                                             {
-                                                <i class="bi bi-chat-left-quote"></i> @item.OrderInfo
+                                                <i class="bi bi-quote text-muted"></i> @item.OrderInfo
                                             }
                                             else
                                             {
-                                                <span>Quyên góp ủng hộ quỹ</span>
+                                                <span>Ủng hộ quỹ cộng đồng</span>
                                             }
                                         </span>
-                                        <span class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-clock"></i> @item.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</span>
+                                        <span class="text-muted" style="font-size: 0.8rem;"><i class="bi bi-clock me-1"></i> @item.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</span>
                                     </div>
-                                    <div class="mt-1">
-                                        <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.7rem;">@item.DonationCategory?.Name</span>
+                                    <div class="mt-2">
+                                        <span class="badge bg-dark border border-secondary border-opacity-50 text-light fw-normal" style="font-size: 0.75rem;">
+                                            <i class="bi bi-tag-fill text-primary me-1"></i> @item.DonationCategory?.Name
+                                        </span>
                                     </div>
                                 </div>
                             </div>

@@ -56,7 +56,7 @@
             <a asp-action="Index" asp-route-category="@((int?)currentCategory)" asp-route-status="@((int?)currentStatus)" asp-route-search="@currentSearch" asp-route-sort="priority" class="btn btn-sm @(currentSort == "priority" ? "btn-primary" : "btn-outline-primary") rounded-pill px-3">Độ ưu tiên</a>
             <a asp-action="Index" asp-route-category="@((int?)currentCategory)" asp-route-status="@((int?)currentStatus)" asp-route-search="@currentSearch" asp-route-sort="oldest" class="btn btn-sm @(currentSort == "oldest" ? "btn-primary" : "btn-outline-primary") rounded-pill px-3">Cũ nhất</a>
         </div>
-        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow hover-scale"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh mới</a>
+        <a asp-action="Create" class="btn btn-primary rounded-2 px-4 shadow hover-scale"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh mới</a>
     </div>
 
     <!-- Feed Cards -->

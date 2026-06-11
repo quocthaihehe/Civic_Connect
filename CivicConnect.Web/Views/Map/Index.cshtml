@@ -219,7 +219,7 @@
         <div class="sidebar-content">
             <!-- Nút Gửi phản ánh -->
             <div class="px-3 pt-3 pb-2">
-                <a asp-action="Create" asp-controller="Issues" class="btn btn-primary w-100 rounded-pill shadow-sm py-2 fw-semibold"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh mới</a>
+                <a asp-action="Create" asp-controller="Issues" class="btn btn-primary w-100 rounded-2 shadow-sm py-2 fw-semibold"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh mới</a>
             </div>
             
             <!-- Search -->
@@ -264,6 +264,7 @@
             </div>
         </div>
     </div>
+    <!-- Kết thúc Sidebar Trái -->
 
     <!-- Nút chọn Lớp bản đồ (Góc trái dưới) -->
     <div class="layer-selector">
@@ -286,21 +287,23 @@
         </div>
     </div>
 
-    <!-- Panel chi tiết phản ánh (Ẩn mặc định) -->
-    <div id="issue-panel" class="bg-white shadow" style="position: absolute; right: 20px; top: 20px; width: 340px; border-radius: 12px; z-index: 1000; display: none; padding: 20px;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-bold text-primary mb-0"><i class="bi bi-info-circle me-1"></i> Thông tin phản ánh</h6>
-            <button type="button" class="btn-close" id="close-panel-btn"></button>
+    <!-- Panel chi tiết phản ánh (Góc phải) -->
+    <div id="issue-panel" class="shadow-lg" style="position: absolute; right: 20px; top: 20px; width: 420px; border-radius: 16px; z-index: 1000; display: none; padding: 24px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5);">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h6 class="fw-bold text-primary mb-0"><i class="bi bi-info-circle-fill me-2"></i> Thông tin phản ánh</h6>
+            <button type="button" class="btn-close shadow-none" id="close-panel-btn" aria-label="Close"></button>
         </div>
-        <h6 class="fw-bold text-dark mb-1" id="panel-title">Tiêu đề</h6>
-        <div class="mb-3 d-flex gap-2">
-            <span class="badge bg-primary" id="panel-category">Danh mục</span>
-            <span class="badge bg-secondary" id="panel-status">Trạng thái</span>
+        <h5 class="fw-bold text-dark mb-2" id="panel-title" style="line-height: 1.4;">Tiêu đề</h5>
+        <div class="mb-3 d-flex flex-wrap gap-2">
+            <span class="badge bg-primary rounded-pill px-3 py-2" id="panel-category">Danh mục</span>
+            <span class="badge bg-secondary rounded-pill px-3 py-2" id="panel-status">Trạng thái</span>
         </div>
-        <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span id="panel-address">Địa chỉ</span></p>
-        <p class="text-secondary mb-4" id="panel-description" style="font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;"></p>
-        <div class="d-grid gap-2">
-            <a href="#" id="panel-link" class="btn btn-outline-primary rounded-pill py-2 fw-semibold">Xem chi tiết</a>
+        <p class="text-muted mb-3" style="font-size: 0.85rem;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span id="panel-address">Địa chỉ</span></p>
+        <div class="p-3 bg-light rounded-3 mb-4">
+            <p class="text-secondary mb-0" id="panel-description" style="font-size: 0.9rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;"></p>
+        </div>
+        <div class="d-grid gap-2 mt-auto">
+            <a href="#" id="panel-link" class="btn btn-primary rounded-pill py-2 fw-semibold shadow-sm">Xem chi tiết <i class="bi bi-arrow-right-short"></i></a>
         </div>
     </div>
 </div>

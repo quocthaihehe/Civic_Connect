@@ -13,42 +13,33 @@
 <header class="topbar horizontal-topbar">
   <div class="container-fluid topbar-container d-flex align-items-center justify-content-between">
     
-    <!-- LEFT: Hamburger & Logo -->
+    <!-- LEFT: Logo -->
     <div class="topbar-left d-flex align-items-center gap-3">
-      <!-- Hamburger Menu Left of Logo -->
-      <button class="btn btn-light border-0 p-2 rounded-2 d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
-          <i class="bi bi-list fs-4 text-dark"></i>
-      </button>
-
       <div class="topbar-logo d-flex align-items-center gap-2">
-      <!-- Thay đổi icon logo cho phù hợp với dịch vụ công phường/xã hơn -->
-      <div class="logo-icon bg-primary text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">
-        <i class="bi bi-buildings-fill"></i>
+        <div class="logo-icon bg-primary text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">
+          <i class="bi bi-buildings-fill"></i>
+        </div>
+        <div class="logo-text d-none d-sm-flex flex-column">
+          <span class="fw-bold" style="color: var(--text-main); font-size: 1.1rem; line-height: 1.2;">Civic Connect</span>
+          <span class="text-muted" style="font-size: 0.75rem;">Cổng thông tin phản ánh hiện trường</span>
+        </div>
       </div>
-      <div class="logo-text d-none d-sm-flex flex-column">
-        <span class="fw-bold" style="color: var(--text-main); font-size: 1.1rem; line-height: 1.2;">Civic Connect</span>
-        <span class="text-muted" style="font-size: 0.75rem;">Cổng thông tin phản ánh hiện trường</span>
-      </div>
-    </div>
     </div>
 
     <!-- RIGHT GROUP: Navigation Links & Actions -->
     <div class="topbar-right-group ms-auto d-flex align-items-center">
-      <nav class="topbar-nav d-none d-lg-flex align-items-center gap-4 pe-4" style="font-family: var(--font-display, 'EB Garamond', serif);">
+      <nav class="topbar-nav d-none d-xl-flex align-items-center gap-4 pe-4" style="font-family: var(--font-display, 'EB Garamond', serif);">
         <a href="/" class="nav-link @(currentPath == "/" ? "active fw-bold" : "")">Trang chủ</a>
-        <a href="/Issues/MyIssues" class="nav-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Phản ánh của tôi</a>
+        @if (SignInManager.IsSignedIn(User)) {
+            <a href="/Issues/MyIssues" class="nav-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Phản ánh của tôi</a>
+        }
         <a href="/Map" class="nav-link @(currentPath.StartsWith("/Map", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Bản đồ</a>
-        <a href="/Policies" class="nav-link @(currentPath.StartsWith("/Policies", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Tin tức nổi bật</a>
+        <a href="/Policy" class="nav-link @(currentPath.StartsWith("/Policy", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Chính sách</a>
         <a href="/Home/About" class="nav-link @(currentPath.StartsWith("/Home/About", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Giới thiệu</a>
-    </nav>
+      </nav>
 
-    <!-- RIGHT: User Profile & Actions -->
-    <div class="topbar-right d-flex align-items-center gap-3">
-        <!-- Nút Gửi phản ánh -->
-        <a href="/Issues/Create" class="btn btn-primary d-none d-md-flex align-items-center gap-2 rounded-1" style="background-color: #1B4D3E; border-color: #1B4D3E; font-family: var(--font-display, 'EB Garamond', serif); font-size: 1.05rem;">
-            <i class="bi bi-plus-lg"></i> Gửi phản ánh
-        </a>
-
+      <!-- RIGHT: User Profile & Actions -->
+      <div class="topbar-right d-flex align-items-center gap-3">
         @if (SignInManager.IsSignedIn(User))
         {
             <!-- Avatar dropdown -->
@@ -72,31 +63,95 @@
         }
         else
         {
-            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-1">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-2">
                 <i class="bi bi-person"></i> Đăng nhập
             </a>
         }
         
-        <!-- Nút Menu cũ đã bị dời sang bên trái, nên đoạn này trống -->
+        <!-- Hamburger Menu Right -->
+        <button class="btn btn-light border p-2 rounded-2 d-flex align-items-center justify-content-center bg-white shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+            <i class="bi bi-list fs-4 text-dark"></i>
+        </button>
       </div>
     </div>
   </div>
 </header>
 
 <!-- Mobile Navigation Offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu">
-  <div class="offcanvas-header border-bottom">
-    <h5 class="offcanvas-title fw-bold">Menu</h5>
+<div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" style="border-left: none; box-shadow: -5px 0 25px rgba(0,0,0,0.05); width: 340px;">
+  <div class="offcanvas-header border-bottom px-4 py-3">
+    <div class="d-flex align-items-center gap-2">
+      <div class="logo-icon bg-primary text-white d-flex align-items-center justify-content-center rounded-circle shadow-sm" style="width: 32px; height: 32px;">
+        <i class="bi bi-buildings-fill fs-6"></i>
+      </div>
+      <h5 class="offcanvas-title fw-bold mb-0" style="font-family: var(--font-display, 'EB Garamond', serif); color: var(--primary-700);">Civic Connect</h5>
+    </div>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
-  <div class="offcanvas-body">
-    <div class="list-group list-group-flush mb-4">
-        <a href="/" class="list-group-item list-group-item-action border-0 fw-medium">Trang chủ</a>
-        <a href="/Issues/MyIssues" class="list-group-item list-group-item-action border-0 fw-medium">Phản ánh của tôi</a>
-        <a href="/Map" class="list-group-item list-group-item-action border-0 fw-medium">Bản đồ</a>
-        <a href="/Policies" class="list-group-item list-group-item-action border-0 fw-medium">Tin tức nổi bật</a>
-        <a href="/Home/About" class="list-group-item list-group-item-action border-0 fw-medium">Giới thiệu</a>
+  <div class="offcanvas-body d-flex flex-column">
+    
+    @if (SignInManager.IsSignedIn(User)) {
+        <div class="d-flex align-items-center gap-3 p-3 mb-4 rounded-3" style="background: var(--gray-50); border: 1px solid var(--gray-100);">
+            <img src="@userAvatar" alt="Avatar" class="rounded-circle shadow-sm" style="width: 48px; height: 48px; object-fit: cover;" onerror="this.src='/images/default-avatar.png'" />
+            <div>
+                <h6 class="mb-0 fw-bold text-dark" style="font-family: var(--font-display);">@userName</h6>
+                <small class="text-muted">Công dân</small>
+            </div>
+        </div>
+    }
+
+    <div class="d-flex flex-column flex-grow-1">
+        <a href="/" class="mobile-menu-link @(currentPath == "/" ? "active" : "")">
+            <div class="mobile-menu-icon"><i class="bi bi-house-door"></i></div>
+            <span class="fw-medium">Trang chủ</span>
+        </a>
+        <a href="/Issues" class="mobile-menu-link @(currentPath.StartsWith("/Issues", StringComparison.OrdinalIgnoreCase) && !currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+            <div class="mobile-menu-icon"><i class="bi bi-megaphone"></i></div>
+            <span class="fw-medium">Phản ánh hiện trường</span>
+        </a>
+        @if (SignInManager.IsSignedIn(User)) {
+            <a href="/Issues/MyIssues" class="mobile-menu-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                <div class="mobile-menu-icon"><i class="bi bi-collection"></i></div>
+                <span class="fw-medium">Phản ánh của tôi</span>
+            </a>
+        }
+        <a href="/Map" class="mobile-menu-link @(currentPath.StartsWith("/Map", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+            <div class="mobile-menu-icon"><i class="bi bi-map"></i></div>
+            <span class="fw-medium">Bản đồ</span>
+        </a>
+        <a href="/Policy" class="mobile-menu-link @(currentPath.StartsWith("/Policy", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+            <div class="mobile-menu-icon"><i class="bi bi-file-text"></i></div>
+            <span class="fw-medium">Chính sách & Pháp luật</span>
+        </a>
+        <a href="/Donation" class="mobile-menu-link @(currentPath.StartsWith("/Donation", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+            <div class="mobile-menu-icon"><i class="bi bi-heart"></i></div>
+            <span class="fw-medium">Quỹ cộng đồng</span>
+        </a>
+        <a href="/Home/About" class="mobile-menu-link @(currentPath.StartsWith("/Home/About", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+            <div class="mobile-menu-icon"><i class="bi bi-info-circle"></i></div>
+            <span class="fw-medium">Giới thiệu</span>
+        </a>
+        <a href="/Home/Guide" class="mobile-menu-link @(currentPath.StartsWith("/Home/Guide", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+            <div class="mobile-menu-icon"><i class="bi bi-journal-bookmark"></i></div>
+            <span class="fw-medium">Hướng dẫn sử dụng</span>
+        </a>
     </div>
-    <a href="/Issues/Create" class="btn btn-primary w-100 mb-2 rounded-1"><i class="bi bi-plus"></i> Gửi phản ánh</a>
+
+    @if (SignInManager.IsSignedIn(User)) {
+        <div class="mt-auto pt-4 border-top">
+            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-light w-100 rounded-3 text-danger fw-medium py-2 d-flex align-items-center justify-content-center gap-2" style="background: var(--gray-50); border: 1px solid var(--gray-200);">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+            </form>
+        </div>
+    } else {
+        <div class="mt-auto pt-4 border-top">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-3 fw-medium py-2 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-person"></i> Đăng nhập
+            </a>
+        </div>
+    }
   </div>
 </div>

@@ -177,9 +177,24 @@ namespace CivicConnect.Web.Controllers
             _ => "closed"
         };
 
+        [AllowAnonymous]
         public IActionResult Privacy()
         {
             ViewData["PageHeader"] = "Chính Sách & Điều Khoản";
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult About()
+        {
+            ViewData["Title"] = "Giới thiệu";
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Guide()
+        {
+            ViewData["Title"] = "Hướng dẫn sử dụng";
             return View();
         }
     }

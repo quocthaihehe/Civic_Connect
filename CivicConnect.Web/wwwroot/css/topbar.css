@@ -51,3 +51,44 @@
     margin-left: 0 !important;
     width: 100%;
 }
+
+/* Mobile Menu Styling */
+.mobile-menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-menu-link:hover, .mobile-menu-link.active {
+    background-color: var(--primary-50);
+    color: var(--primary-700);
+    transform: translateX(4px);
+}
+
+.mobile-menu-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 10px;
+    margin-right: 14px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    color: var(--gray-500);
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-link:hover .mobile-menu-icon, .mobile-menu-link.active .mobile-menu-icon {
+    background-color: var(--primary-500);
+    color: white;
+}
+
+#mobileMenu .offcanvas-body {
+    padding: 24px;
+}

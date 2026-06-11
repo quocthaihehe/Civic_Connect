@@ -247,22 +247,11 @@ namespace CivicConnect.Web.Controllers
                 user.DistrictCode = model.DistrictCode;
                 user.WardCode = model.WardCode;
 
-                if (model.AvatarFile != null)
+                // Avatar được upload trực tiếp lên Cloudinary từ trình duyệt (client-side)
+                // Server chỉ nhận lại URL string
+                if (!string.IsNullOrEmpty(model.AvatarUrl) && model.AvatarUrl.StartsWith("https://"))
                 {
-                    try
-                    {
-                        using (var stream = model.AvatarFile.OpenReadStream())
-                        {
-                            var uploadResult = await _photoService.AddPhotoAsync(stream, model.AvatarFile.FileName);
-                            user.AvatarUrl = uploadResult.Url;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        ModelState.AddModelError(string.Empty, $"Lỗi upload avatar: {ex.Message}");
-                        ViewData["PageHeader"] = "Hồ Sơ Cá Nhân";
-                        return View(model);
-                    }
+                    user.AvatarUrl = model.AvatarUrl;
                 }
 
                 var result = await _userManager.UpdateAsync(user);
