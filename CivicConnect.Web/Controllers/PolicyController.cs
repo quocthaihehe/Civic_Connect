@@ -94,7 +94,6 @@ namespace CivicConnect.Web.Controllers
             {
                 using (var client = new HttpClient())
                 {
-                    // Tối ưu hóa timeout là 4 giây để người dùng không phải chờ lâu
                     client.Timeout = TimeSpan.FromSeconds(4);
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                     
@@ -133,7 +132,6 @@ namespace CivicConnect.Web.Controllers
             }
             catch (Exception)
             {
-                // Trả về trang thông báo giao diện đẹp mắt nếu không load được iframe
                 var fallbackHtml = $@"
 <!DOCTYPE html>
 <html>
@@ -197,7 +195,6 @@ namespace CivicConnect.Web.Controllers
             
             if (!string.IsNullOrEmpty(geminiKey))
             {
-                // Làm sạch API Key nếu có khoảng trắng hoặc dấu ngoặc kép thừa khi copy-paste
                 geminiKey = geminiKey.Trim(' ', '"', '\'', '\n', '\r');
                 
                 try
@@ -230,119 +227,157 @@ namespace CivicConnect.Web.Controllers
                         var response = await client.PostAsync(requestUrl, httpContent);
                         var responseBody = await response.Content.ReadAsStringAsync();
 
-                        if (!response.IsSuccessStatusCode)
+                        if (response.IsSuccessStatusCode)
                         {
-                            return Json(new { success = true, answer = $"**Lỗi cuộc gọi Google Gemini API (Mã lỗi HTTP: {response.StatusCode}):**\n\n{responseBody}\n\n*Vui lòng kiểm tra lại tính hợp lệ của API Key (không được chứa khoảng trắng hoặc nháy kép thừa) hoặc kiểm tra xem tài khoản/dự án của bạn đã kích hoạt API chưa.*" });
-                        }
-
-                        using (var doc = System.Text.Json.JsonDocument.Parse(responseBody))
-                        {
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
+                            using (var doc = System.Text.Json.JsonDocument.Parse(responseBody))
                             {
-                                var firstCandidate = candidates[0];
-                                if (firstCandidate.TryGetProperty("content", out var contentObj) &&
-                                    contentObj.TryGetProperty("parts", out var parts) &&
-                                    parts.GetArrayLength() > 0)
+                                var root = doc.RootElement;
+                                if (root.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
                                 {
-                                    var answer = parts[0].GetProperty("text").GetString();
-                                    return Json(new { success = true, answer = answer });
+                                    var firstCandidate = candidates[0];
+                                    if (firstCandidate.TryGetProperty("content", out var contentObj) &&
+                                        contentObj.TryGetProperty("parts", out var parts) &&
+                                        parts.GetArrayLength() > 0)
+                                    {
+                                        var answer = parts[0].GetProperty("text").GetString();
+                                        return Json(new { success = true, answer = answer });
+                                    }
                                 }
                             }
-
-                            if (root.TryGetProperty("promptFeedback", out var feedback))
-                            {
-                                return Json(new { success = true, answer = $"**Yêu cầu bị chặn bởi bộ lọc an toàn của Google Gemini:**\n\n{feedback}" });
-                            }
-
-                            return Json(new { success = true, answer = $"**Không thể giải mã phản hồi từ Gemini. Nội dung thô:**\n\n{responseBody}" });
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    return Json(new { success = true, answer = $"**Lỗi kết nối hoặc xử lý nội dung đến Google Gemini:**\n\n{ex.Message}\n\n*Vui lòng kiểm tra kết nối Internet của máy chủ.*" });
-                }
-            }
-            else
-            {
-                // Nếu chưa cấu hình API Key, hiển thị cảnh báo ngay trong câu trả lời để hướng dẫn người dùng
-                if (request.Question.Contains("Tóm tắt nội dung chính") || request.Question.Contains("Ngày có hiệu lực") || request.Question.Contains("mức phạt"))
-                {
-                    // Cho phép chạy qua bộ máy cục bộ đối với các câu hỏi gợi ý nhanh để giao diện trông hoạt động mượt mà
-                }
-                else
-                {
-                    return Json(new { success = true, answer = $"**[CẢNH BÁO] Chưa cấu hình Gemini API Key:**\n\n" +
-                        $"Hệ thống chưa tìm thấy khóa API của bạn trong cấu hình. Để kích hoạt Trợ lý AI thực thụ (có khả năng tư vấn chuyên sâu, hiểu rõ 100% nội dung bài viết):\n\n" +
-                        $"1. Mở file [appsettings.json](file:///d:/LTWeb/DA/Civic_Connect/CivicConnect.Web/appsettings.json) trong dự án.\n" +
-                        $"2. Thêm khóa **`\"GeminiApiKey\": \"Khóa_API_Của_Bạn_Ở_Đây\"`** vào khối ngoài cùng hoặc trong khối **`\"GeminiSettings\": {{ \"ApiKey\": \"Khóa_API_Của_Bạn\" }}`**.\n" +
-                        $"3. Lưu file và thử lại.\n\n" +
-                        $"*(Tạm thời hệ thống sẽ chạy bộ máy quy tắc trả lời cục bộ để phản hồi các thắc mắc cơ bản nhất).* \n\n" +
-                        $"--- \n\n" +
-                        $"**Câu trả lời tạm thời từ bộ máy cục bộ:**\n" +
-                        $"Về câu hỏi \"{request.Question}\", văn bản này có tên \"{request.DocTitle}\" phát hành bởi \"{request.IssuingUnit}\" với nội dung tóm tắt là: *{request.DocContent}*." });
+                    // Lỗi gọi API sẽ tự động nhảy xuống Fallback cục bộ
                 }
             }
 
-            // Fallback: Bộ máy quy tắc trả lời pháp luật thông minh tại chỗ (Local Heuristic QA Engine)
-            string questionLower = request.Question.ToLower();
-            string answerText = "";
-
-            if (questionLower.Contains("tóm tắt") || questionLower.Contains("cốt lõi") || questionLower.Contains("nội dung chính") || questionLower.Contains("gì"))
-            {
-                answerText = $"**Tóm tắt cốt lõi của văn bản \"{request.DocTitle}\":**\n\n" +
-                             $"- **Nội dung chính:** {request.DocContent}\n" +
-                             $"- **Nguồn tin / Đơn vị ban hành:** {request.IssuingUnit}\n" +
-                             $"- **Ngày cập nhật:** {request.PublishedDate:dd/MM/yyyy}\n" +
-                             $"- **Số hiệu:** {request.DocNumber ?? "Không có (Tin tức điện tử)"}\n\n" +
-                             $"Văn bản/Bài báo tập trung cập nhật các hoạt động đô thị mới nhất, chính sách liên quan trực tiếp đến đời sống xã hội của người dân địa phương.";
-            }
-            else if (questionLower.Contains("hiệu lực") || questionLower.Contains("khi nào") || questionLower.Contains("ngày nào"))
-            {
-                answerText = $"**Thông tin hiệu lực/thời gian của văn bản:**\n\n" +
-                             $"- **Ngày đăng tải/cập nhật:** {request.PublishedDate:dd/MM/yyyy}\n" +
-                             $"- **Ngày áp dụng dự kiến:** {(request.PublishedDate.AddDays(15)):dd/MM/yyyy} (hoặc theo quy chuẩn cụ thể được ghi tại trang gốc).\n" +
-                             $"- **Trạng thái:** Đang có hiệu lực thi hành.\n\n" +
-                             $"Bạn có thể theo dõi chi tiết cột thuộc tính bên phải trang để xem thông tin chính xác về thời gian áp dụng.";
-            }
-            else if (questionLower.Contains("số hiệu") || questionLower.Contains("ký hiệu"))
-            {
-                answerText = !string.IsNullOrEmpty(request.DocNumber) 
-                    ? $"Văn bản này có số hiệu chính thức là: **{request.DocNumber}**."
-                    : "Đây là tin tức truyền thông đô thị hàng ngày nên không có số hiệu văn bản pháp lý chính thức.";
-            }
-            else if (questionLower.Contains("người ký") || questionLower.Contains("ai ký"))
-            {
-                answerText = !string.IsNullOrEmpty(request.Signer)
-                    ? $"Văn bản này được ký duyệt bởi: **{request.Signer}**."
-                    : "Đây là tin tức truyền thông báo chí nên không có thông tin người ký trực tiếp.";
-            }
-            else if (questionLower.Contains("mức phạt") || questionLower.Contains("phạt bao nhiêu") || questionLower.Contains("xử phạt"))
-            {
-                if (request.DocTitle.Contains("45/2026/NĐ-CP") || request.DocContent.Contains("xử phạt") || request.DocContent.Contains("phạt"))
-                {
-                    answerText = "**Dựa trên Nghị định 45/2026/NĐ-CP của Chính phủ:**\n\n" +
-                                 "- **Phạt tiền từ 500.000đ - 1.000.000đ** đối với hành vi vứt, thải, bỏ rác thải sinh hoạt không đúng nơi quy định tại chung cư, thương mại, dịch vụ hoặc nơi công cộng.\n" +
-                                 "- **Phạt tiền từ 1.000.000đ - 2.000.000đ** đối với hành vi vứt, thải rác thải sinh hoạt trên vỉa hè, lòng đường hoặc vào hệ thống thoát nước.\n" +
-                                 "- **Phạt tiền từ 10.000.000đ - 20.000.000đ** đối với hành vi lấn chiếm vỉa hè, đổ rác phế thải xây dựng gây lấp ngõ hẻm.\n\n" +
-                                 "Các biện pháp bổ sung bao gồm buộc khôi phục tình trạng ban đầu và thu dọn rác thải vi phạm.";
-                }
-                else
-                {
-                    answerText = "Nội dung xử phạt cụ thể chưa được chi tiết hóa trong văn bản này. Vui lòng nhấp vào Tab \"Xem trang gốc trực tiếp\" để đọc toàn văn hoặc liên hệ cơ quan tư pháp địa phương.";
-                }
-            }
-            else
-            {
-                answerText = $"**Xin chào! Tôi là Trợ lý AI CivicConnect.**\n\n" +
-                             $"Về câu hỏi \"{request.Question}\" liên quan đến bài viết \"{request.DocTitle}\", tôi xin tóm tắt các điểm quan trọng nhất:\n" +
-                             $"- **Nội dung cốt lõi:** {request.DocContent}\n" +
-                             $"- **Nguồn tin:** {request.IssuingUnit}\n\n" +
-                             $"Để nắm bắt 100% chi tiết sâu hơn, bạn vui lòng cấu hình **Gemini API Key** vào file `appsettings.json` của dự án để AI kích hoạt tính năng phân tích thông minh thời gian thực.";
-            }
-
+            // Fallback: Tìm kiếm trong Bộ Cơ sở Dữ liệu Pháp luật Cục bộ và Toàn văn bài viết
+            string answerText = SearchLocalKnowledge(request.Question, request.DocTitle, fullTextContext, request.PublishedDate, geminiKey);
             return Json(new { success = true, answer = answerText });
+        }
+
+        private static string SearchLocalKnowledge(string question, string docTitle, string docContent, DateTime publishedDate, string geminiKey)
+        {
+            string questionLower = question.ToLower();
+            
+            // 1. Tìm kiếm trong Dataset Luật & Chính sách cục bộ
+            LawEntry bestMatchLaw = null;
+            int highestLawScore = 0;
+            
+            foreach (var law in LawDataset)
+            {
+                int score = 0;
+                var keywords = law.Keywords.Split(',');
+                foreach (var kw in keywords)
+                {
+                    var trimmedKw = kw.Trim().ToLower();
+                    if (string.IsNullOrEmpty(trimmedKw)) continue;
+                    
+                    if (questionLower.Contains(trimmedKw))
+                    {
+                        score += 3;
+                    }
+                }
+                
+                if (score > highestLawScore)
+                {
+                    highestLawScore = score;
+                    bestMatchLaw = law;
+                }
+            }
+            
+            // 2. Tìm kiếm các câu chứa từ khóa trong Toàn văn bài viết hiện tại
+            var docSentences = docContent.Split(new[] { '.', '?', '!', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 8)
+                .ToList();
+                
+            var matchedSentences = new List<string>();
+            int highestSentenceScore = 0;
+            
+            // Lọc các từ vô nghĩa khi so khớp câu
+            var stopWords = new HashSet<string> { "là", "bị", "phạt", "bao", "nhiêu", "của", "và", "trong", "có", "không", "cho", "để", "làm", "gì", "thế", "nào" };
+            var questionWords = questionLower.Split(new[] { ' ', ',', '.', '?', '!' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(w => w.Trim())
+                .Where(w => w.Length > 2 && !stopWords.Contains(w))
+                .ToList();
+
+            foreach (var sentence in docSentences)
+            {
+                int sentenceScore = 0;
+                foreach (var qw in questionWords)
+                {
+                    if (sentence.ToLower().Contains(qw))
+                    {
+                        sentenceScore += 2;
+                    }
+                }
+                
+                if (sentenceScore > 2)
+                {
+                    matchedSentences.Add(sentence);
+                    if (sentenceScore > highestSentenceScore)
+                    {
+                        highestSentenceScore = sentenceScore;
+                    }
+                }
+            }
+            
+            // 3. Tổng hợp câu trả lời
+            string response = "";
+            
+            // Nếu có kết quả đối khớp luật
+            if (bestMatchLaw != null && highestLawScore >= 3)
+            {
+                response += $"### 📜 Kết quả Tra cứu Cơ sở Dữ liệu Pháp luật:\n" +
+                            $"**Bộ luật/Nghị định:** {bestMatchLaw.Title}\n" +
+                            $"- **Nội dung quy định:** {bestMatchLaw.Content}\n" +
+                            $"- **Mức xử phạt hành chính:** **{bestMatchLaw.PenaltyInfo}**\n";
+                            
+                if (!string.IsNullOrEmpty(bestMatchLaw.DocumentNumber))
+                {
+                    response += $"- **Số hiệu văn bản pháp lý:** `{bestMatchLaw.DocumentNumber}`\n";
+                }
+                response += "\n";
+            }
+            
+            // Nếu tìm thấy các câu trả lời trực tiếp trong bài viết/tài liệu hiện tại
+            if (matchedSentences.Any())
+            {
+                response += $"### 📰 Trích dẫn thông tin từ bài viết hiện tại:\n";
+                var uniqueSentences = matchedSentences.Distinct().Take(3);
+                foreach (var sent in uniqueSentences)
+                {
+                    response += $"- *\"{sent}.\"*\n";
+                }
+                response += "\n";
+            }
+            
+            // Nếu không khớp được gì cụ thể, cung cấp tóm tắt văn bản tổng quát
+            if (string.IsNullOrEmpty(response))
+            {
+                response = $"### 🤖 Trợ lý CivicConnect (Chế độ Offline):\n" +
+                           $"Tôi đã nhận được câu hỏi: *\"{question}\"*.\n\n" +
+                           $"Hiện tại cơ sở dữ liệu luật cục bộ chưa khớp từ khóa cụ thể. Dưới đây là thông tin tóm tắt cốt lõi của tài liệu này để bạn tham khảo:\n" +
+                           $"- **Tên tài liệu/Tin tức:** {docTitle}\n" +
+                           $"- **Nội dung cốt lõi:** {docContent}\n" +
+                           $"- **Đăng tải vào lúc:** {publishedDate:dd/MM/yyyy HH:mm}\n\n" +
+                           $"*Gợi ý:* Bạn hãy thử hỏi về các chủ đề luật xử phạt như: *vứt rác bừa bãi, lấn chiếm vỉa hè, nồng độ cồn rượu bia, không đội mũ bảo hiểm, karaoke làm ồn ban đêm, xây nhà không phép, chó thả rông không rọ mõm, hoặc đốt pháo tết* để tôi có thể tra cứu luật chính xác nhất!";
+            }
+            
+            // Đính kèm ghi chú chân trang cấu hình
+            if (string.IsNullOrEmpty(geminiKey))
+            {
+                response += $"\n---\n*💡 Lưu ý: Trợ lý đang hoạt động ở chế độ **Offline cục bộ** (Chưa cấu hình Gemini API Key). Để mở rộng khả năng suy luận vô hạn và giải đáp tự do, vui lòng mở file `appsettings.json` và điền khóa của bạn vào trường `\"GeminiApiKey\"`.*";
+            }
+            else
+            {
+                response += $"\n---\n*💡 Lưu ý: Hệ thống phát hiện cuộc gọi đến API Gemini thất bại (có thể khóa hết hạn mức hoặc không hợp lệ). Trợ lý đã chuyển sang **phản hồi từ cơ sở dữ liệu pháp luật ngoại tuyến** để hỗ trợ bạn.*";
+            }
+            
+            return response;
         }
 
         private async Task<string> ScrapeUrlTextAsync(string url)
@@ -435,7 +470,7 @@ namespace CivicConnect.Web.Controllers
                                 Id = 0,
                                 Title = title,
                                 Excerpt = cleanDescription,
-                                Content = cleanDescription, // Dùng mô tả làm nội dung tóm tắt để luôn hiển thị đầy đủ
+                                Content = cleanDescription,
                                 Tag = "Tin tức",
                                 TagClass = "tag-news",
                                 IssuingUnit = "Báo điện tử",
@@ -455,6 +490,90 @@ namespace CivicConnect.Web.Controllers
             }
             return newsList;
         }
+
+        private static readonly List<LawEntry> LawDataset = new List<LawEntry>
+        {
+            new LawEntry
+            {
+                Title = "Xử phạt vi phạm vệ sinh môi trường đô thị",
+                Keywords = "rác, vứt rác, xả rác, vệ sinh, môi trường, đổ rác, sinh hoạt, ngõ hẻm, bừa bãi",
+                Content = "Quy định xử phạt đối với các hành vi vứt, thải, bỏ rác thải sinh hoạt sai nơi quy định tại chung cư, trung tâm thương mại hoặc nơi công cộng đô thị.",
+                DocumentNumber = "45/2026/NĐ-CP (Nghị định Chính phủ)",
+                PenaltyInfo = "Phạt tiền từ 500.000đ đến 1.000.000đ đối với hành vi vứt rác tại chung cư, nơi công cộng. Phạt tiền từ 1.000.000đ đến 2.000.000đ đối với hành vi vứt rác bừa bãi ra vỉa hè, lòng đường hoặc vào hệ thống thoát nước đô thị."
+            },
+            new LawEntry
+            {
+                Title = "Xử phạt hành vi lấn chiếm vỉa hè, lòng lề đường",
+                Keywords = "vỉa hè, lòng đường, lấn chiếm, buôn bán, đỗ xe, hè phố, đậu xe, đỗ trái phép, chiếm dụng",
+                Content = "Xử phạt các tổ chức, cá nhân tự ý sử dụng trái phép lòng đường đô thị hoặc hè phố để làm nơi bày bán hàng hóa, kinh doanh dịch vụ ăn uống, đặt biển hiệu quảng cáo hoặc dừng đỗ xe cản trở giao thông.",
+                DocumentNumber = "Nghị định 100/2019/NĐ-CP",
+                PenaltyInfo = "Phạt tiền từ 2.000.000đ đến 3.000.000đ đối với cá nhân (4.000.000đ - 6.000.000đ đối với tổ chức) bày bán hàng hóa lấn chiếm hè phố. Phạt từ 6.000.000đ đến 8.000.000đ đối với hành vi dựng rạp, lấn chiếm lòng lề đường trái phép."
+            },
+            new LawEntry
+            {
+                Title = "Quy định bắt buộc đội mũ bảo hiểm khi đi xe máy",
+                Keywords = "mũ bảo hiểm, không đội mũ, quai mũ, xe máy, mô tô, xe gắn máy, đi xe",
+                Content = "Người điều khiển, người ngồi trên xe mô tô hai bánh, xe mô tô ba bánh, xe gắn máy phải đội mũ bảo hiểm cho người đi mô tô, xe máy và cài quai đúng quy cách khi tham gia giao thông đường bộ.",
+                DocumentNumber = "Nghị định 100/2019/NĐ-CP (sửa đổi bởi Nghị định 123/2021/NĐ-CP)",
+                PenaltyInfo = "Phạt tiền từ 400.000đ đến 600.000đ đối với người điều khiển hoặc người ngồi sau không đội mũ bảo hiểm hoặc đội mũ bảo hiểm không cài quai đúng quy cách."
+            },
+            new LawEntry
+            {
+                Title = "Xử phạt vi phạm nồng độ cồn khi lái xe",
+                Keywords = "nồng độ cồn, cồn, rượu, bia, say xỉn, thổi cồn, đo cồn, uống rượu, uống bia, uống rượu bia",
+                Content = "Cấm tuyệt đối người điều khiển phương tiện giao thông (ô tô, xe máy, xe đạp, máy kéo) tham gia giao thông khi trong máu hoặc hơi thở có nồng độ cồn.",
+                DocumentNumber = "Nghị định 100/2019/NĐ-CP",
+                PenaltyInfo = "Đối với xe máy: Phạt tiền từ 2-3 triệu đồng (nồng độ cồn chưa vượt quá 50mg/100ml máu); 4-5 triệu đồng (vượt quá 50-80mg); 6-8 triệu đồng (vượt quá 80mg) kèm tước GPLX từ 10 - 24 tháng. Đối với ô tô: Phạt tối đa từ 30 - 40 triệu đồng và tước GPLX 22 - 24 tháng đối với mức vi phạm cao nhất."
+            },
+            new LawEntry
+            {
+                Title = "Gây tiếng ồn lớn trong khu dân cư (Hát Karaoke loa kéo)",
+                Keywords = "tiếng ồn, ồn, karaoke, loa kéo, làm ồn, nhạc to, ban đêm, hát karaoke, huyên náo",
+                Content = "Quy định xử phạt hành vi gây tiếng động lớn, làm ồn ào, huyên náo tại khu dân cư, nơi công cộng trong khoảng thời gian từ 22 giờ ngày hôm trước đến 6 giờ sáng ngày hôm sau.",
+                DocumentNumber = "Nghị định 144/2021/NĐ-CP",
+                PenaltyInfo = "Phạt cảnh cáo hoặc phạt tiền từ 500.000đ đến 1.000.000đ đối với cá nhân gây tiếng ồn lớn sau 22 giờ đêm. Nếu tiếng ồn vượt quy chuẩn kỹ thuật môi trường do các cơ sở kinh doanh phát ra, mức phạt từ 1.000.000đ lên tới 160.000.000đ."
+            },
+            new LawEntry
+            {
+                Title = "Xây dựng nhà ở không phép, sửa chữa trái phép",
+                Keywords = "xây dựng, xây nhà, không phép, sửa nhà, trái phép, thi công, công trình, xây dựng trái phép",
+                Content = "Xử phạt hành vi tổ chức thi công xây dựng công trình không có giấy phép xây dựng mà theo quy định phải có giấy phép xây dựng.",
+                DocumentNumber = "Nghị định 16/2022/NĐ-CP",
+                PenaltyInfo = "Phạt tiền từ 60.000.000đ đến 80.000.000đ đối với xây dựng nhà ở riêng lẻ không có giấy phép xây dựng. Biện pháp khắc phục là buộc dừng thi công, xin cấp phép trong thời hạn quy định hoặc buộc phá dỡ phần công trình vi phạm."
+            },
+            new LawEntry
+            {
+                Title = "Quy định về nuôi chó, thả rông và rọ mõm vật nuôi",
+                Keywords = "chó, thả rông, rọ mõm, vật nuôi, xích chó, chó cắn, thú cưng, chó thả rông",
+                Content = "Chủ nuôi chó phải đăng ký, tiêm phòng dại định kỳ và bắt buộc phải đeo rọ mõm cho chó, xích giữ hoặc có người dắt khi đưa chó ra nơi công cộng nhằm bảo đảm an toàn cho người xung quanh.",
+                DocumentNumber = "Nghị định 90/2017/NĐ-CP (sửa đổi bởi Nghị định 04/2020/NĐ-CP)",
+                PenaltyInfo = "Phạt tiền từ 1.000.000đ đến 2.000.000đ đối với hành vi không đeo rọ mõm cho chó hoặc không xích giữ chó khi đưa ra nơi công cộng. Buộc bồi thường thiệt hại nếu chó cắn người khác gây thương tích."
+            },
+            new LawEntry
+            {
+                Title = "Quy định cấm đốt pháo nổ, pháo hoa nổ trái phép",
+                Keywords = "pháo, đốt pháo, pháo hoa, pháo nổ, tết, chất nổ, tàng trữ pháo, pháo hoa nổ",
+                Content = "Nghiêm cấm hành vi sử dụng các loại pháo nổ, pháo hoa nổ trái pháp luật. Người dân chỉ được phép sử dụng pháo hoa không nổ (chỉ phát sáng) do Bộ Quốc phòng sản xuất vào các dịp lễ tết.",
+                DocumentNumber = "Nghị định 144/2021/NĐ-CP",
+                PenaltyInfo = "Phạt tiền từ 1.000.000đ đến 2.000.000đ đối với hành vi sử dụng các loại pháo hoa nổ, pháo nổ trái phép. Phạt từ 5.000.000đ đến 10.000.000đ đối với hành vi chế tạo, tàng trữ hoặc vận chuyển pháo trái phép."
+            },
+            new LawEntry
+            {
+                Title = "Bảo vệ dòng kênh Nhiêu Lộc - Thị Nghè",
+                Keywords = "nhiêu lộc, thị nghè, câu cá, kênh, vớt rác, dòng sông, rác thải, dòng kênh",
+                Content = "Quy định cấm tuyệt đối các hành vi xả rác thải sinh hoạt xuống lòng kênh Nhiêu Lộc - Thị Nghè, câu cá giải trí trái phép hoặc làm tổn hại mỹ quan, cảnh quan dọc tuyến kênh xanh.",
+                DocumentNumber = "Quy chế Quản lý đô thị TP.HCM",
+                PenaltyInfo = "Hành vi câu cá trộm dọc kênh Nhiêu Lộc bị xử phạt từ 1.000.000đ đến 2.000.000đ. Hành vi vứt rác sinh hoạt xuống sông, kênh rạch bị phạt tiền từ 1.000.000đ đến 2.000.000đ."
+            },
+            new LawEntry
+            {
+                Title = "Quyền phản ánh, kiến nghị trật tự đô thị của người dân",
+                Keywords = "phản ánh, kiến nghị, gửi phản ánh, tố giác, khiếu nại, dân bàn, ý kiến",
+                Content = "Người dân có quyền và trách nhiệm gửi phản ánh, kiến nghị về các hành vi vi phạm trật tự công cộng, lấn chiếm vỉa hè hoặc xả rác bừa bãi lên chính quyền địa phương qua ứng dụng đô thị thông minh để kịp thời xử lý.",
+                DocumentNumber = "Luật Thực hiện dân chủ ở cơ sở 2022",
+                PenaltyInfo = "Chính quyền cấp Phường/Quận có nghĩa vụ tiếp nhận, phản hồi và công khai tiến độ xử lý đơn thư phản ánh của cư dân trong thời hạn từ 3 - 5 ngày làm việc."
+            }
+        };
     }
 
     public class AskAIRequest
@@ -467,5 +586,14 @@ namespace CivicConnect.Web.Controllers
         public string Signer { get; set; }
         public DateTime PublishedDate { get; set; }
         public string SourceUrl { get; set; }
+    }
+
+    public class LawEntry
+    {
+        public string Title { get; set; }
+        public string Keywords { get; set; }
+        public string Content { get; set; }
+        public string DocumentNumber { get; set; }
+        public string PenaltyInfo { get; set; }
     }
 }
