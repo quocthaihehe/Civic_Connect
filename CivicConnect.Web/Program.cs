@@ -73,6 +73,7 @@ builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
+builder.Services.AddScoped<IMomoService, MomoService>();
 
 // Đăng ký các Hosted Services (Background Jobs chạy nền)
 builder.Services.AddHostedService<PriorityScoreJob>();
@@ -123,6 +124,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<NotificationHub>("/hubs/notification");
+app.MapHub<DonationHub>("/hubs/donation");
 
 app.Run();
 
