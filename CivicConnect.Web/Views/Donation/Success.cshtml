@@ -1,0 +1,83 @@
+@model CivicConnect.Core.Entities.Donation
+@{
+    ViewData["Title"] = "Quyên góp thành công";
+}
+
+<style>
+    .result-card {
+        max-width: 550px;
+        margin: 40px auto;
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        padding: 40px;
+        position: relative;
+    }
+    .success-icon-wrap {
+        width: 80px;
+        height: 80px;
+        background-color: #d1fae5;
+        color: #10b981;
+        font-size: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto 24px;
+        animation: scale-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @@keyframes scale-up {
+        0% { transform: scale(0.5); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+</style>
+
+<div class="container">
+    <div class="result-card">
+        <div class="success-icon-wrap">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+
+        <h2 class="fw-bold text-success mb-2">QUYÊN GÓP THÀNH CÔNG!</h2>
+        <p class="text-secondary mb-4">Cảm ơn tấm lòng hảo tâm của bạn đã đồng lòng xây dựng cộng đồng.</p>
+
+        <!-- Details -->
+        <div class="card bg-light border-0 rounded-3 p-3 text-start mb-4">
+            <table class="table table-sm table-borderless mb-0 small">
+                <tbody>
+                    <tr>
+                        <td class="text-secondary">Quỹ nhận:</td>
+                        <td class="text-dark fw-semibold text-end">@Model.DonationCategory?.Name</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">Tên nhà hảo tâm:</td>
+                        <td class="text-dark fw-semibold text-end">@Model.DonorName</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">Số tiền:</td>
+                        <td class="text-success fw-bold text-end">@Model.Amount.ToString("N0") đ</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">Mã giao dịch MoMo:</td>
+                        <td class="text-secondary text-end font-monospace">@Model.TransactionId</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">Thời gian:</td>
+                        <td class="text-secondary text-end">@Model.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex flex-column gap-2">
+            <a asp-action="Index" class="btn btn-primary py-2.5 rounded-pill fw-semibold shadow-sm">
+                Quay lại Trang Quỹ <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="/" class="btn btn-light py-2.5 rounded-pill text-secondary">
+                Về Trang Chủ
+            </a>
+        </div>
+    </div>
+</div>

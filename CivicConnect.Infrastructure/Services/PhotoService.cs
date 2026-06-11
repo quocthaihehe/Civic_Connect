@@ -21,7 +21,14 @@ namespace CivicConnect.Infrastructure.Services
                 config.Value.ApiSecret
             );
 
+            var handler = new System.Net.Http.HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+            };
+            var httpClient = new System.Net.Http.HttpClient(handler);
+
             _cloudinary = new Cloudinary(account);
+            _cloudinary.Api.Client = httpClient;
         }
 
         public async Task<PhotoUploadResult> AddPhotoAsync(Stream fileStream, string fileName)

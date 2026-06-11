@@ -22,6 +22,8 @@ namespace CivicConnect.Infrastructure.Data
         public DbSet<UnitCategory> UnitCategories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Policy> Policies { get; set; }
+        public DbSet<DonationCategory> DonationCategories { get; set; }
+        public DbSet<Donation> Donations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -217,6 +219,64 @@ namespace CivicConnect.Infrastructure.Data
                     IssuingUnit = "UBND Quận 1",
                     PublishedDate = DateTime.UtcNow,
                     IsActive = true
+                }
+            );
+
+            // Cấu hình bảng DonationCategory
+            modelBuilder.Entity<DonationCategory>(entity =>
+            {
+                entity.Property(dc => dc.TargetAmount).HasColumnType("decimal(18,2)");
+                entity.Property(dc => dc.CurrentAmount).HasColumnType("decimal(18,2)");
+            });
+
+            // Cấu hình bảng Donation
+            modelBuilder.Entity<Donation>(entity =>
+            {
+                entity.Property(d => d.Amount).HasColumnType("decimal(18,2)");
+                entity.HasIndex(d => d.OrderId).IsUnique();
+
+                entity.HasOne(d => d.DonationCategory)
+                    .WithMany(dc => dc.Donations)
+                    .HasForeignKey(d => d.DonationCategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany()
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Seed các Quỹ Quyên Góp mẫu
+            modelBuilder.Entity<DonationCategory>().HasData(
+                new DonationCategory
+                {
+                    Id = 1,
+                    Name = "Quỹ Trồng Xanh Đô Thị",
+                    Description = "Quyên góp mua cây xanh, hoa trang trí trồng tại các tuyến ngõ hẻm, công viên công cộng trên địa bàn Phường Bến Nghé.",
+                    TargetAmount = 50000000,
+                    CurrentAmount = 0,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new DonationCategory
+                {
+                    Id = 2,
+                    Name = "Quỹ Thắp Sáng Ngõ Hẻm",
+                    Description = "Hỗ trợ lắp đặt hệ thống đèn đường LED thông minh, tiết kiệm điện tại các ngõ hẻm chưa có đủ ánh sáng.",
+                    TargetAmount = 30000000,
+                    CurrentAmount = 0,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new DonationCategory
+                {
+                    Id = 3,
+                    Name = "Quỹ Nâng Cấp Sân Chơi Trẻ Em",
+                    Description = "Mua sắm, lắp đặt và sửa chữa các thiết bị vui chơi ngoài trời tại điểm sinh hoạt cộng đồng của phường.",
+                    TargetAmount = 100000000,
+                    CurrentAmount = 0,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }
