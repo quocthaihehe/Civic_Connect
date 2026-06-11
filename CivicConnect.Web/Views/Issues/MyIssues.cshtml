@@ -7,7 +7,7 @@
 <div class="d-flex flex-column gap-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
-            <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-person-workspace me-2"></i> Phản ánh của tôi</h4>
+            <h4 class="fw-bold mb-1 text-primary">Phản ánh của tôi</h4>
             <p class="text-muted mb-0" style="font-size: 0.85rem;">Danh sách các ý kiến phản ánh do bạn đã gửi lên hệ thống.</p>
         </div>
         <a asp-action="Create" class="btn btn-primary rounded-pill shadow-sm"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh mới</a>
@@ -28,7 +28,7 @@
             @foreach (var issue in Model)
             {
                 <div class="col-md-6 col-xl-4">
-                    <div class="glass-card h-100 d-flex flex-column" style="overflow: hidden;">
+                    <div class="glass-card h-100 d-flex flex-column shadow-sm rounded-3 bg-white" style="overflow: hidden; border: 1px solid var(--gray-200);">
                         <div class="position-relative" style="height: 160px; background-color: #cbd5e1;">
                             @if (issue.Images != null && issue.Images.Any())
                             {
@@ -57,13 +57,12 @@
                             </p>
 
                             <div class="d-flex align-items-center gap-2 mb-3 text-muted" style="font-size: 0.75rem;">
-                                <i class="bi bi-geo-alt-fill text-danger"></i>
-                                <span class="text-truncate" style="max-width: 250px;">@issue.Address</span>
+                                <i class="bi bi-clock text-primary"></i>
+                                <span class="text-truncate">@issue.CreatedAt.ToString("dd/MM/yyyy")</span>
                             </div>
 
                             <div class="border-top pt-3 mt-auto d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
-                                <span class="text-muted"><i class="bi bi-hand-thumbs-up-fill text-primary me-1"></i> @issue.Votes.Count(v => v.Type == VoteType.Up) đồng ý</span>
-                                <span class="text-muted">Gửi ngày @issue.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                <a asp-action="Details" asp-route-id="@issue.Id" class="btn btn-outline-primary btn-sm rounded-1 w-100">Xem chi tiết phản ánh</a>
                             </div>
                         </div>
                     </div>

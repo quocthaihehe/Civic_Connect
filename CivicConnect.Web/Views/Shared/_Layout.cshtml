@@ -6,7 +6,9 @@
   <title>@ViewData["Title"] - CivicConnect</title>
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <!-- Bootstrap 5 CSS -->
   <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
   <!-- Bootstrap Icons -->
@@ -29,15 +31,16 @@
   @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-  <div class="app-shell">
-    <!-- Sidebar -->
-    @await Html.PartialAsync("_Sidebar")
-
+  <div class="app-shell no-sidebar">
     <!-- Main area -->
-    <div class="main-area">
+    <div class="main-area full-width">
       @await Html.PartialAsync("_Navbar")
       
-      <main class="main-content">
+      @{
+          var isFullWidth = ViewData["IsFullWidth"] as bool? ?? false;
+          var mainClass = isFullWidth ? "main-content-fluid" : "main-content";
+      }
+      <main class="@mainClass">
         @RenderBody()
       </main>
     </div>

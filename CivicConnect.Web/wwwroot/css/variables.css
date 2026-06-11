@@ -3,10 +3,10 @@
   --primary-50:  #EFF6FF;
   --primary-100: #DBEAFE;
   --primary-200: #BFDBFE;
-  --primary-400: #60A5FA;
-  --primary-500: #3B82F6;
-  --primary-600: #2563EB;   /* ← Màu chủ đạo */
-  --primary-700: #1D4ED8;
+  --primary-400: #2D7A62;
+  --primary-500: #1B4D3E; /* Forest Green */
+  --primary-600: #133B2F;   /* ← Màu chủ đạo mới */
+  --primary-700: #0E2B22;
 
   /* Accent — Teal xanh lá biển */
   --accent-400: #34D399;
@@ -14,8 +14,8 @@
   --accent-600: #059669;
 
   /* Warning — Amber cam */
-  --warning-400: #FBBF24;
-  --warning-500: #F59E0B;
+  --warning-400: #FAD12A;
+  --warning-500: #E6C200; /* Golden Mustard */
 
   /* Danger — Rose đỏ hồng */
   --danger-400: #FB7185;
@@ -34,7 +34,7 @@
   --gray-900: #0F172A;
 
   /* Background */
-  --bg-page:    #F0F4FF;   /* Nền trang — blue tint nhẹ */
+  --bg-page:    #FDFBF7;   /* Nền trang — Kem nhạt ấm áp */
   --bg-card:    #FFFFFF;
   --bg-sidebar: #FFFFFF;
 
@@ -52,15 +52,16 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-main: 'Inter', 'Be Vietnam Pro', sans-serif;
-  --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-main: 'Inter', sans-serif;
+  --font-display: 'EB Garamond', serif;
+  --text-main: #2C3531; /* Xanh rêu đen */
 }
 
 [data-theme="dark"] {
   /* Background */
-  --bg-page:    #0f172a;   /* Slate 900 */
-  --bg-card:    #1e293b;   /* Slate 800 */
-  --bg-sidebar: #1e293b;
+  --bg-page:    #2C3531;   /* Slate ngả rêu */
+  --bg-card:    #1F2623;   
+  --bg-sidebar: #1F2623;
 
   /* Neutrals */
   --gray-50:  #1e293b;

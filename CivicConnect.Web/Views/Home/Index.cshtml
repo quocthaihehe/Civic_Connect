@@ -1,204 +1,282 @@
-@* Views/Home/Index.cshtml *@
 @model CivicConnect.Web.Models.Home.HomeViewModel
 @using CivicConnect.Core.Enums
 @{
     ViewData["Title"] = "Trang chủ";
+    ViewData["IsFullWidth"] = true;
 }
 
-<div class="home-page">
-
-  @* ── SECTION 1: HERO GREETING ── *@
-  <div class="hero-greeting fade-in-up">
-    <div class="hero-greeting-inner">
-      <div class="hero-text">
-        <p class="hero-time-greeting text-primary">@Model.TimeGreeting, 👋</p>
-        <h1 class="hero-name">@Model.UserFullName</h1>
-        <p class="hero-subtitle">
-          Cùng xây dựng <strong>@Model.WardName, @Model.DistrictName</strong> tốt đẹp hơn.
-          Bạn có <strong class="text-primary">@Model.MyPendingCount phản ánh</strong> đang chờ xử lý.
-        </p>
-      </div>
-      <div class="hero-illustration d-none d-md-block" style="width: 160px;">
-        <img src="~/images/hero-city.svg" alt="" aria-hidden="true" style="width: 100%; opacity: 0.85;" />
-      </div>
+<div class="landing-page fade-in-up">
+  
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <!-- Nửa phải là hình ảnh minh họa -->
+    <div class="hero-bg-container d-none d-md-block">
+      <!-- Dùng ảnh đại diện con người vui vẻ, cộng đồng để tạo cảm giác y hệt mẫu -->
+      <img src="\images\hinh_herosection.png" alt="Cộng đồng Civic Connect" class="hero-bg-img" />
     </div>
-  </div>
-
-  @* ── SECTION 2: QUICK ACTIONS ── *@
-  <div class="quick-actions fade-in-up">
-    <a href="/Issues/Create" class="quick-action-card action-primary text-decoration-none">
-      <div class="qa-icon"><i class="bi bi-plus-circle-fill"></i></div>
-      <div class="qa-text">
-        <span class="qa-title">Gửi phản ánh mới</span>
-        <span class="qa-desc">Báo cáo sự cố trong khu vực của bạn</span>
-      </div>
-      <i class="bi bi-arrow-right qa-arrow"></i>
-    </a>
-    <a href="/Issues/MyIssues" class="quick-action-card action-teal text-decoration-none">
-      <div class="qa-icon"><i class="bi bi-clock-history"></i></div>
-      <div class="qa-text">
-        <span class="qa-title">Theo dõi phản ánh</span>
-        <span class="qa-desc">Xem tiến độ xử lý của bạn</span>
-      </div>
-      <i class="bi bi-arrow-right qa-arrow"></i>
-    </a>
-    <a href="/Map" class="quick-action-card action-amber text-decoration-none">
-      <div class="qa-icon"><i class="bi bi-map-fill"></i></div>
-      <div class="qa-text">
-        <span class="qa-title">Bản đồ khu vực</span>
-        <span class="qa-desc">Xem các vấn đề đang xảy ra</span>
-      </div>
-      <i class="bi bi-arrow-right qa-arrow"></i>
-    </a>
-  </div>
-
-  @* ── SECTION 3: TIN TỨC & CHÍNH SÁCH ── *@
-  <div class="section-block fade-in-up">
-    <div class="section-header">
-      <div class="section-title-wrap">
-        <span class="section-icon bg-blue"><i class="bi bi-newspaper"></i></span>
-        <h2 class="section-title">Tin tức & Chính sách mới</h2>
-      </div>
-      <a href="/Policy" class="section-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
-    </div>
-    <div class="news-grid">
-      @if (Model.LatestPolicies == null || !Model.LatestPolicies.Any())
-      {
-         <div class="col-12 text-center text-muted py-4">Không có tin tức hay chính sách mới.</div>
-      }
-      else
-      {
-          @foreach (var news in Model.LatestPolicies)
-          {
-            <a href="/Policy/Details/@news.Id" class="news-card card-hover text-decoration-none">
-              <div class="news-tag @news.TagClass">@news.Tag</div>
-              <h3 class="news-title">@news.Title</h3>
-              <p class="news-excerpt">@news.Excerpt</p>
-              <div class="news-meta">
-                <span><i class="bi bi-building"></i> @news.IssuingUnit</span>
-                <span><i class="bi bi-calendar3"></i> @news.PublishedDate.ToString("dd/MM/yyyy")</span>
-              </div>
+    
+    <div class="container-fluid px-4 px-xl-5 hero-content">
+      <div class="row">
+        <div class="col-lg-7 hero-text-box">
+          <h1 class="hero-headline">
+            Cùng nhau xây dựng<br/>
+            môi trường tốt đẹp hơn
+          </h1>
+          <p class="hero-subheadline">
+            Mỗi phản ánh của bạn là một viên gạch xây nên<br/>một cộng đồng văn minh, sạch đẹp và đáng sống.
+          </p>
+          
+          <div class="hero-actions d-flex align-items-center gap-4 mb-4">
+            <a href="/Issues/Create" class="btn btn-primary d-flex align-items-center gap-2 rounded-1 hero-btn-main">
+              <i class="bi bi-pencil-square"></i> Gửi phản ánh ngay
             </a>
-          }
-      }
-    </div>
-  </div>
-
-  @* ── SECTION 4: PHẢN ÁNH NỔI BẬT (đã duyệt) ── *@
-  <div class="section-block fade-in-up">
-    <div class="section-header">
-      <div class="section-title-wrap">
-        <span class="section-icon bg-teal"><i class="bi bi-megaphone"></i></span>
-        <h2 class="section-title">Phản ánh nổi bật gần đây</h2>
-      </div>
-      <a href="/Issues" class="section-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
-    </div>
-    <div class="issues-feed">
-      @if (Model.FeaturedIssues == null || !Model.FeaturedIssues.Any())
-      {
-         <div class="col-12 text-center text-muted py-4">Chưa có phản ánh nổi bật nào được duyệt.</div>
-      }
-      else
-      {
-          @foreach (var issue in Model.FeaturedIssues)
-          {
-            <div class="issue-feed-card card-hover fade-in-up">
-              <div class="issue-feed-img">
-                @if (issue.ThumbnailUrl != null)
-                {
-                  <img src="@issue.ThumbnailUrl" alt="@issue.Title" loading="lazy" />
-                }
-                else
-                {
-                  <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted" style="background: var(--gray-100); height: 140px;">
-                     <i class="bi bi-image fs-3"></i>
-                  </div>
-                }
-                <span class="issue-feed-category @issue.CategoryClass">@issue.CategoryLabel</span>
-              </div>
-              <div class="issue-feed-body">
-                <div class="issue-feed-meta">
-                  <span class="issue-status-badge status-@issue.StatusClass">
-                    <span class="status-dot"></span>@issue.StatusLabel
-                  </span>
-                  <span class="issue-date">@issue.CreatedAt.ToString("dd/MM")</span>
-                </div>
-                <h3 class="issue-feed-title">
-                  <a href="/Issues/Details/@issue.Id" class="text-decoration-none">@issue.Title</a>
-                </h3>
-                <p class="issue-feed-address">
-                  <i class="bi bi-geo-alt"></i> @issue.Address
-                </p>
-                <div class="issue-feed-footer">
-                  <div class="issue-stats">
-                    <span><i class="bi bi-hand-thumbs-up"></i> @issue.VoteCount</span>
-                    <span><i class="bi bi-chat"></i> @issue.CommentCount</span>
-                  </div>
-                  <div class="issue-author">
-                    <img src="@issue.AuthorAvatar" onerror="this.src='https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/avatar.png'" alt="" class="author-mini-avatar" />
-                    <span>@issue.AuthorName</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-      }
-    </div>
-  </div>
-
-  @* ── SECTION 5: PHẢN ÁNH CỦA TÔI ── *@
-  @if (Model.MyRecentIssues != null && Model.MyRecentIssues.Any())
-  {
-    <div class="section-block fade-in-up">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <span class="section-icon bg-amber"><i class="bi bi-person-lines-fill"></i></span>
-          <h2 class="section-title">Phản ánh gần đây của tôi</h2>
-        </div>
-        <a href="/Issues/MyIssues" class="section-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
-      </div>
-      <div class="my-issues-list">
-        @foreach (var issue in Model.MyRecentIssues)
-        {
-          <div class="my-issue-row card-hover">
-            <div class="my-issue-status">
-              <div class="status-circle status-@issue.StatusClass"></div>
-            </div>
-            <div class="my-issue-info">
-              <a href="/Issues/Details/@issue.Id" class="my-issue-title text-decoration-none">@issue.Title</a>
-              <span class="my-issue-meta">@issue.CategoryLabel · @issue.CreatedAt.ToString("dd/MM/yyyy")</span>
-            </div>
-            <div class="my-issue-badge ms-auto">
-              <span class="issue-status-badge status-@issue.StatusClass">@issue.StatusLabel</span>
-            </div>
-            @if (issue.DueDate.HasValue && issue.Status != IssueStatus.Resolved)
-            {
-              <div class="my-issue-due @(issue.IsOverdue ? "overdue" : "")">
-                <i class="bi bi-clock"></i>
-                <span>@(issue.IsOverdue ? "Quá hạn" : $"Còn {issue.DaysLeft} ngày")</span>
-              </div>
-            }
+            <a href="/Home/Guide" class="btn btn-link text-decoration-none d-flex align-items-center gap-1 hero-btn-link">
+              Xem hướng dẫn <i class="bi bi-chevron-right small"></i>
+            </a>
           </div>
+
+          <div class="hero-trust-badge">
+            <i class="bi bi-shield-check"></i>
+            <span>Phản ánh của bạn được tiếp nhận và xử lý công khai, minh bạch.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUCCESS STORY CARD (CÂU CHUYỆN THÀNH CÔNG) -->
+  <section class="success-story-section container-fluid px-4 px-xl-5 position-relative">
+    
+    <button class="nav-btn prev-btn bg-white position-absolute rounded-circle border-0"><i class="bi bi-chevron-left"></i></button>
+
+    <div class="success-card">
+      <!-- Cột Trái -->
+      <div class="story-col-left">
+        <div class="story-category">
+           <i class="bi bi-book"></i> Câu chuyện thành công
+        </div>
+        <h2 class="story-title-left font-serif fw-bold">Những thay đổi<br/>từ ý kiến của bạn</h2>
+        <p class="story-desc-left">Cảm ơn cộng đồng đã chung tay góp sức. Những thay đổi tích cực mỗi ngày bắt nguồn từ chính bạn.</p>
+        <a href="/Issues" class="story-btn text-decoration-none">Xem thêm câu chuyện</a>
+      </div>
+
+      <!-- Cột Giữa (Ảnh) -->
+      <div class="story-col-center">
+        <div class="story-img-box">
+          <span class="story-badge">Trước</span>
+          <img src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=800&auto=format&fit=crop" alt="Trước" />
+        </div>
+        <div class="story-img-box">
+          <span class="story-badge">Sau</span>
+          <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=800&auto=format&fit=crop" alt="Sau" />
+        </div>
+        <div class="story-center-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </div>
+
+      <!-- Cột Phải -->
+      <div class="story-col-right">
+        <span class="status-badge"><i class="bi bi-check-circle-fill"></i> Đã hoàn thành</span>
+        <h3 class="story-title-right font-serif fw-bold">Đường số 8, Khu phố 3<br/>đã được vá và nâng cấp</h3>
+        <div class="story-meta">
+           <span><i class="bi bi-calendar3"></i> 15/04/2024</span>
+           <span><i class="bi bi-geo-alt"></i> Khu phố 3</span>
+        </div>
+        <p class="story-desc-right">Phản ánh về tình trạng mặt đường hư hỏng, ổ gà gây khó khăn cho việc đi lại, đặc biệt vào mùa mưa. Sau 7 ngày tiếp nhận, tuyến đường đã được kiểm tra và khắc phục hoàn toàn.</p>
+        <a href="/Issues" class="story-link">Xem chi tiết &rarr;</a>
+      </div>
+    </div>
+
+    <button class="nav-btn next-btn bg-white position-absolute rounded-circle border-0"><i class="bi bi-chevron-right"></i></button>
+  </section>
+
+
+  <!-- DYNAMIC DATA SECTIONS: TIN TỨC & PHẢN ÁNH -->
+  
+  <!-- Tin tức nổi bật -->
+  <section class="news-section py-5 mt-4">
+    <div class="container-fluid px-4 px-xl-5">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h3 class="font-serif fw-bold m-0" style="color: #1B4D3E;">Tin tức nổi bật</h3>
+        <a href="/Policies" class="text-decoration-none small text-muted">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+      </div>
+      
+      <div class="row g-4">
+        @if (Model.LatestPolicies != null && Model.LatestPolicies.Any())
+        {
+            foreach (var policy in Model.LatestPolicies)
+            {
+                <div class="col-md-6 col-lg-4">
+                  <div class="card border-0 bg-white rounded-4 p-4 shadow-sm transition-hover h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">@policy.Tag</span>
+                      <div class="text-end lh-1">
+                         <span class="d-inline-block text-danger fw-bold fs-5">@policy.PublishedDate.ToString("dd")</span>
+                         <span class="d-inline-block text-muted small">Th @policy.PublishedDate.ToString("MM")</span>
+                      </div>
+                    </div>
+                    <h5 class="fw-bold mb-2"><a href="#" class="text-dark text-decoration-none">@policy.Title</a></h5>
+                    <p class="text-muted small mb-0 flex-grow-1 mt-2" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">@policy.Excerpt</p>
+                  </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+              <div class="text-center p-4 bg-light rounded-4 text-muted">
+                 <i class="bi bi-newspaper fs-3 d-block mb-2"></i> Chưa có tin tức nào.
+              </div>
+            </div>
         }
       </div>
     </div>
-  }
-  else
-  {
-    <div class="section-block fade-in-up">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <span class="section-icon bg-amber"><i class="bi bi-person-lines-fill"></i></span>
-          <h2 class="section-title">Phản ánh gần đây của tôi</h2>
+  </section>
+
+  <!-- Phản ánh của tôi (Dạng Bảng Accordion) -->
+  <section class="my-issues-section py-5">
+    <div class="container-fluid px-4 px-xl-5">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h3 class="font-serif fw-bold m-0" style="color: #1B4D3E;">Danh sách phản ánh gần đây của tôi</h3>
+        <a href="/Issues/MyIssues" class="text-decoration-none small text-muted">Quản lý <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+      @if (Model.MyRecentIssues != null && Model.MyRecentIssues.Any())
+      {
+          <div class="accordion" id="issuesAccordion">
+              @foreach (var issue in Model.MyRecentIssues)
+              {
+                  <div class="accordion-item border mb-3 shadow-sm rounded-3 overflow-hidden" style="border-color: var(--gray-200) !important;">
+                      <h2 class="accordion-header" id="heading_@issue.Id">
+                          <button class="accordion-button collapsed bg-white border-0 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_@issue.Id" aria-expanded="false" aria-controls="collapse_@issue.Id" style="box-shadow: none;">
+                              <div class="d-flex w-100 align-items-center flex-wrap gap-2">
+                                  <div style="flex: 2; min-width: 250px;">
+                                      <span class="badge bg-secondary mb-1 fw-medium px-2 py-1 rounded-1" style="font-size: 0.7rem;">@issue.CategoryLabel</span>
+                                      <h6 class="fw-bold mb-0 text-dark">@issue.Title</h6>
+                                  </div>
+                                  <div style="flex: 1; min-width: 120px;" class="text-muted small">
+                                      <i class="bi bi-clock"></i> @issue.CreatedAt.ToString("dd/MM/yyyy")
+                                  </div>
+                                  <div style="flex: 1; min-width: 120px;" class="text-md-end pe-md-3">
+                                      <span class="badge @issue.StatusClass rounded-pill">@issue.StatusLabel</span>
+                                  </div>
+                              </div>
+                          </button>
+                      </h2>
+                      <div id="collapse_@issue.Id" class="accordion-collapse collapse bg-light border-top" aria-labelledby="heading_@issue.Id" data-bs-parent="#issuesAccordion">
+                          <div class="accordion-body p-4">
+                              <!-- Horizontal Stepper -->
+                              @{
+                                  bool step1 = true;
+                                  bool step2 = issue.Status >= CivicConnect.Core.Enums.IssueStatus.Assigned && issue.Status != CivicConnect.Core.Enums.IssueStatus.Rejected;
+                                  bool step3 = issue.Status == CivicConnect.Core.Enums.IssueStatus.Resolved || issue.Status == CivicConnect.Core.Enums.IssueStatus.Closed;
+                                  string progressWidth = step3 ? "100%" : (step2 ? "50%" : "0%");
+                              }
+                              <div class="stepper-wrapper d-flex justify-content-between position-relative px-4 mt-2 mb-4">
+                                  <div class="position-absolute" style="top: 15px; left: 60px; right: 60px; height: 2px; background: var(--gray-300); z-index: 1;">
+                                      <div style="height: 100%; background: var(--bs-success); width: @progressWidth; transition: width 0.5s;"></div>
+                                  </div>
+                                  
+                                  <!-- Step 1: Chờ tiếp nhận -->
+                                  <div class="stepper-step text-center position-relative" style="z-index: 2; width: 100px;">
+                                      <div class="step-circle @(step1 ? "bg-success text-white" : "bg-white text-muted") rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 32px; height: 32px; border: 2px solid #fff; box-shadow: 0 0 0 2px @(step1 ? "var(--bs-success)" : "var(--gray-300)");">
+                                          <i class="bi bi-check"></i>
+                                      </div>
+                                      <div class="step-label small fw-medium @(step1 ? "text-success" : "text-muted")">Chờ tiếp nhận</div>
+                                  </div>
+
+                                  <!-- Step 2: Đang xử lý -->
+                                  <div class="stepper-step text-center position-relative" style="z-index: 2; width: 100px;">
+                                      <div class="step-circle @(step2 ? "bg-success text-white" : "bg-white text-muted") rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 32px; height: 32px; border: 2px solid #fff; box-shadow: 0 0 0 2px @(step2 ? "var(--bs-success)" : "var(--gray-300)");">
+                                          @if (step2)
+                                          {
+                                              <i class="bi bi-check"></i>
+                                          }
+                                          else
+                                          {
+                                              <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                                          }
+                                      </div>
+                                      <div class="step-label small fw-medium @(step2 ? "text-success" : "text-muted")">Đang xử lý</div>
+                                  </div>
+
+                                  <!-- Step 3: Đã hoàn thành -->
+                                  <div class="stepper-step text-center position-relative" style="z-index: 2; width: 100px;">
+                                      <div class="step-circle @(step3 ? "bg-success text-white" : "bg-white text-muted") rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 32px; height: 32px; border: 2px solid #fff; box-shadow: 0 0 0 2px @(step3 ? "var(--bs-success)" : "var(--gray-300)");">
+                                          @if (step3)
+                                          {
+                                              <i class="bi bi-check"></i>
+                                          }
+                                          else
+                                          {
+                                              <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                                          }
+                                      </div>
+                                      <div class="step-label small fw-medium @(step3 ? "text-success" : "text-muted")">Hoàn thành</div>
+                                  </div>
+                              </div>
+                              
+                              <div class="text-end">
+                                  <a href="/Issues/Details/@issue.Id" class="btn btn-outline-primary btn-sm rounded-1">Xem chi tiết phản ánh</a>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              }
+          </div>
+      }
+      else
+      {
+          <div class="text-center p-5 border border-dashed rounded-4 text-muted" style="border-style: dashed !important; border-color: var(--gray-300);">
+             <i class="bi bi-inbox fs-3 d-block mb-2"></i> Bạn chưa có phản ánh nào.
+          </div>
+      }
+    </div>
+  </section>
+
+  <!-- STATISTICS BAR (Dời xuống cuối) -->
+  <section class="stats-section pb-5">
+    <div class="container-fluid px-4 px-xl-5">
+      <div class="row text-center g-4">
+        <div class="col-6 col-md-3 stat-border">
+           <div class="stat-item d-flex align-items-center justify-content-center gap-3">
+             <i class="bi bi-people-fill stat-icon fs-1" style="color: #E6C200;"></i>
+             <div class="text-start">
+               <h3 class="stat-number m-0 font-serif" style="color: #1B4D3E;">1.248</h3>
+               <p class="stat-label m-0 text-muted small">Người dân đã tham gia</p>
+             </div>
+           </div>
+        </div>
+        <div class="col-6 col-md-3 stat-border">
+           <div class="stat-item d-flex align-items-center justify-content-center gap-3">
+             <i class="bi bi-chat-dots-fill stat-icon fs-1" style="color: #E6C200;"></i>
+             <div class="text-start">
+               <h3 class="stat-number m-0 font-serif" style="color: #1B4D3E;">2.531</h3>
+               <p class="stat-label m-0 text-muted small">Phản ánh đã tiếp nhận</p>
+             </div>
+           </div>
+        </div>
+        <div class="col-6 col-md-3 stat-border">
+           <div class="stat-item d-flex align-items-center justify-content-center gap-3">
+             <i class="bi bi-clock-history stat-icon fs-1" style="color: #E6C200;"></i>
+             <div class="text-start">
+               <h3 class="stat-number m-0 font-serif" style="color: #1B4D3E;">1.987</h3>
+               <p class="stat-label m-0 text-muted small">Phản ánh đã xử lý</p>
+             </div>
+           </div>
+        </div>
+        <div class="col-6 col-md-3">
+           <div class="stat-item d-flex align-items-center justify-content-center gap-3">
+             <i class="bi bi-emoji-smile-fill stat-icon fs-1" style="color: #E6C200;"></i>
+             <div class="text-start">
+               <h3 class="stat-number m-0 font-serif" style="color: #1B4D3E;">98%</h3>
+               <p class="stat-label m-0 text-muted small">Người dân hài lòng</p>
+             </div>
+           </div>
         </div>
       </div>
-      <div class="empty-state fade-in-up">
-        <div class="empty-icon bg-blue"><i class="bi bi-inbox"></i></div>
-        <h3 class="empty-title">Chưa có phản ánh nào</h3>
-        <p class="empty-desc">Bạn chưa gửi phản ánh nào lên hệ thống. Hãy gửi phản ánh nếu bạn phát hiện sự cố trong khu vực nhé!</p>
-        <a href="/Issues/Create" class="btn btn-primary mt-3 text-decoration-none">Gửi phản ánh ngay</a>
-      </div>
     </div>
-  }
+  </section>
 
 </div>

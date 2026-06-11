@@ -37,6 +37,12 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 auto;
 }
 
+.main-content-fluid {
+  flex: 1; 
+  width: 100%; 
+  padding: 0;
+}
+
 /* Glass-panel and Glass-card retrofitted overrides */
 .glass-panel, .glass-card {
   background: var(--bg-card);
