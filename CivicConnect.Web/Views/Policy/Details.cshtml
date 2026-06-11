@@ -163,6 +163,40 @@
         align-items: center;
         gap: 4px;
     }
+    /* Tabs styles */
+    .nav-tabs {
+        border-bottom: 2px solid var(--border-color, #e5e7eb) !important;
+        margin-bottom: 20px;
+    }
+    .nav-tabs .nav-link {
+        border: none !important;
+        color: #6b7280 !important;
+        padding: 12px 20px !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+        background: transparent !important;
+    }
+    .nav-tabs .nav-link.active {
+        color: #0d6efd !important;
+        border-bottom: 3px solid #0d6efd !important;
+        border-radius: 0;
+    }
+    .nav-tabs .nav-link:hover:not(.active) {
+        color: #1f2937 !important;
+        border-bottom: 3px solid #d1d5db !important;
+        border-radius: 0;
+    }
+    .iframe-container {
+        position: relative;
+        width: 100%;
+        height: 750px;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f9fafb;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
 </style>
 
 <div class="section-block fade-in-up">
@@ -191,16 +225,60 @@
             <span class="policy-tag-badge @Model.TagClass">@Model.Tag</span>
             <h1 class="document-title">@Model.Title</h1>
 
-            <div class="document-body">
-                @Model.Content
-            </div>
-            
             @if (!string.IsNullOrEmpty(Model.SourceUrl))
             {
-                <div class="mt-4 pt-4 border-top">
-                    <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-primary fw-bold">
-                        <i class="bi bi-box-arrow-up-right"></i> Xem văn bản gốc chính thức tại Cổng thông tin Nhà nước
-                    </a>
+                <ul class="nav nav-tabs" id="docTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-panel" type="button" role="tab" aria-controls="summary-panel" aria-selected="true">
+                            <i class="bi bi-file-text-fill me-1"></i> Tóm tắt & Nội dung
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-panel" type="button" role="tab" aria-controls="iframe-panel" aria-selected="false">
+                            <i class="bi bi-globe me-1"></i> Xem trang gốc trực tiếp
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="docTabsContent">
+                    <div class="tab-pane fade show active" id="summary-panel" role="tabpanel" aria-labelledby="summary-tab">
+                        <div class="document-body mt-3">
+                            @if (Model.Id == 0)
+                            {
+                                <p class="lead text-secondary">@Model.Excerpt</p>
+                                <hr />
+                            }
+                            @Model.Content
+                        </div>
+                        <div class="mt-4 pt-4 border-top">
+                            <button onclick="$('#iframe-tab').click();" class="btn btn-primary fw-bold me-2">
+                                <i class="bi bi-eye-fill"></i> Xem trực tiếp trang gốc tại đây
+                            </button>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="iframe-panel" role="tabpanel" aria-labelledby="iframe-tab">
+                        <div class="iframe-container mt-3">
+                            <div class="iframe-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6b7280; z-index: 1;">
+                                <div class="spinner-border text-primary mb-2" role="status"></div>
+                                <div>Đang kết nối và tải trang gốc...</div>
+                            </div>
+                            <iframe src="@Model.SourceUrl" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 2; background: transparent;" onload="this.previousElementSibling.style.display='none';"></iframe>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <span class="small text-muted"><i class="bi bi-info-circle"></i> Trang web được tải an toàn qua iframe. Nếu bị chặn, hãy bấm nút bên phải.</span>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trang gốc trong tab mới
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="document-body">
+                    @Model.Content
                 </div>
             }
         </div>

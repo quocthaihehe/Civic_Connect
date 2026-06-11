@@ -192,7 +192,10 @@
                 <div class="laws-list">
                     @foreach (var law in laws)
                     {
-                        <a href="/Policy/Details/@law.Id" class="law-card">
+                        var detailUrl = law.Id == 0 
+                            ? Url.Action("Details", "Policy", new { id = 0, url = law.SourceUrl }) 
+                            : Url.Action("Details", "Policy", new { id = law.Id });
+                        <a href="@detailUrl" class="law-card">
                             <div class="law-title">@law.Title</div>
                             <p class="law-excerpt">@law.Excerpt</p>
                             <div class="law-meta">
@@ -227,7 +230,10 @@
                 <div class="news-list">
                     @foreach (var item in newsAndNotices)
                     {
-                        <a href="/Policy/Details/@item.Id" class="side-news-card">
+                        var detailUrl = item.Id == 0 
+                            ? Url.Action("Details", "Policy", new { id = 0, url = item.SourceUrl }) 
+                            : Url.Action("Details", "Policy", new { id = item.Id });
+                        <a href="@detailUrl" class="side-news-card">
                             <div class="side-news-title">@item.Title</div>
                             <p class="side-news-excerpt">@item.Excerpt</p>
                             <div class="side-news-meta">
