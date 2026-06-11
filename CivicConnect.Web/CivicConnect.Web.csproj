@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\CivicConnect.Core\CivicConnect.Core.csproj" />
@@ -19,6 +19,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>585a259f-f9d1-4d89-a08d-c8c79d6f5c72</UserSecretsId>
   </PropertyGroup>
 
 </Project>

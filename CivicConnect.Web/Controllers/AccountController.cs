@@ -14,18 +14,18 @@ namespace CivicConnect.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly ICloudinaryService _cloudinaryService;
+        private readonly IPhotoService _photoService;
         private readonly ISmsService _smsService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ICloudinaryService cloudinaryService,
+            IPhotoService photoService,
             ISmsService smsService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _cloudinaryService = cloudinaryService;
+            _photoService = photoService;
             _smsService = smsService;
         }
 
@@ -253,12 +253,7 @@ namespace CivicConnect.Web.Controllers
                     {
                         using (var stream = model.AvatarFile.OpenReadStream())
                         {
-                            var uploadResult = await _cloudinaryService.UploadIssueImageAsync(
-                                stream,
-                                model.AvatarFile.FileName,
-                                model.AvatarFile.ContentType,
-                                0 // Dùng 0 để đánh dấu là avatar chung
-                            );
+                            var uploadResult = await _photoService.AddPhotoAsync(stream, model.AvatarFile.FileName);
                             user.AvatarUrl = uploadResult.Url;
                         }
                     }

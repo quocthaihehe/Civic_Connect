@@ -15,9 +15,23 @@ var builder = WebApplication.CreateBuilder(args);
 // Cấu hình MVC
 builder.Services.AddControllersWithViews();
 
+// Cấu hình giới hạn upload file (tối đa 5 ảnh x 5MB = 25MB + overhead)
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
+    options.ValueLengthLimit = 10 * 1024 * 1024;         // 10 MB
+    options.MultipartHeadersLengthLimit = 32 * 1024;     // 32 KB
+});
+
+// Cấu hình Kestrel cho phép request body lớn
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
+});
+
 // Cấu hình Database Connection
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"),
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("CivicConnect.Infrastructure")));
 
 // Cấu hình ASP.NET Core Identity
@@ -52,9 +66,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Đăng ký các Repository và Service chuyên biệt
+builder.Services.Configure<CivicConnect.Infrastructure.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 builder.Services.AddScoped<IIssueService, IssueService>();
-builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
@@ -64,7 +79,11 @@ builder.Services.AddHostedService<PriorityScoreJob>();
 builder.Services.AddHostedService<DeadlineCheckJob>();
 
 // Đăng ký SignalR để gửi thông báo realtime
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10 MB
+});
 
 var app = builder.Build();
 
@@ -106,3 +125,5 @@ app.MapControllerRoute(
 app.MapHub<NotificationHub>("/hubs/notification");
 
 app.Run();
+
+public partial class Program { }

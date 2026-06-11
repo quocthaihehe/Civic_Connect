@@ -2,10 +2,23 @@ $(document).ready(function() {
     // 1. Quản lý tải ảnh lên và xem trước (Previews)
     const fileInput = $('#image-upload-input');
     const previewsContainer = $('#image-previews-container');
+    let blobUrls = []; // Theo dõi blob URLs để giải phóng bộ nhớ
+
+    // Hàm giải phóng tất cả blob URLs đã tạo
+    function revokeAllBlobUrls() {
+        blobUrls.forEach(function(url) {
+            try { URL.revokeObjectURL(url); } catch(e) {}
+        });
+        blobUrls = [];
+    }
 
     fileInput.on('change', function() {
+        // Giải phóng blob URLs cũ trước khi tạo mới
+        revokeAllBlobUrls();
         previewsContainer.empty();
         const files = this.files;
+
+        if (!files || files.length === 0) return;
 
         if (files.length > 5) {
             alert("Chỉ cho phép tải lên tối đa 5 hình ảnh.");
@@ -13,32 +26,52 @@ $(document).ready(function() {
             return;
         }
 
+        // Kiểm tra kích thước từng file trước khi tạo preview
         for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            
-            if (file.size > 5 * 1024 * 1024) {
-                alert(`Tệp ${file.name} vượt quá dung lượng tối đa cho phép (5MB).`);
+            if (files[i].size > 5 * 1024 * 1024) {
+                alert('Tệp ' + files[i].name + ' vượt quá dung lượng tối đa cho phép (5MB).');
                 fileInput.val('');
                 previewsContainer.empty();
                 return;
             }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imgHtml = `
-                    <div class="position-relative" style="width: 75px; height: 75px;">
-                        <img src="${e.target.result}" class="rounded border" style="width: 75px; height: 75px; object-fit: cover;" />
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger cursor-pointer remove-preview-btn" style="padding: 0.25em 0.45em; font-size: 0.65rem; cursor: pointer;">x</span>
-                    </div>
-                `;
-                previewsContainer.append(imgHtml);
-            };
-            reader.readAsDataURL(file);
         }
+
+        // Sử dụng DocumentFragment để batch DOM updates — tránh trigger
+        // Browser Link DOM mutation observer nhiều lần gây crash kết nối VS
+        var fragment = document.createDocumentFragment();
+        for (let i = 0; i < files.length; i++) {
+            var imgUrl = URL.createObjectURL(files[i]);
+            blobUrls.push(imgUrl);
+
+            var wrapper = document.createElement('div');
+            wrapper.className = 'position-relative';
+            wrapper.style.cssText = 'width: 75px; height: 75px;';
+
+            var img = document.createElement('img');
+            img.className = 'rounded border';
+            img.style.cssText = 'width: 75px; height: 75px; object-fit: cover;';
+            img.src = imgUrl;
+
+            var badge = document.createElement('span');
+            badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger remove-preview-btn';
+            badge.style.cssText = 'padding: 0.25em 0.45em; font-size: 0.65rem; cursor: pointer;';
+            badge.textContent = 'x';
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(badge);
+            fragment.appendChild(wrapper);
+        }
+
+        // Dùng setTimeout(0) để insert DOM sau khi call stack hiện tại hoàn tất,
+        // giúp Browser Link không bị overwhelm bởi DOM changes đồng bộ
+        setTimeout(function() {
+            previewsContainer[0].appendChild(fragment);
+        }, 0);
     });
 
-    // Hủy bỏ xem trước ảnh (Clear input)
+    // Hủy bỏ xem trước ảnh (Clear input) và giải phóng bộ nhớ
     previewsContainer.on('click', '.remove-preview-btn', function() {
+        revokeAllBlobUrls();
         fileInput.val('');
         previewsContainer.empty();
     });
