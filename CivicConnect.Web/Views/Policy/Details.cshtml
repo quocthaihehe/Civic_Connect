@@ -1,23 +1,289 @@
 @model CivicConnect.Core.Entities.Policy
 @{
     ViewData["Title"] = Model.Title;
+    bool isOfficialDoc = !string.IsNullOrEmpty(Model.DocumentNumber);
 }
+
+<style>
+    .policy-detail-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    @@media (max-width: 991px) {
+        .policy-detail-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    .policy-main-content {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .policy-sidebar-meta {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        align-self: start;
+    }
+    .official-seal {
+        border: 2px solid #198754;
+        border-radius: 12px;
+        padding: 16px;
+        background-color: #f4faf6;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        border-left-width: 6px;
+    }
+    .seal-icon {
+        font-size: 2.25rem;
+        color: #198754;
+    }
+    .seal-text h5 {
+        font-weight: 800;
+        margin-bottom: 2px;
+        color: #0f5132;
+        font-size: 1rem;
+    }
+    .seal-text p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #198754;
+        font-weight: 600;
+    }
+    .policy-tag-badge {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+    }
+    .policy-tag-badge.tag-law {
+        background-color: #cfe2ff;
+        color: #084298;
+        border: 1px solid #b6d4fe;
+    }
+    .policy-tag-badge.tag-policy {
+        background-color: #e2d9f3;
+        color: #563d7c;
+        border: 1px solid #d2c4ec;
+    }
+    .policy-tag-badge.tag-notice {
+        background-color: #fff3cd;
+        color: #664d03;
+        border: 1px solid #ffecb5;
+    }
+    .policy-tag-badge.tag-news {
+        background-color: #cff4fc;
+        color: #087990;
+        border: 1px solid #b6effb;
+    }
+    .document-title {
+        font-family: var(--font-display, inherit);
+        font-size: 1.75rem;
+        font-weight: 850;
+        line-height: 1.4;
+        color: var(--gray-800, #111827);
+        margin-bottom: 20px;
+    }
+    .document-body {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #374151;
+        white-space: pre-line;
+    }
+    .meta-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .meta-item {
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 8px;
+    }
+    .meta-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .meta-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 600;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        display: block;
+    }
+    .meta-value {
+        font-size: 0.925rem;
+        color: #1f2937;
+        font-weight: 700;
+        display: block;
+    }
+    .scroll-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        outline: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        transition: all 0.2s ease;
+        z-index: 1000;
+    }
+    .scroll-btn:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-4px);
+    }
+    .status-badge {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+</style>
+
 <div class="section-block fade-in-up">
+    <!-- Nút quay lại -->
     <div class="mb-4">
-        <a href="/Policy" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="bi bi-arrow-left me-1"></i> Quay lại danh sách</a>
+        <a href="/Policy" class="btn btn-secondary text-decoration-none fw-semibold small">
+            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+        </a>
     </div>
-    
-    <div class="news-tag @Model.TagClass mb-3">@Model.Tag</div>
-    <h1 class="fw-bold mb-3" style="font-family: var(--font-display); font-size: 2rem; color: var(--gray-800);">@Model.Title</h1>
-    
-    <div class="news-meta mb-4 pb-3 border-bottom" style="font-size: 0.85rem; color: var(--gray-400);">
-        <span class="me-3"><i class="bi bi-building"></i> @Model.IssuingUnit</span>
-        <span><i class="bi bi-calendar3"></i> @Model.PublishedDate.ToString("dd/MM/yyyy HH:mm")</span>
-    </div>
-    
-    <div class="news-content text-secondary" style="font-size: 1.05rem; line-height: 1.8; white-space: pre-line;">
-        @Model.Excerpt
-        
-        @Model.Content
+
+    <div class="policy-detail-container">
+        <!-- Phần nội dung chính -->
+        <div class="policy-main-content">
+            <!-- Dấu chứng thực (Nếu là văn bản chính thức) -->
+            @if (isOfficialDoc)
+            {
+                <div class="official-seal">
+                    <span class="seal-icon"><i class="bi bi-patch-check-fill"></i></span>
+                    <div class="seal-text">
+                        <h5>VĂN BẢN ĐÃ ĐƯỢC CHỨNG THỰC</h5>
+                        <p><i class="bi bi-check-circle-fill"></i> Dữ liệu minh bạch từ Cổng Thông Tin Điện Tử Chính Phủ Việt Nam</p>
+                    </div>
+                </div>
+            }
+
+            <span class="policy-tag-badge @Model.TagClass">@Model.Tag</span>
+            <h1 class="document-title">@Model.Title</h1>
+
+            <div class="document-body">
+                @Model.Content
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.SourceUrl))
+            {
+                <div class="mt-4 pt-4 border-top">
+                    <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-primary fw-bold">
+                        <i class="bi bi-box-arrow-up-right"></i> Xem văn bản gốc chính thức tại Cổng thông tin Nhà nước
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Phần thông tin văn bản bên lề (Công báo) -->
+        <div class="policy-sidebar-meta">
+            <h4 class="fw-bold border-bottom pb-2 mb-3 text-secondary" style="font-size: 1.05rem;">
+                <i class="bi bi-info-circle-fill"></i> Thuộc tính văn bản
+            </h4>
+            
+            <div class="meta-list">
+                <div class="meta-item">
+                    <span class="meta-label">Cơ quan ban hành</span>
+                    <span class="meta-value">@Model.IssuingUnit</span>
+                </div>
+                
+                @if (isOfficialDoc)
+                {
+                    <div class="meta-item">
+                        <span class="meta-label">Số hiệu văn bản</span>
+                        <span class="meta-value text-primary">@Model.DocumentNumber</span>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <span class="meta-label">Loại văn bản</span>
+                        <span class="meta-value">@Model.DocumentType</span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Signer))
+                    {
+                        <div class="meta-item">
+                            <span class="meta-label">Người ký</span>
+                            <span class="meta-value">@Model.Signer</span>
+                        </div>
+                    }
+
+                    @if (Model.EffectiveDate.HasValue)
+                    {
+                        <div class="meta-item">
+                            <span class="meta-label">Ngày có hiệu lực</span>
+                            <span class="meta-value">@Model.EffectiveDate.Value.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    }
+
+                    <div class="meta-item">
+                        <span class="meta-label">Trạng thái hiệu lực</span>
+                        <span class="meta-value">
+                            <span class="status-badge"><i class="bi bi-check-circle-fill"></i> Còn hiệu lực</span>
+                        </span>
+                    </div>
+                }
+
+                <div class="meta-item">
+                    <span class="meta-label">Ngày đăng tải công báo</span>
+                    <span class="meta-value">@Model.PublishedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Nút cuộn lên đầu trang (Scroll-to-top) -->
+<button class="scroll-btn" id="scrollToTopBtn" title="Cuộn lên đầu trang">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Lắng nghe sự kiện cuộn trang để hiện nút
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 300) {
+                    $('#scrollToTopBtn').fadeIn().css('display', 'flex');
+                } else {
+                    $('#scrollToTopBtn').fadeOut();
+                }
+            });
+
+            // Click cuộn lên đầu trang mượt mà
+            $('#scrollToTopBtn').click(function() {
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                return false;
+            });
+        });
+    </script>
+}
