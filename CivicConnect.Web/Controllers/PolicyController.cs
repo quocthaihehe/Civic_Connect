@@ -76,6 +76,60 @@ namespace CivicConnect.Web.Controllers
             return View(policyDb);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Proxy(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return Content("URL không hợp lệ.");
+            }
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(5);
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                    
+                    var response = await client.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return Content($"Không thể kết nối đến nguồn gốc ({response.StatusCode}).");
+                    }
+                    
+                    var html = await response.Content.ReadAsStringAsync();
+                    
+                    // Set base tag to resolve relative paths
+                    var uri = new Uri(url);
+                    var baseHref = $"{uri.Scheme}://{uri.Host}";
+                    var baseTag = $"<base href=\"{baseHref}/\" />";
+                    
+                    // Remove top location redirects to prevent escape
+                    html = html.Replace("window.top.location", "window.self.location");
+                    html = html.Replace("top.location", "self.location");
+                    
+                    if (html.Contains("<head>"))
+                    {
+                        html = html.Replace("<head>", $"<head>\n{baseTag}");
+                    }
+                    else if (html.Contains("<HEAD>"))
+                    {
+                        html = html.Replace("<HEAD>", $"<HEAD>\n{baseTag}");
+                    }
+                    else
+                    {
+                        html = baseTag + html;
+                    }
+                    
+                    return Content(html, "text/html; charset=utf-8");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content($"Lỗi kết nối đường truyền: {ex.Message}");
+            }
+        }
+
         private async Task<List<Policy>> FetchRssNewsAsync()
         {
             var newsList = new List<Policy>();
