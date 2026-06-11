@@ -46,6 +46,10 @@
       <span class="nav-icon"><i class="bi bi-file-text"></i></span>
       <span class="nav-label">Chính sách</span>
     </a>
+    <a asp-controller="Donation" asp-action="Index" class="nav-item @(activeController == "Donation" ? "active" : "")">
+      <span class="nav-icon"><i class="bi bi-heart-fill" style="color: #e11d48;"></i></span>
+      <span class="nav-label">Quỹ cộng đồng</span>
+    </a>
 
     @if (SignInManager.IsSignedIn(User))
     {

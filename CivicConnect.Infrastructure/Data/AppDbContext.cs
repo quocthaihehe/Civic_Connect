@@ -22,6 +22,8 @@ namespace CivicConnect.Infrastructure.Data
         public DbSet<UnitCategory> UnitCategories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Policy> Policies { get; set; }
+        public DbSet<DonationCategory> DonationCategories { get; set; }
+        public DbSet<Donation> Donations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -180,43 +182,133 @@ namespace CivicConnect.Infrastructure.Data
                 new UnitCategory { GovernmentUnitId = "UBND_Q1", Category = IssueCategory.Administration }
             );
 
-            // Seed sample policies/announcements
+            // Seed sample policies/announcements with legal metadata
             modelBuilder.Entity<Policy>().HasData(
                 new Policy
                 {
                     Id = 1,
-                    Title = "Nghị định mới về xử phạt hành chính vi phạm môi trường đô thị",
-                    Excerpt = "Chính phủ vừa ban hành nghị định mới tăng mức phạt đối với các hành vi xả rác bừa bãi và lấn chiếm lòng lề đường tại đô thị.",
-                    Content = "Nội dung chi tiết nghị định mới...",
-                    Tag = "Luật mới",
+                    Title = "Nghị định 45/2026/NĐ-CP về xử phạt vi phạm hành chính trong lĩnh vực bảo vệ môi trường đô thị",
+                    Excerpt = "Chính phủ ban hành quy định tăng mức phạt đối với các hành vi xả rác bừa bãi, đổ chất thải không đúng nơi quy định và lấn chiếm lòng lề đường.",
+                    Content = "Nghị định quy định chi tiết các mức xử phạt đối với cá nhân, tổ chức có hành vi vi phạm vệ sinh môi trường đô thị. Mức phạt tiền tối đa đối với cá nhân là 1.000.000đ cho hành vi vứt rác không đúng nơi quy định, 5.000.000đ cho hành vi tự ý đổ rác thải sinh hoạt ra lòng đường, vỉa hè. Các đơn vị kinh doanh lấn chiếm vỉa hè sẽ bị xử phạt từ 10.000.000đ đến 20.000.000đ và buộc khôi phục tình trạng ban đầu.",
+                    Tag = "Nghị định",
                     TagClass = "tag-law",
-                    IssuingUnit = "UBND Quận 1",
-                    PublishedDate = DateTime.UtcNow.AddDays(-2),
-                    IsActive = true
+                    IssuingUnit = "Chính phủ",
+                    PublishedDate = new DateTime(2026, 5, 20, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "45/2026/NĐ-CP",
+                    DocumentType = "Nghị định",
+                    Signer = "Thủ tướng Phạm Minh Chính",
+                    SourceUrl = "https://vanban.chinhphu.vn",
+                    EffectiveDate = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Policy
                 {
                     Id = 2,
-                    Title = "Thông báo ra quân dọn dẹp vệ sinh môi trường trên địa bàn Phường Bến Nghé",
-                    Excerpt = "Thực hiện nếp sống văn minh đô thị, UBND Phường tổ chức đợt ra quân tổng vệ sinh các tuyến đường trọng điểm vào sáng Chủ Nhật tuần này.",
-                    Content = "Nội dung thông báo chi tiết...",
-                    Tag = "Thông báo",
-                    TagClass = "tag-notice",
-                    IssuingUnit = "UBND Phường Bến Nghé",
-                    PublishedDate = DateTime.UtcNow.AddDays(-1),
-                    IsActive = true
+                    Title = "Thông tư 08/2026/TT-BXD hướng dẫn về chỉnh trang đô thị và phát triển không gian công cộng xanh",
+                    Excerpt = "Bộ Xây dựng ban hành hướng dẫn thực hiện các chỉ tiêu về diện tích cây xanh, hoa và hạ tầng tiện ích tại khu dân cư đô thị.",
+                    Content = "Bộ Xây dựng ban hành Thông tư hướng dẫn chi tiết quy chuẩn kỹ thuật quốc gia về quy hoạch xây dựng. Trong đó, yêu cầu các khu dân cư mới phải đạt tỷ lệ diện tích cây xanh tối thiểu là 2m2/người, khuyến khích các khu dân cư hiện hữu tận dụng các ngõ hẻm để trồng hoa, cây cảnh công cộng và tạo không gian sinh hoạt cộng đồng tự quản.",
+                    Tag = "Thông tư",
+                    TagClass = "tag-policy",
+                    IssuingUnit = "Bộ Xây dựng",
+                    PublishedDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "08/2026/TT-BXD",
+                    DocumentType = "Thông tư",
+                    Signer = "Bộ trưởng Nguyễn Thanh Nghị",
+                    SourceUrl = "https://moc.gov.vn",
+                    EffectiveDate = new DateTime(2026, 8, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Policy
                 {
                     Id = 3,
-                    Title = "Chính sách hỗ trợ chỉnh trang đô thị, cải tạo vỉa hè Quận 1 năm 2026",
-                    Excerpt = "Chương trình nâng cấp, chỉnh trang các tuyến vỉa hè trung tâm nhằm nâng cao mỹ quan đô thị và tạo không gian đi bộ an toàn cho người dân.",
-                    Content = "Nội dung chính sách chi tiết...",
-                    Tag = "Chính sách",
-                    TagClass = "tag-policy",
-                    IssuingUnit = "UBND Quận 1",
-                    PublishedDate = DateTime.UtcNow,
-                    IsActive = true
+                    Title = "Thông báo 124/TB-UBND ra quân tổng vệ sinh môi trường trên địa bàn Phường Bến Nghé",
+                    Excerpt = "UBND Phường phát động lễ ra quân tổng vệ sinh, dọn dẹp rác thải và trang trí tuyến hẻm xanh vào sáng Chủ Nhật.",
+                    Content = "Nhằm xây dựng nếp sống văn minh đô thị và giữ gìn vệ sinh chung, UBND Phường Bến Nghé phát động chiến dịch ra quân quét dọn các tuyến đường chính và chỉnh trang cây xanh tại ngõ hẻm 45 Lê Thánh Tôn. Kính mời toàn thể nhân dân, các ban ngành đoàn thể và tổ dân phố tham gia đầy đủ. Thời gian bắt đầu từ 7:30 sáng ngày Chủ Nhật.",
+                    Tag = "Thông báo",
+                    TagClass = "tag-notice",
+                    IssuingUnit = "UBND Phường Bến Nghé",
+                    PublishedDate = new DateTime(2026, 6, 10, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "124/TB-UBND",
+                    DocumentType = "Thông báo",
+                    Signer = "Chủ tịch UBND Phường",
+                    SourceUrl = "",
+                    EffectiveDate = new DateTime(2026, 6, 10, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 4,
+                    Title = "Hơn 500 đoàn viên thanh niên Quận 1 tham gia làm sạch kênh Nhiêu Lộc - Thị Nghè",
+                    Excerpt = "Chiến dịch 'Chung tay bảo vệ dòng sông quê hương' thu hút hàng trăm bạn trẻ dọn dẹp rác thải nhựa và vớt lục bình.",
+                    Content = "Sáng nay, Quận Đoàn 1 phối hợp với Công ty Môi trường Đô thị tổ chức lễ phát động ra quân làm sạch toàn tuyến kênh chảy qua địa bàn quận. Sau 4 giờ làm việc nỗ lực, lực lượng tình nguyện đã thu gom được hơn 3 tấn rác thải các loại, chủ yếu là túi ni lông, chai nhựa và rác sinh hoạt bị vứt xuống lòng kênh. Đây là hoạt động thường niên nhằm tuyên truyền ý thức bảo vệ môi trường nước cho cư dân xung quanh.",
+                    Tag = "Tin tức",
+                    TagClass = "tag-news",
+                    IssuingUnit = "Quận Đoàn 1",
+                    PublishedDate = new DateTime(2026, 6, 11, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "",
+                    DocumentType = "Tin tức",
+                    Signer = "",
+                    SourceUrl = "https://tuoitre.vn",
+                    EffectiveDate = new DateTime(2026, 6, 11, 0, 0, 0, DateTimeKind.Utc)
+                }
+            );
+
+            // Cấu hình bảng DonationCategory
+            modelBuilder.Entity<DonationCategory>(entity =>
+            {
+                entity.Property(dc => dc.TargetAmount).HasColumnType("decimal(18,2)");
+                entity.Property(dc => dc.CurrentAmount).HasColumnType("decimal(18,2)");
+            });
+
+            // Cấu hình bảng Donation
+            modelBuilder.Entity<Donation>(entity =>
+            {
+                entity.Property(d => d.Amount).HasColumnType("decimal(18,2)");
+                entity.HasIndex(d => d.OrderId).IsUnique();
+
+                entity.HasOne(d => d.DonationCategory)
+                    .WithMany(dc => dc.Donations)
+                    .HasForeignKey(d => d.DonationCategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany()
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Seed các Quỹ Quyên Góp mẫu
+            modelBuilder.Entity<DonationCategory>().HasData(
+                new DonationCategory
+                {
+                    Id = 1,
+                    Name = "Quỹ Trồng Xanh Đô Thị",
+                    Description = "Quyên góp mua cây xanh, hoa trang trí trồng tại các tuyến ngõ hẻm, công viên công cộng trên địa bàn Phường Bến Nghé.",
+                    TargetAmount = 50000000,
+                    CurrentAmount = 0,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new DonationCategory
+                {
+                    Id = 2,
+                    Name = "Quỹ Thắp Sáng Ngõ Hẻm",
+                    Description = "Hỗ trợ lắp đặt hệ thống đèn đường LED thông minh, tiết kiệm điện tại các ngõ hẻm chưa có đủ ánh sáng.",
+                    TargetAmount = 30000000,
+                    CurrentAmount = 0,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new DonationCategory
+                {
+                    Id = 3,
+                    Name = "Quỹ Nâng Cấp Sân Chơi Trẻ Em",
+                    Description = "Mua sắm, lắp đặt và sửa chữa các thiết bị vui chơi ngoài trời tại điểm sinh hoạt cộng đồng của phường.",
+                    TargetAmount = 100000000,
+                    CurrentAmount = 0,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

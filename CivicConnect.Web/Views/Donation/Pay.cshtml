@@ -1,0 +1,197 @@
+@model CivicConnect.Core.Entities.Donation
+@{
+    ViewData["Title"] = "Thanh toán quyên góp";
+}
+
+<style>
+    .pay-card {
+        max-width: 500px;
+        margin: 0 auto;
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    .pay-header {
+        background: linear-gradient(135deg, #a21caf 0%, #a21caf 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+    .qr-container {
+        padding: 30px;
+        text-align: center;
+        background-color: white;
+        border-radius: 12px;
+        margin: 20px;
+        border: 1px solid #f3f4f6;
+    }
+    .loading-pulse {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #a21caf;
+        margin-right: 5px;
+        animation: loading-pulse-anim 1s infinite alternate;
+    }
+    .loading-pulse:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+    .loading-pulse:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+    @@keyframes loading-pulse-anim {
+        from { transform: scale(0.6); opacity: 0.5; }
+        to { transform: scale(1.2); opacity: 1; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="pay-card">
+        <!-- Header -->
+        <div class="pay-header">
+            <h3 class="fw-bold mb-1"><i class="bi bi-qr-code-scan"></i> CỔNG THANH TOÁN MOMO</h3>
+            <p class="mb-0 small opacity-90">Quét mã QR bằng ứng dụng MoMo để hoàn tất quyên góp</p>
+        </div>
+
+        <!-- Body -->
+        <div class="p-4">
+            <!-- QR Code Canvas -->
+            <div class="qr-container">
+                <canvas id="momo-qr" style="max-width: 250px;"></canvas>
+                <div class="mt-3 text-secondary small">
+                    <i class="bi bi-phone"></i> Sử dụng <strong>App MoMo</strong> hoặc <strong>Camera điện thoại</strong> để quét
+                </div>
+            </div>
+
+            <!-- Waiting Indicator -->
+            <div class="text-center py-2 mb-4">
+                <div class="d-flex align-items-center justify-content-center gap-1">
+                    <span class="loading-pulse"></span>
+                    <span class="loading-pulse"></span>
+                    <span class="loading-pulse"></span>
+                </div>
+                <span class="fw-semibold text-dark mt-2 d-block" id="status-text">Đang chờ bạn thanh toán trên điện thoại...</span>
+            </div>
+
+            <!-- Donation Info -->
+            <div class="table-responsive mb-4">
+                <table class="table table-sm table-borderless align-middle mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="text-secondary ps-0">Quỹ ủng hộ:</td>
+                            <td class="text-dark fw-semibold text-end">@Model.DonationCategory?.Name</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary ps-0">Nhà hảo tâm:</td>
+                            <td class="text-dark fw-semibold text-end">@Model.DonorName</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary ps-0">Số tiền:</td>
+                            <td class="text-success fw-bold text-end" style="font-size: 1.25rem;">@Model.Amount.ToString("N0") đ</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary ps-0">Mã đơn hàng:</td>
+                            <td class="text-secondary small text-end">@Model.OrderId</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Fallback payment link -->
+            <div class="text-center">
+                <a href="@Model.PayUrl" target="_blank" class="btn btn-outline-magenta w-100 py-2 rounded-pill fw-semibold mb-2" style="border-color: #a21caf; color: #a21caf;">
+                    Thanh toán trực tiếp (Mở link MoMo) <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+                <a asp-action="Index" class="btn btn-light w-100 py-2 rounded-pill small text-secondary">
+                    Hủy giao dịch
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QRious library for JS QR code generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 1. Tạo QR Code bằng thư viện QRious
+            var qr = new QRious({
+                element: document.getElementById('momo-qr'),
+                value: '@Html.Raw(Model.PayUrl)',
+                size: 250
+            });
+
+            // 2. Thiết lập SignalR Realtime Connection
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/donation")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.start().then(function() {
+                console.log("SignalR Connected!");
+                // Tham gia nhóm orderId riêng tư
+                connection.invoke("JoinOrderGroup", "@Model.OrderId").catch(err => console.error(err));
+            }).catch(err => console.error(err.toString()));
+
+            // Lắng nghe sự kiện thành công từ Server gửi về
+            connection.on("PaymentSuccess", function(orderId) {
+                if(orderId === "@Model.OrderId") {
+                    $('#status-text').text("Thanh toán thành công! Đang chuyển hướng...").addClass("text-success");
+                    setTimeout(() => {
+                        window.location.href = '/Donation/Success?orderId=' + orderId;
+                    }, 1000);
+                }
+            });
+
+            // Lắng nghe sự kiện thất bại
+            connection.on("PaymentFailed", function(orderId) {
+                if(orderId === "@Model.OrderId") {
+                    $('#status-text').text("Thanh toán thất bại hoặc đã bị huỷ!").addClass("text-danger");
+                    setTimeout(() => {
+                        window.location.href = '/Donation/Error?orderId=' + orderId + '&message=Giao dịch thất bại';
+                    }, 1500);
+                }
+            });
+
+            // 3. Cơ chế Polling (Mỗi 2 giây check 1 lần dự phòng cho localhost)
+            function pollPaymentStatus() {
+                $.ajax({
+                    url: '/Donation/CheckStatus',
+                    type: 'GET',
+                    data: { orderId: '@Model.OrderId' },
+                    success: function(response) {
+                        if (response.success && response.status === 'Completed') {
+                            console.log("Polling detected success!");
+                            $('#status-text').text("Thanh toán thành công! Đang chuyển hướng...").addClass("text-success");
+                            setTimeout(() => {
+                                window.location.href = '/Donation/Success?orderId=@Model.OrderId';
+                            }, 1000);
+                        } else if (response.status === 'Failed') {
+                            console.log("Polling detected failure!");
+                            $('#status-text').text("Thanh toán thất bại hoặc đã bị huỷ!").addClass("text-danger");
+                            setTimeout(() => {
+                                window.location.href = '/Donation/Error?orderId=@Model.OrderId&message=' + encodeURIComponent(response.message || 'Thanh toán thất bại.');
+                            }, 1500);
+                        }
+                    },
+                    error: function() {
+                        console.log("Polling status check failed.");
+                    }
+                });
+            }
+
+            // Chạy polling mỗi 2 giây
+            const pollInterval = setInterval(pollPaymentStatus, 2000);
+
+            // Huỷ polling khi rời khỏi trang
+            $(window).on('beforeunload', function() {
+                clearInterval(pollInterval);
+            });
+        });
+    </script>
+}
