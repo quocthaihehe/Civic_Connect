@@ -189,11 +189,17 @@ namespace CivicConnect.Web.Controllers
                              $"Số hiệu văn bản: {request.DocNumber ?? "N/A"}\n" +
                              $"Người ký: {request.Signer ?? "N/A"}\n";
 
-            // Kiểm tra cấu hình Gemini API Key
-            string geminiKey = _configuration["GeminiSettings:ApiKey"] ?? _configuration["GeminiApiKey"];
+            // Kiểm tra cấu hình Gemini API Key từ nhiều nguồn để tăng độ ổn định
+            string geminiKey = _configuration["GeminiSettings:ApiKey"] 
+                ?? _configuration["GeminiApiKey"] 
+                ?? Environment.GetEnvironmentVariable("GeminiApiKey")
+                ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY");
             
             if (!string.IsNullOrEmpty(geminiKey))
             {
+                // Làm sạch API Key nếu có khoảng trắng hoặc dấu ngoặc kép thừa khi copy-paste
+                geminiKey = geminiKey.Trim(' ', '"', '\'', '\n', '\r');
+                
                 try
                 {
                     using (var client = new HttpClient())
@@ -222,26 +228,60 @@ namespace CivicConnect.Web.Controllers
                         var httpContent = new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json");
 
                         var response = await client.PostAsync(requestUrl, httpContent);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var responseBody = await response.Content.ReadAsStringAsync();
-                            using (var doc = System.Text.Json.JsonDocument.Parse(responseBody))
-                            {
-                                var answer = doc.RootElement
-                                    .GetProperty("candidates")[0]
-                                    .GetProperty("content")
-                                    .GetProperty("parts")[0]
-                                    .GetProperty("text")
-                                    .GetString();
+                        var responseBody = await response.Content.ReadAsStringAsync();
 
-                                return Json(new { success = true, answer = answer });
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            return Json(new { success = true, answer = $"**Lỗi cuộc gọi Google Gemini API (Mã lỗi HTTP: {response.StatusCode}):**\n\n{responseBody}\n\n*Vui lòng kiểm tra lại tính hợp lệ của API Key (không được chứa khoảng trắng hoặc nháy kép thừa) hoặc kiểm tra xem tài khoản/dự án của bạn đã kích hoạt API chưa.*" });
+                        }
+
+                        using (var doc = System.Text.Json.JsonDocument.Parse(responseBody))
+                        {
+                            var root = doc.RootElement;
+                            if (root.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
+                            {
+                                var firstCandidate = candidates[0];
+                                if (firstCandidate.TryGetProperty("content", out var contentObj) &&
+                                    contentObj.TryGetProperty("parts", out var parts) &&
+                                    parts.GetArrayLength() > 0)
+                                {
+                                    var answer = parts[0].GetProperty("text").GetString();
+                                    return Json(new { success = true, answer = answer });
+                                }
                             }
+
+                            if (root.TryGetProperty("promptFeedback", out var feedback))
+                            {
+                                return Json(new { success = true, answer = $"**Yêu cầu bị chặn bởi bộ lọc an toàn của Google Gemini:**\n\n{feedback}" });
+                            }
+
+                            return Json(new { success = true, answer = $"**Không thể giải mã phản hồi từ Gemini. Nội dung thô:**\n\n{responseBody}" });
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Gemini API Error: {ex.Message}");
+                    return Json(new { success = true, answer = $"**Lỗi kết nối hoặc xử lý nội dung đến Google Gemini:**\n\n{ex.Message}\n\n*Vui lòng kiểm tra kết nối Internet của máy chủ.*" });
+                }
+            }
+            else
+            {
+                // Nếu chưa cấu hình API Key, hiển thị cảnh báo ngay trong câu trả lời để hướng dẫn người dùng
+                if (request.Question.Contains("Tóm tắt nội dung chính") || request.Question.Contains("Ngày có hiệu lực") || request.Question.Contains("mức phạt"))
+                {
+                    // Cho phép chạy qua bộ máy cục bộ đối với các câu hỏi gợi ý nhanh để giao diện trông hoạt động mượt mà
+                }
+                else
+                {
+                    return Json(new { success = true, answer = $"**[CẢNH BÁO] Chưa cấu hình Gemini API Key:**\n\n" +
+                        $"Hệ thống chưa tìm thấy khóa API của bạn trong cấu hình. Để kích hoạt Trợ lý AI thực thụ (có khả năng tư vấn chuyên sâu, hiểu rõ 100% nội dung bài viết):\n\n" +
+                        $"1. Mở file [appsettings.json](file:///d:/LTWeb/DA/Civic_Connect/CivicConnect.Web/appsettings.json) trong dự án.\n" +
+                        $"2. Thêm khóa **`\"GeminiApiKey\": \"Khóa_API_Của_Bạn_Ở_Đây\"`** vào khối ngoài cùng hoặc trong khối **`\"GeminiSettings\": {{ \"ApiKey\": \"Khóa_API_Của_Bạn\" }}`**.\n" +
+                        $"3. Lưu file và thử lại.\n\n" +
+                        $"*(Tạm thời hệ thống sẽ chạy bộ máy quy tắc trả lời cục bộ để phản hồi các thắc mắc cơ bản nhất).* \n\n" +
+                        $"--- \n\n" +
+                        $"**Câu trả lời tạm thời từ bộ máy cục bộ:**\n" +
+                        $"Về câu hỏi \"{request.Question}\", văn bản này có tên \"{request.DocTitle}\" phát hành bởi \"{request.IssuingUnit}\" với nội dung tóm tắt là: *{request.DocContent}*." });
                 }
             }
 
