@@ -18,18 +18,18 @@ namespace CivicConnect.Web.Controllers
     {
         private readonly IIssueService _issueService;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ICloudinaryService _cloudinaryService;
+        private readonly IPhotoService _photoService;
         private readonly CivicConnect.Infrastructure.Data.AppDbContext _context;
 
         public IssuesController(
             IIssueService issueService,
             UserManager<ApplicationUser> userManager,
-            ICloudinaryService cloudinaryService,
+            IPhotoService photoService,
             CivicConnect.Infrastructure.Data.AppDbContext context)
         {
             _issueService = issueService;
             _userManager = userManager;
-            _cloudinaryService = cloudinaryService;
+            _photoService = photoService;
             _context = context;
         }
 
@@ -109,6 +109,8 @@ namespace CivicConnect.Web.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
+        [RequestSizeLimit(50 * 1024 * 1024)] // 50 MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 50 * 1024 * 1024)]
         public async Task<IActionResult> Create(IssueCreateViewModel model)
         {
             if (ModelState.IsValid)
@@ -151,35 +153,41 @@ namespace CivicConnect.Web.Controllers
                     // Khởi tạo trước Issue để lấy ID cho thư mục Cloudinary
                     var createdIssue = await _issueService.CreateIssueAsync(issue, new List<IssueImage>());
 
-                    foreach (var file in model.ImageFiles)
+                    try
                     {
-                        if (file.Length > 5 * 1024 * 1024)
+                        foreach (var file in model.ImageFiles)
                         {
-                            ModelState.AddModelError(nameof(model.ImageFiles), $"Tệp {file.FileName} vượt quá kích thước cho phép (5MB).");
-                            ViewData["PageHeader"] = "Gửi Phản Ánh Mới";
-                            return View(model);
-                        }
-
-                        using (var stream = file.OpenReadStream())
-                        {
-                            var upload = await _cloudinaryService.UploadIssueImageAsync(
-                                stream,
-                                file.FileName,
-                                file.ContentType,
-                                createdIssue.Id
-                            );
-
-                            images.Add(new IssueImage
+                            if (file.Length > 5 * 1024 * 1024)
                             {
-                                IssueId = createdIssue.Id,
-                                PublicId = upload.PublicId,
-                                Url = upload.Url,
-                                ThumbnailUrl = upload.ThumbnailUrl,
-                                OriginalFileName = file.FileName,
-                                FileSizeBytes = file.Length,
-                                UploadedAt = DateTime.UtcNow
-                            });
+                                throw new Exception($"Tệp {file.FileName} vượt quá kích thước cho phép (5MB).");
+                            }
+
+                            using (var stream = file.OpenReadStream())
+                            {
+                                var upload = await _photoService.AddPhotoAsync(stream, file.FileName);
+
+                                images.Add(new IssueImage
+                                {
+                                    IssueId = createdIssue.Id,
+                                    PublicId = upload.PublicId,
+                                    Url = upload.Url,
+                                    ThumbnailUrl = upload.ThumbnailUrl,
+                                    OriginalFileName = file.FileName,
+                                    FileSizeBytes = file.Length,
+                                    UploadedAt = DateTime.UtcNow
+                                });
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Xóa (rollback) phản ánh đã được tạo tạm trong DB
+                        _context.Issues.Remove(createdIssue);
+                        await _context.SaveChangesAsync();
+
+                        ModelState.AddModelError(nameof(model.ImageFiles), $"Lỗi khi tải ảnh lên Cloudinary: {ex.Message}");
+                        ViewData["PageHeader"] = "Gửi Phản Ánh Mới";
+                        return View(model);
                     }
 
                     // Lưu cập nhật ảnh
