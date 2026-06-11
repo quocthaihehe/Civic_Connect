@@ -468,7 +468,8 @@
                 IssuingUnit: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.IssuingUnit))",
                 DocNumber: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.DocumentNumber ?? ""))",
                 Signer: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Signer ?? ""))",
-                PublishedDate: "@Model.PublishedDate.ToString("o")"
+                PublishedDate: "@Model.PublishedDate.ToString("o")",
+                SourceUrl: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.SourceUrl ?? ""))"
             };
 
             $.ajax({

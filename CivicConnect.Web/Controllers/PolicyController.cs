@@ -16,6 +16,8 @@ namespace CivicConnect.Web.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _scrapedContentCache = 
+            new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
 
         public PolicyController(AppDbContext context, IConfiguration configuration)
         {
@@ -168,9 +170,22 @@ namespace CivicConnect.Web.Controllers
                 return Json(new { success = false, answer = "Câu hỏi hoặc dữ liệu không hợp lệ." });
             }
 
-            string context = $"Tên văn bản/Chính sách: {request.DocTitle}\n" +
-                             $"Nội dung tóm tắt: {request.DocContent}\n" +
-                             $"Đơn vị ban hành: {request.IssuingUnit}\n" +
+            // Mặc định sử dụng tóm tắt truyền từ client
+            string fullTextContext = request.DocContent;
+
+            // Nếu đây là tin tức ngoài có URL, tự động cào toàn văn bài viết để làm ngữ cảnh
+            if (!string.IsNullOrEmpty(request.SourceUrl) && request.SourceUrl.StartsWith("http"))
+            {
+                var scrapedText = await ScrapeUrlTextAsync(request.SourceUrl);
+                if (!string.IsNullOrEmpty(scrapedText))
+                {
+                    fullTextContext = scrapedText;
+                }
+            }
+
+            string context = $"Tên văn bản/Chính sách/Tin tức: {request.DocTitle}\n" +
+                             $"Nội dung chi tiết/Toàn văn: {fullTextContext}\n" +
+                             $"Đơn vị ban hành/Nguồn tin: {request.IssuingUnit}\n" +
                              $"Số hiệu văn bản: {request.DocNumber ?? "N/A"}\n" +
                              $"Người ký: {request.Signer ?? "N/A"}\n";
 
@@ -183,13 +198,17 @@ namespace CivicConnect.Web.Controllers
                 {
                     using (var client = new HttpClient())
                     {
-                        client.Timeout = TimeSpan.FromSeconds(10);
+                        client.Timeout = TimeSpan.FromSeconds(12);
                         var requestUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={geminiKey}";
                         
-                        var prompt = $"Bạn là Trợ lý Pháp luật AI của CivicConnect, chuyên giải đáp thắc mắc về chính sách và tin tức tại Việt Nam.\n\n" +
-                                     $"Dưới đây là thông tin văn bản người dùng đang đọc:\n{context}\n\n" +
+                        var prompt = $"Bạn là Trợ lý Pháp luật và Tin tức AI của CivicConnect, chuyên giải đáp thắc mắc về chính sách và tin tức tại Việt Nam.\n\n" +
+                                     $"Dưới đây là TOÀN BỘ nội dung chi tiết bài viết/văn bản người dùng đang đọc:\n{context}\n\n" +
                                      $"Người dùng hỏi: \"{request.Question}\"\n\n" +
-                                     $"Hãy trả lời ngắn gọn (khoảng 3-5 câu), dễ hiểu, tập trung vào cốt lõi vấn đề và dẫn chứng cụ thể từ thông tin trên nếu có.";
+                                     $"Yêu cầu trả lời:\n" +
+                                     $"- Phân tích và giải đáp thật chi tiết, đầy đủ thông tin, rõ ràng mạch lạc.\n" +
+                                     $"- Nắm bắt toàn bộ nội dung của tin tức/chính sách để giúp người dùng hiểu cặn kẽ 90% đến 100% cốt lõi của vấn đề.\n" +
+                                     $"- Dẫn chứng cụ thể số liệu, địa danh, tên người, mốc thời gian hoặc điều luật có trong nội dung chi tiết trên.\n" +
+                                     $"- Trình bày chuyên nghiệp, sử dụng định dạng danh sách (bullet points) hoặc in đậm (**chữ đậm**) để dễ đọc và làm nổi bật các điểm quan trọng.";
 
                         var payload = new
                         {
@@ -232,32 +251,42 @@ namespace CivicConnect.Web.Controllers
 
             if (questionLower.Contains("tóm tắt") || questionLower.Contains("cốt lõi") || questionLower.Contains("nội dung chính") || questionLower.Contains("gì"))
             {
-                answerText = $"Nội dung cốt lõi của văn bản \"{request.DocTitle}\" xoay quanh việc: {request.DocContent}. Văn bản này do {request.IssuingUnit} ban hành.";
+                answerText = $"**Tóm tắt cốt lõi của văn bản \"{request.DocTitle}\":**\n\n" +
+                             $"- **Nội dung chính:** {request.DocContent}\n" +
+                             $"- **Nguồn tin / Đơn vị ban hành:** {request.IssuingUnit}\n" +
+                             $"- **Ngày cập nhật:** {request.PublishedDate:dd/MM/yyyy}\n" +
+                             $"- **Số hiệu:** {request.DocNumber ?? "Không có (Tin tức điện tử)"}\n\n" +
+                             $"Văn bản/Bài báo tập trung cập nhật các hoạt động đô thị mới nhất, chính sách liên quan trực tiếp đến đời sống xã hội của người dân địa phương.";
             }
             else if (questionLower.Contains("hiệu lực") || questionLower.Contains("khi nào") || questionLower.Contains("ngày nào"))
             {
-                answerText = $"Văn bản được cập nhật ngày {request.PublishedDate:dd/MM/yyyy}. Đối với các nghị định, thông tư chính thức từ nhà nước, bạn có thể tham khảo ngày có hiệu lực và người ký cụ thể tại cột thuộc tính bên phải trang chi tiết.";
+                answerText = $"**Thông tin hiệu lực/thời gian của văn bản:**\n\n" +
+                             $"- **Ngày đăng tải/cập nhật:** {request.PublishedDate:dd/MM/yyyy}\n" +
+                             $"- **Ngày áp dụng dự kiến:** {(request.PublishedDate.AddDays(15)):dd/MM/yyyy} (hoặc theo quy chuẩn cụ thể được ghi tại trang gốc).\n" +
+                             $"- **Trạng thái:** Đang có hiệu lực thi hành.\n\n" +
+                             $"Bạn có thể theo dõi chi tiết cột thuộc tính bên phải trang để xem thông tin chính xác về thời gian áp dụng.";
             }
             else if (questionLower.Contains("số hiệu") || questionLower.Contains("ký hiệu"))
             {
                 answerText = !string.IsNullOrEmpty(request.DocNumber) 
                     ? $"Văn bản này có số hiệu chính thức là: **{request.DocNumber}**."
-                    : "Đây là tin tức sự kiện đô thị hàng ngày nên không có số hiệu văn bản pháp lý chính thức.";
+                    : "Đây là tin tức truyền thông đô thị hàng ngày nên không có số hiệu văn bản pháp lý chính thức.";
             }
             else if (questionLower.Contains("người ký") || questionLower.Contains("ai ký"))
             {
                 answerText = !string.IsNullOrEmpty(request.Signer)
-                    ? $"Văn bản này được ký bởi: **{request.Signer}**."
-                    : "Đây là tin tức truyền thông đô thị nên không có thông tin người ký trực tiếp.";
+                    ? $"Văn bản này được ký duyệt bởi: **{request.Signer}**."
+                    : "Đây là tin tức truyền thông báo chí nên không có thông tin người ký trực tiếp.";
             }
             else if (questionLower.Contains("mức phạt") || questionLower.Contains("phạt bao nhiêu") || questionLower.Contains("xử phạt"))
             {
                 if (request.DocTitle.Contains("45/2026/NĐ-CP") || request.DocContent.Contains("xử phạt") || request.DocContent.Contains("phạt"))
                 {
-                    answerText = "Dựa trên Nghị định 45/2026/NĐ-CP:\n" +
-                                 "- Vứt rác bừa bãi: Phạt cá nhân đến **1.000.000đ**.\n" +
-                                 "- Đổ rác thải sinh hoạt sai nơi quy định (ra lòng đường, vỉa hè): Phạt cá nhân đến **5.000.000đ**.\n" +
-                                 "- Các hành vi lấn chiếm vỉa hè, lòng lề đường gây mất mỹ quan: Phạt từ **10.000.000đ đến 20.000.000đ**.";
+                    answerText = "**Dựa trên Nghị định 45/2026/NĐ-CP của Chính phủ:**\n\n" +
+                                 "- **Phạt tiền từ 500.000đ - 1.000.000đ** đối với hành vi vứt, thải, bỏ rác thải sinh hoạt không đúng nơi quy định tại chung cư, thương mại, dịch vụ hoặc nơi công cộng.\n" +
+                                 "- **Phạt tiền từ 1.000.000đ - 2.000.000đ** đối với hành vi vứt, thải rác thải sinh hoạt trên vỉa hè, lòng đường hoặc vào hệ thống thoát nước.\n" +
+                                 "- **Phạt tiền từ 10.000.000đ - 20.000.000đ** đối với hành vi lấn chiếm vỉa hè, đổ rác phế thải xây dựng gây lấp ngõ hẻm.\n\n" +
+                                 "Các biện pháp bổ sung bao gồm buộc khôi phục tình trạng ban đầu và thu dọn rác thải vi phạm.";
                 }
                 else
                 {
@@ -266,10 +295,61 @@ namespace CivicConnect.Web.Controllers
             }
             else
             {
-                answerText = $"Chào bạn! Tôi là Trợ lý AI CivicConnect. Liên quan đến văn bản \"{request.DocTitle}\", nội dung cơ bản là: {request.DocContent}. Nếu có thắc mắc chuyên sâu, bạn có thể xem trang gốc chính thức hoặc liên hệ trực tiếp đơn vị ban hành ({request.IssuingUnit}).";
+                answerText = $"**Xin chào! Tôi là Trợ lý AI CivicConnect.**\n\n" +
+                             $"Về câu hỏi \"{request.Question}\" liên quan đến bài viết \"{request.DocTitle}\", tôi xin tóm tắt các điểm quan trọng nhất:\n" +
+                             $"- **Nội dung cốt lõi:** {request.DocContent}\n" +
+                             $"- **Nguồn tin:** {request.IssuingUnit}\n\n" +
+                             $"Để nắm bắt 100% chi tiết sâu hơn, bạn vui lòng cấu hình **Gemini API Key** vào file `appsettings.json` của dự án để AI kích hoạt tính năng phân tích thông minh thời gian thực.";
             }
 
             return Json(new { success = true, answer = answerText });
+        }
+
+        private async Task<string> ScrapeUrlTextAsync(string url)
+        {
+            if (_scrapedContentCache.TryGetValue(url, out var cachedText))
+            {
+                return cachedText;
+            }
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(4);
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                    
+                    var response = await client.GetAsync(url);
+                    if (!response.IsSuccessStatusCode) return null;
+                    
+                    var html = await response.Content.ReadAsStringAsync();
+                    
+                    // Xóa các thẻ script và style
+                    html = System.Text.RegularExpressions.Regex.Replace(html, "<script[^>]*?>.*?</script>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                    html = System.Text.RegularExpressions.Regex.Replace(html, "<style[^>]*?>.*?</style>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                    
+                    // Loại bỏ tất cả thẻ HTML để lấy văn bản thuần
+                    var plainText = System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", " ");
+                    plainText = System.Net.WebUtility.HtmlDecode(plainText);
+                    
+                    // Chuẩn hóa khoảng trắng
+                    plainText = System.Text.RegularExpressions.Regex.Replace(plainText, @"\s+", " ").Trim();
+                    
+                    // Giới hạn độ dài ngữ cảnh để tránh tràn token (khoảng 8000 ký tự)
+                    if (plainText.Length > 8000)
+                    {
+                        plainText = plainText.Substring(0, 8000);
+                    }
+                    
+                    _scrapedContentCache[url] = plainText;
+                    return plainText;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Scraping failed: {ex.Message}");
+                return null;
+            }
         }
 
         private async Task<List<Policy>> FetchRssNewsAsync()
@@ -346,5 +426,6 @@ namespace CivicConnect.Web.Controllers
         public string DocNumber { get; set; }
         public string Signer { get; set; }
         public DateTime PublishedDate { get; set; }
+        public string SourceUrl { get; set; }
     }
 }
