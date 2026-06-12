@@ -1,7 +1,8 @@
-using CivicConnect.Core.Entities;
-using CivicConnect.Core.Interfaces;
-using CivicConnect.Core.Models;
-using CivicConnect.Infrastructure.Data;
+using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Repositories;
+using CivicConnect.Web.Services;
+using CivicConnect.Web.Models;
+using CivicConnect.Web.Data;
 using CivicConnect.Web.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

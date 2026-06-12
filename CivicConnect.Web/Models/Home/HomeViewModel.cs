@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using CivicConnect.Core.Enums;
+using CivicConnect.Web.Models.Enums;
 
 namespace CivicConnect.Web.Models.Home
 {

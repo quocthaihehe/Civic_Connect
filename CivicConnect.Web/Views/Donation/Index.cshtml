@@ -1,7 +1,7 @@
-@model IEnumerable<CivicConnect.Core.Entities.DonationCategory>
+@model IEnumerable<CivicConnect.Web.Models.Entities.DonationCategory>
 @{
     ViewData["Title"] = "Quỹ Cộng Đồng";
-    var recentDonations = ViewBag.RecentDonations as List<CivicConnect.Core.Entities.Donation> ?? new List<CivicConnect.Core.Entities.Donation>();
+    var recentDonations = ViewBag.RecentDonations as List<CivicConnect.Web.Models.Entities.Donation> ?? new List<CivicConnect.Web.Models.Entities.Donation>();
     var totalAmount = (decimal)ViewBag.TotalAmount;
     var totalCount = (int)ViewBag.TotalCount;
 }

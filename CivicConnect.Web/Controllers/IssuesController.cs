@@ -1,6 +1,8 @@
-using CivicConnect.Core.Entities;
-using CivicConnect.Core.Enums;
-using CivicConnect.Core.Interfaces;
+using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Enums;
+using CivicConnect.Web.Repositories;
+
+using CivicConnect.Web.Services;
 using CivicConnect.Web.Models.Issues;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,13 +21,13 @@ namespace CivicConnect.Web.Controllers
         private readonly IIssueService _issueService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPhotoService _photoService;
-        private readonly CivicConnect.Infrastructure.Data.AppDbContext _context;
+        private readonly CivicConnect.Web.Data.AppDbContext _context;
 
         public IssuesController(
             IIssueService issueService,
             UserManager<ApplicationUser> userManager,
             IPhotoService photoService,
-            CivicConnect.Infrastructure.Data.AppDbContext context)
+            CivicConnect.Web.Data.AppDbContext context)
         {
             _issueService = issueService;
             _userManager = userManager;

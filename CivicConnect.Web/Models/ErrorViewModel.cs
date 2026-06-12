@@ -1,4 +1,4 @@
-namespace CivicConnect.Models
+namespace CivicConnect.Web.Models
 {
     public class ErrorViewModel
     {

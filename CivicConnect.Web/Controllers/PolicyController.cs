@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CivicConnect.Infrastructure.Data;
-using CivicConnect.Core.Entities;
+using CivicConnect.Web.Data;
+using CivicConnect.Web.Models.Entities;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.Collections.Generic;

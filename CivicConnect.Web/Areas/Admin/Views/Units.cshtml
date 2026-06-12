@@ -1,0 +1,68 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.GovernmentUnit>
+@using CivicConnect.Web.Models.Enums
+@{
+    ViewData["Title"] = "Quản lý cơ quan";
+}
+
+<div class="d-flex flex-column gap-4">
+    <div>
+        <a asp-action="Dashboard" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="bi bi-arrow-left me-1"></i> Quay lại Admin</a>
+    </div>
+
+    <!-- Bảng danh sách cơ quan -->
+    <div class="glass-card p-4 p-md-5">
+        <h5 class="fw-bold mb-4 text-white"><i class="bi bi-building-fill text-primary me-2"></i> Danh sách cơ quan hành chính liên kết</h5>
+
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0">
+                <thead class="table-light">
+                    <tr style="font-size: 0.85rem;">
+                        <th>ID</th>
+                        <th>Tên cơ quan</th>
+                        <th>Cấp cơ quan</th>
+                        <th>Địa chỉ</th>
+                        <th>Điện thoại</th>
+                        <th>Email</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody style="font-size: 0.85rem;">
+                    @foreach (var unit in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-white">@unit.Id</td>
+                            <td>@unit.Name</td>
+                            <td>
+                                <span class="badge bg-primary rounded-pill" style="font-size: 0.75rem;">@GetUnitTypeName(unit.Type)</span>
+                            </td>
+                            <td class="text-secondary text-truncate" style="max-width: 250px;">@unit.Address</td>
+                            <td>@unit.Phone</td>
+                            <td>@unit.Email</td>
+                            <td>
+                                @if (unit.IsActive)
+                                {
+                                    <span class="badge bg-success-light text-success rounded-pill px-3 py-1" style="background: rgba(16,185,129,0.08);">Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-light text-danger rounded-pill px-3 py-1" style="background: rgba(239,68,68,0.08);">Ngừng hoạt động</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetUnitTypeName(GovernmentUnitType type) => type switch
+    {
+        GovernmentUnitType.Province => "Cấp Tỉnh/Thành phố",
+        GovernmentUnitType.District => "Cấp Quận/Huyện",
+        GovernmentUnitType.Ward => "Cấp Phường/Xã",
+        GovernmentUnitType.Department => "Phòng ban chuyên môn",
+        _ => "Khác"
+    };
+}
