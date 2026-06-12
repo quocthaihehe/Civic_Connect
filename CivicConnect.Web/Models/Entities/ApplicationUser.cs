@@ -15,8 +15,18 @@ namespace CivicConnect.Web.Models.Entities
         public string? DistrictCode { get; set; }     // Mã quận/huyện
         public string? ProvinceCode { get; set; }     // Mã tỉnh/thành
         public bool IsActive { get; set; } = true;    // Khoá tài khoản
+        public int TrustScore { get; set; } = 0;      // Điểm uy tín
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastLoginAt { get; set; }
+
+        public string BadgeLevel => TrustScore switch
+        {
+            >= 500 => "Kim cương",
+            >= 200 => "Vàng",
+            >= 50 => "Bạc",
+            >= 10 => "Đồng",
+            _ => "Tân binh"
+        };
 
         // Liên kết cán bộ với đơn vị cơ quan hành chính
         public string? GovernmentUnitId { get; set; }

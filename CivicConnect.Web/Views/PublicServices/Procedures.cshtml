@@ -1,0 +1,120 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.AdministrativeProcedure>
+@{
+    ViewData["Title"] = "Tra cứu Thủ tục hành chính";
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0" style="font-family: var(--font-display);">Thủ tục hành chính</h2>
+</div>
+
+<div class="glass-card p-4 rounded-4 shadow-sm mb-5 border-0">
+    <form asp-action="Procedures" method="get" class="row g-3">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@ViewData["CurrentSearch"]" class="form-control border-start-0 ps-0" placeholder="Nhập tên thủ tục, mã thủ tục..." />
+            </div>
+        </div>
+        <div class="col-md-5">
+            <select name="category" class="form-select">
+                <option value="">Tất cả lĩnh vực</option>
+                @foreach (var cat in categories)
+                {
+                    var isSelected = ViewData["CurrentCategory"]?.ToString() == cat ? "selected" : "";
+                    <!option value="@cat" @isSelected>@cat</!option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary rounded-pill fw-semibold"><i class="bi bi-funnel me-1"></i> Lọc</button>
+        </div>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-file-earmark-x display-1 text-muted opacity-50 mb-3 d-block"></i>
+        <h5 class="text-muted">Không tìm thấy thủ tục nào phù hợp.</h5>
+    </div>
+}
+else
+{
+    <div class="accordion custom-accordion" id="proceduresAccordion">
+        @foreach (var (proc, index) in Model.Select((p, i) => (p, i)))
+        {
+            var targetId = $"collapse_{proc.Id}";
+            var headingId = $"heading_{proc.Id}";
+
+            <div class="accordion-item glass-card mb-3 border-0 rounded-4 shadow-sm overflow-hidden">
+                <h2 class="accordion-header" id="@headingId">
+                    <button class="accordion-button collapsed bg-white fw-bold py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#@targetId" aria-expanded="false" aria-controls="@targetId" style="font-size: 1.1rem; box-shadow: none;">
+                        <span class="badge bg-primary bg-opacity-10 text-primary me-3 rounded-pill">@proc.Code</span>
+                        @proc.Title
+                    </button>
+                </h2>
+                <div id="@targetId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#proceduresAccordion">
+                    <div class="accordion-body px-4 pb-4 pt-0 bg-white">
+                        <hr class="mt-0 mb-4 opacity-10" />
+                        
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <h6 class="text-uppercase fw-bold text-muted small mb-2">Mô tả</h6>
+                                <p class="mb-4">@proc.Description</p>
+                                
+                                <h6 class="text-uppercase fw-bold text-muted small mb-2">Hồ sơ cần chuẩn bị</h6>
+                                <div class="bg-light p-3 rounded-3 mb-4" style="white-space: pre-line;">
+                                    @proc.RequiredDocuments
+                                </div>
+                                
+                                <h6 class="text-uppercase fw-bold text-muted small mb-2">Cơ sở pháp lý</h6>
+                                <p class="mb-0">@proc.LegalBasis</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-primary bg-opacity-10 p-4 rounded-4 h-100 border border-primary border-opacity-25">
+                                    <ul class="list-unstyled mb-4">
+                                        <li class="mb-3">
+                                            <div class="text-muted small fw-medium mb-1"><i class="bi bi-clock me-1"></i> Thời gian giải quyết</div>
+                                            <div class="fw-bold text-dark">@proc.ProcessingTime</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <div class="text-muted small fw-medium mb-1"><i class="bi bi-cash me-1"></i> Lệ phí</div>
+                                            <div class="fw-bold text-dark">@proc.Fee</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <div class="text-muted small fw-medium mb-1"><i class="bi bi-geo-alt me-1"></i> Nơi tiếp nhận</div>
+                                            <div class="fw-bold text-dark">@proc.SubmissionPlace</div>
+                                        </li>
+                                    </ul>
+                                    <div class="d-grid">
+                                        <a href="@proc.TemplateUrl" target="_blank" class="btn btn-primary rounded-pill fw-semibold hover-scale">
+                                            <i class="bi bi-download me-1"></i> Tải biểu mẫu
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Styles {
+    <style>
+        .custom-accordion .accordion-button::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232c3e50'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        }
+        .custom-accordion .accordion-button:not(.collapsed)::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230d6efd'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        }
+        .custom-accordion .accordion-button:not(.collapsed) {
+            color: var(--primary-color);
+            background-color: transparent;
+        }
+    </style>
+}

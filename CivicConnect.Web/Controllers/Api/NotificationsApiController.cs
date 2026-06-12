@@ -1,4 +1,5 @@
-using CivicConnect.Web.Repositories;
+using CivicConnect.Web.Repositories;
+
 using CivicConnect.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +21,16 @@ namespace CivicConnect.Web.Controllers.Api
         {
             _notificationService = notificationService;
             _userManager = userManager;
+        }
+
+        [HttpGet("unread")]
+        public async Task<IActionResult> GetUnread()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var notifications = await _notificationService.GetUnreadAsync(userId);
+            return Ok(notifications);
         }
 
         [HttpPost("mark-all-read")]

@@ -1,0 +1,99 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.CommunityEvent>
+@{
+    ViewData["Title"] = "Sự kiện Cộng đồng";
+    var userRegistrations = ViewBag.UserRegistrations as List<int> ?? new List<int>();
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-lg-8">
+        <h2 class="fw-bold mb-1 text-dark">Lịch Sự kiện & Tình nguyện</h2>
+        <p class="text-muted mb-0">Tham gia các hoạt động cộng đồng, chung tay xây dựng môi trường sống tốt đẹp hơn.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var ev in Model)
+        {
+            var isRegistered = userRegistrations.Contains(ev.Id);
+            var isFull = ev.Registrations?.Count >= ev.MaxParticipants;
+            var isPast = ev.StartTime < DateTime.UtcNow;
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-lift">
+                    @if (!string.IsNullOrEmpty(ev.ImageUrl))
+                    {
+                        <img src="@ev.ImageUrl" class="card-img-top" alt="Event Image" style="height: 180px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex justify-content-center align-items-center" style="height: 180px;">
+                            <i class="bi bi-calendar-event display-3 text-primary opacity-25"></i>
+                        </div>
+                    }
+                    
+                    <div class="card-body p-4 position-relative">
+                        <div class="position-absolute top-0 end-0 bg-primary text-white text-center rounded-bottom px-3 py-2 shadow-sm" style="margin-right: 20px; transform: translateY(-100%);">
+                            <h4 class="fw-bold mb-0">@ev.StartTime.ToString("dd")</h4>
+                            <small>Thg @ev.StartTime.ToString("MM")</small>
+                        </div>
+
+                        <div class="mb-3 mt-2">
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-semibold">
+                                <i class="bi bi-clock me-1"></i> @ev.StartTime.ToString("HH:mm") - @ev.EndTime.ToString("HH:mm")
+                            </span>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-2">@ev.Title</h5>
+                        <p class="text-secondary small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">@ev.Description</p>
+                        
+                        <div class="d-flex align-items-center text-muted small mb-2">
+                            <i class="bi bi-geo-alt-fill text-danger me-2"></i> @ev.Location
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center text-muted small mb-4">
+                            <span><i class="bi bi-person-badge-fill text-primary me-2"></i> @ev.Organizer</span>
+                            <span class="fw-bold">@(ev.Registrations?.Count ?? 0) / @ev.MaxParticipants</span>
+                        </div>
+
+                        @if (isPast)
+                        {
+                            <button class="btn btn-secondary w-100 rounded-pill fw-bold" disabled>Đã diễn ra</button>
+                        }
+                        else if (isRegistered)
+                        {
+                            <button class="btn btn-outline-success w-100 rounded-pill fw-bold" disabled>
+                                <i class="bi bi-check-circle-fill me-2"></i>Bạn đã đăng ký
+                            </button>
+                        }
+                        else if (isFull)
+                        {
+                            <button class="btn btn-warning w-100 rounded-pill fw-bold text-dark" disabled>
+                                <i class="bi bi-x-circle me-2"></i>Đã đủ số lượng
+                            </button>
+                        }
+                        else
+                        {
+                            <form asp-action="RegisterEvent" method="post">
+                                <input type="hidden" name="eventId" value="@ev.Id" />
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">Đăng ký tham gia</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-calendar-x display-1 text-muted opacity-25 mb-3 d-block"></i>
+            <h5 class="text-muted">Chưa có sự kiện nào</h5>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-lift { transition: transform 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-5px); }
+</style>

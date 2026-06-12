@@ -9,10 +9,6 @@ $(document).ready(function () {
             .withAutomaticReconnect()
             .build();
 
-        connection.on("LoadNotifications", function (notifications) {
-            renderNotifications(notifications);
-        });
-
         connection.on("IssueStatusChanged", function (n) {
             addNewNotification(n);
         });
@@ -21,7 +17,20 @@ $(document).ready(function () {
             addNewNotification(n);
         });
 
-        connection.start().catch(err => console.error(err.toString()));
+        connection.on("UpdateStats", function (totalUsers, totalIssues, resolvedIssues, satisfactionRate) {
+            animateValue("kpi-total-users", totalUsers);
+            animateValue("kpi-total-issues", totalIssues);
+            animateValue("kpi-resolved-issues", resolvedIssues);
+            const satEl = document.getElementById("kpi-satisfaction-rate");
+            if (satEl) satEl.innerText = satisfactionRate + "%";
+        });
+
+        connection.start().then(function() {
+            // Load existing unread notifications from API
+            $.get('/api/notifications/unread', function(data) {
+                renderNotifications(data);
+            });
+        }).catch(err => console.error(err.toString()));
 
         // Sự kiện click Đọc tất cả thông báo
         $('#mark-all-read').on('click', function(e) {
@@ -96,3 +105,13 @@ $(document).ready(function () {
         }
     });
 });
+
+function animateValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        // Chỉ đơn giản là cập nhật số, có thể thêm hiệu ứng countup nếu thích
+        el.innerText = value.toLocaleString('vi-VN');
+        el.classList.add('animate-shake');
+        setTimeout(() => el.classList.remove('animate-shake'), 1000);
+    }
+}

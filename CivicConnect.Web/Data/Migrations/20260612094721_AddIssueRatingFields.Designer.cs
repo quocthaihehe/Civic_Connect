@@ -4,6 +4,7 @@ using CivicConnect.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CivicConnect.Web.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260612094721_AddIssueRatingFields")]
+    partial class AddIssueRatingFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,251 +24,6 @@ namespace CivicConnect.Web.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.AdministrativeProcedure", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Fee")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LegalBasis")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("ProcessingTime")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("RequiredDocuments")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SubmissionPlace")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("TemplateUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AdministrativeProcedures");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Category = "Hộ tịch",
-                            Code = "TTHC-01",
-                            CreatedAt = new DateTime(2026, 6, 12, 12, 36, 26, 895, DateTimeKind.Utc).AddTicks(1599),
-                            Description = "Cán bộ tư pháp xuống tận nhà dân để làm thủ tục đăng ký khai sinh đối với các trường hợp đặc biệt khó khăn, khuyết tật.",
-                            Fee = "Miễn phí",
-                            IsActive = true,
-                            LegalBasis = "Luật Hộ tịch 2014, Nghị định 123/2015/NĐ-CP",
-                            ProcessingTime = "1 ngày làm việc",
-                            RequiredDocuments = "- Tờ khai đăng ký khai sinh\n- Giấy chứng sinh (hoặc văn bản làm chứng)\n- Thẻ CCCD của người yêu cầu",
-                            SubmissionPlace = "Nhà dân / Bộ phận một cửa UBND Phường",
-                            TemplateUrl = "https://dichvucong.gov.vn",
-                            Title = "Đăng ký khai sinh lưu động"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Category = "Hộ tịch",
-                            Code = "TTHC-02",
-                            CreatedAt = new DateTime(2026, 6, 12, 12, 36, 26, 895, DateTimeKind.Utc).AddTicks(1604),
-                            Description = "Cấp giấy xác nhận tình trạng hôn nhân để làm thủ tục vay vốn, mua bán đất, hoặc đăng ký kết hôn.",
-                            Fee = "15.000 VNĐ",
-                            IsActive = true,
-                            LegalBasis = "Luật Hộ tịch 2014",
-                            ProcessingTime = "3 ngày làm việc",
-                            RequiredDocuments = "- Tờ khai yêu cầu xác nhận\n- Thẻ CCCD\n- Quyết định ly hôn (nếu đã từng ly hôn)",
-                            SubmissionPlace = "Bộ phận một cửa UBND Phường Bến Nghé",
-                            TemplateUrl = "https://dichvucong.gov.vn",
-                            Title = "Xác nhận tình trạng hôn nhân"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Category = "Hộ tịch",
-                            Code = "TTHC-03",
-                            CreatedAt = new DateTime(2026, 6, 12, 12, 36, 26, 895, DateTimeKind.Utc).AddTicks(1605),
-                            Description = "Cấp bản sao trích lục từ sổ gốc hộ tịch (Khai sinh, Kết hôn, Khai tử).",
-                            Fee = "8.000 VNĐ/bản",
-                            IsActive = true,
-                            LegalBasis = "Luật Hộ tịch 2014",
-                            ProcessingTime = "Trả kết quả ngay trong ngày",
-                            RequiredDocuments = "- Tờ khai yêu cầu cấp bản sao\n- Thẻ CCCD",
-                            SubmissionPlace = "Bộ phận một cửa UBND Phường Bến Nghé",
-                            TemplateUrl = "https://dichvucong.gov.vn",
-                            Title = "Cấp bản sao trích lục hộ tịch"
-                        });
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.AgencyDirectory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsEmergency")
-                        .HasColumnType("bit");
-
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<float>("Rating")
-                        .HasColumnType("real");
-
-                    b.Property<string>("ReceptionSchedule")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("WorkingHours")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AgencyDirectories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "29 Nguyễn Trung Ngạn, Bến Nghé, Quận 1, TPHCM",
-                            Email = "congan.bennghe@tphcm.gov.vn",
-                            IsEmergency = true,
-                            Latitude = 10.7811,
-                            Longitude = 106.7051,
-                            Name = "Công an Phường Bến Nghé",
-                            OrderIndex = 1,
-                            Phone = "02838297335",
-                            Rating = 4.8f,
-                            ReceptionSchedule = "Tiếp công dân hằng ngày vào giờ hành chính (Trưởng công an phường tiếp vào sáng Thứ 5).",
-                            Type = "Công an",
-                            WorkingHours = "Trực 24/7"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Address = "Số 1 Lý Tự Trọng, Bến Nghé, Quận 1, TPHCM",
-                            Email = "tramyte.bennghe@tphcm.gov.vn",
-                            IsEmergency = false,
-                            Latitude = 10.7788,
-                            Longitude = 106.7032,
-                            Name = "Trạm Y tế Phường Bến Nghé",
-                            OrderIndex = 2,
-                            Phone = "02838222956",
-                            Rating = 4.5f,
-                            ReceptionSchedule = "Tiêm chủng định kỳ vào sáng Thứ 4 và Thứ 6 hằng tuần.",
-                            Type = "Y tế",
-                            WorkingHours = "07:30 - 16:30 (Thứ 2 - Thứ 6)"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Address = "194 Pasteur, Phường Võ Thị Sáu, Quận 3, TPHCM",
-                            Email = "cskh@capnuocbenthanh.com",
-                            IsEmergency = false,
-                            Latitude = 10.782999999999999,
-                            Longitude = 106.694,
-                            Name = "Công ty Cấp nước Bến Thành",
-                            OrderIndex = 3,
-                            Phone = "19001224",
-                            Rating = 4f,
-                            ReceptionSchedule = "Tiếp nhận hồ sơ lắp đặt mới tại quầy vào giờ hành chính.",
-                            Type = "Hạ tầng",
-                            WorkingHours = "08:00 - 17:00 (Thứ 2 - Thứ 6)"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Address = "29 Nguyễn Trung Ngạn, Bến Nghé, Quận 1, TPHCM",
-                            Email = "bennghe.q1@tphcm.gov.vn",
-                            IsEmergency = false,
-                            Latitude = 10.7811,
-                            Longitude = 106.7051,
-                            Name = "Lịch tiếp dân Chủ tịch UBND Phường Bến Nghé",
-                            OrderIndex = 0,
-                            Phone = "02838290290",
-                            Rating = 5f,
-                            ReceptionSchedule = "Đồng chí Chủ tịch UBND Phường tiếp công dân định kỳ để giải quyết khiếu nại, tố cáo và các vấn đề dân sinh phức tạp.",
-                            Type = "Hành chính",
-                            WorkingHours = "Sáng Thứ 3 & Thứ 5 hằng tuần"
-                        });
-                });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.ApplicationUser", b =>
                 {
@@ -346,9 +104,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TrustScore")
-                        .HasColumnType("int");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -417,48 +172,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.HasIndex("ParentCommentId");
 
                     b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.CommunityEvent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MaxParticipants")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Organizer")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CommunityEvents");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Donation", b =>
@@ -584,102 +297,6 @@ namespace CivicConnect.Web.Data.Migrations
                             Name = "Quỹ Nâng Cấp Sân Chơi Trẻ Em",
                             TargetAmount = 100000000m
                         });
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.EventRegistration", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RegisteredAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("UserId", "EventId")
-                        .IsUnique();
-
-                    b.ToTable("EventRegistrations");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.ForumComment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AuthorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("ForumComments");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.ForumPost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AuthorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Upvotes")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.ToTable("ForumPosts");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.GovernmentUnit", b =>
@@ -997,75 +614,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Petition", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CurrentSignatures")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TargetAudience")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TargetSignatures")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Petitions");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PetitionSignature", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PetitionId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SignedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PetitionId");
-
-                    b.HasIndex("UserId", "PetitionId")
-                        .IsUnique();
-
-                    b.ToTable("PetitionSignatures");
-                });
-
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Policy", b =>
                 {
                     b.Property<int>("Id")
@@ -1192,94 +740,6 @@ namespace CivicConnect.Web.Data.Migrations
                             TagClass = "tag-news",
                             Title = "Hơn 500 đoàn viên thanh niên Quận 1 tham gia làm sạch kênh Nhiêu Lộc - Thị Nghè"
                         });
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Poll", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Question")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Polls");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollOption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PollId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("VoteCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PollId");
-
-                    b.ToTable("PollOptions");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollVote", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OptionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PollId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("VotedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OptionId");
-
-                    b.HasIndex("PollId");
-
-                    b.HasIndex("UserId", "PollId")
-                        .IsUnique();
-
-                    b.ToTable("PollVotes");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.UnitCategory", b =>
@@ -1597,55 +1057,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.EventRegistration", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.CommunityEvent", "Event")
-                        .WithMany("Registrations")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.ForumComment", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CivicConnect.Web.Models.Entities.ForumPost", "Post")
-                        .WithMany("Comments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.ForumPost", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-                });
-
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.GovernmentUnit", b =>
                 {
                     b.HasOne("CivicConnect.Web.Models.Entities.GovernmentUnit", "ParentUnit")
@@ -1716,63 +1127,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("ChangedBy");
 
                     b.Navigation("Issue");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PetitionSignature", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.Petition", "Petition")
-                        .WithMany()
-                        .HasForeignKey("PetitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Petition");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollOption", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.Poll", "Poll")
-                        .WithMany("Options")
-                        .HasForeignKey("PollId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Poll");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollVote", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.PollOption", "Option")
-                        .WithMany()
-                        .HasForeignKey("OptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CivicConnect.Web.Models.Entities.Poll", "Poll")
-                        .WithMany("Votes")
-                        .HasForeignKey("PollId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Option");
-
-                    b.Navigation("Poll");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.UnitCategory", b =>
@@ -1866,19 +1220,9 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("Replies");
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.CommunityEvent", b =>
-                {
-                    b.Navigation("Registrations");
-                });
-
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.DonationCategory", b =>
                 {
                     b.Navigation("Donations");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.ForumPost", b =>
-                {
-                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.GovernmentUnit", b =>
@@ -1901,13 +1245,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("StatusHistory");
-
-                    b.Navigation("Votes");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Poll", b =>
-                {
-                    b.Navigation("Options");
 
                     b.Navigation("Votes");
                 });

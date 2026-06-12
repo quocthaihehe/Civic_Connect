@@ -24,10 +24,34 @@ namespace CivicConnect.Web.Data
         public DbSet<Policy> Policies { get; set; }
         public DbSet<DonationCategory> DonationCategories { get; set; }
         public DbSet<Donation> Donations { get; set; }
-
+        public DbSet<AdministrativeProcedure> AdministrativeProcedures { get; set; }
+        public DbSet<AgencyDirectory> AgencyDirectories { get; set; }
+        public DbSet<ForumPost> ForumPosts { get; set; }
+        public DbSet<ForumComment> ForumComments { get; set; }
+        public DbSet<Poll> Polls { get; set; }
+        public DbSet<PollOption> PollOptions { get; set; }
+        public DbSet<PollVote> PollVotes { get; set; }
+        public DbSet<Petition> Petitions { get; set; }
+        public DbSet<PetitionSignature> PetitionSignatures { get; set; }
+        public DbSet<CommunityEvent> CommunityEvents { get; set; }
+        public DbSet<EventRegistration> EventRegistrations { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Cấu hình Community Entities
+            modelBuilder.Entity<ForumPost>().HasOne(p => p.Author).WithMany().HasForeignKey(p => p.AuthorId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ForumComment>().HasOne(c => c.Author).WithMany().HasForeignKey(c => c.AuthorId).OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PollVote>().HasIndex(v => new { v.UserId, v.PollId }).IsUnique();
+            modelBuilder.Entity<PollVote>().HasOne(v => v.User).WithMany().HasForeignKey(v => v.UserId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PollVote>().HasOne(v => v.Poll).WithMany(p => p.Votes).HasForeignKey(v => v.PollId).OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PetitionSignature>().HasIndex(s => new { s.UserId, s.PetitionId }).IsUnique();
+            modelBuilder.Entity<PetitionSignature>().HasOne(s => s.User).WithMany().HasForeignKey(s => s.UserId).OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<EventRegistration>().HasIndex(r => new { r.UserId, r.EventId }).IsUnique();
+            modelBuilder.Entity<EventRegistration>().HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Restrict);
 
             // Cấu hình bảng biểu quyết Vote
             modelBuilder.Entity<Vote>(entity =>
@@ -309,6 +333,123 @@ namespace CivicConnect.Web.Data
                     CurrentAmount = 0,
                     IsActive = true,
                     CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                }
+            );
+
+            // Seed dữ liệu mẫu cho Thủ tục hành chính (Phase 5)
+            modelBuilder.Entity<AdministrativeProcedure>().HasData(
+                new AdministrativeProcedure
+                {
+                    Id = 1,
+                    Title = "Đăng ký khai sinh lưu động",
+                    Code = "TTHC-01",
+                    LegalBasis = "Luật Hộ tịch 2014, Nghị định 123/2015/NĐ-CP",
+                    Category = "Hộ tịch",
+                    Description = "Cán bộ tư pháp xuống tận nhà dân để làm thủ tục đăng ký khai sinh đối với các trường hợp đặc biệt khó khăn, khuyết tật.",
+                    RequiredDocuments = "- Tờ khai đăng ký khai sinh\n- Giấy chứng sinh (hoặc văn bản làm chứng)\n- Thẻ CCCD của người yêu cầu",
+                    ProcessingTime = "1 ngày làm việc",
+                    Fee = "Miễn phí",
+                    SubmissionPlace = "Nhà dân / Bộ phận một cửa UBND Phường",
+                    TemplateUrl = "https://dichvucong.gov.vn",
+                    IsActive = true
+                },
+                new AdministrativeProcedure
+                {
+                    Id = 2,
+                    Title = "Xác nhận tình trạng hôn nhân",
+                    Code = "TTHC-02",
+                    LegalBasis = "Luật Hộ tịch 2014",
+                    Category = "Hộ tịch",
+                    Description = "Cấp giấy xác nhận tình trạng hôn nhân để làm thủ tục vay vốn, mua bán đất, hoặc đăng ký kết hôn.",
+                    RequiredDocuments = "- Tờ khai yêu cầu xác nhận\n- Thẻ CCCD\n- Quyết định ly hôn (nếu đã từng ly hôn)",
+                    ProcessingTime = "3 ngày làm việc",
+                    Fee = "15.000 VNĐ",
+                    SubmissionPlace = "Bộ phận một cửa UBND Phường Bến Nghé",
+                    TemplateUrl = "https://dichvucong.gov.vn",
+                    IsActive = true
+                },
+                new AdministrativeProcedure
+                {
+                    Id = 3,
+                    Title = "Cấp bản sao trích lục hộ tịch",
+                    Code = "TTHC-03",
+                    LegalBasis = "Luật Hộ tịch 2014",
+                    Category = "Hộ tịch",
+                    Description = "Cấp bản sao trích lục từ sổ gốc hộ tịch (Khai sinh, Kết hôn, Khai tử).",
+                    RequiredDocuments = "- Tờ khai yêu cầu cấp bản sao\n- Thẻ CCCD",
+                    ProcessingTime = "Trả kết quả ngay trong ngày",
+                    Fee = "8.000 VNĐ/bản",
+                    SubmissionPlace = "Bộ phận một cửa UBND Phường Bến Nghé",
+                    TemplateUrl = "https://dichvucong.gov.vn",
+                    IsActive = true
+                }
+            );
+
+            // Seed dữ liệu mẫu cho Danh bạ cơ quan (Phase 5)
+            modelBuilder.Entity<AgencyDirectory>().HasData(
+                new AgencyDirectory
+                {
+                    Id = 1,
+                    Name = "Công an Phường Bến Nghé",
+                    Type = "Công an",
+                    Phone = "02838297335",
+                    Email = "congan.bennghe@tphcm.gov.vn",
+                    Address = "29 Nguyễn Trung Ngạn, Bến Nghé, Quận 1, TPHCM",
+                    WorkingHours = "Trực 24/7",
+                    Latitude = 10.7811,
+                    Longitude = 106.7051,
+                    Rating = 4.8f,
+                    ReceptionSchedule = "Tiếp công dân hằng ngày vào giờ hành chính (Trưởng công an phường tiếp vào sáng Thứ 5).",
+                    IsEmergency = true,
+                    OrderIndex = 1
+                },
+                new AgencyDirectory
+                {
+                    Id = 2,
+                    Name = "Trạm Y tế Phường Bến Nghé",
+                    Type = "Y tế",
+                    Phone = "02838222956",
+                    Email = "tramyte.bennghe@tphcm.gov.vn",
+                    Address = "Số 1 Lý Tự Trọng, Bến Nghé, Quận 1, TPHCM",
+                    WorkingHours = "07:30 - 16:30 (Thứ 2 - Thứ 6)",
+                    Latitude = 10.7788,
+                    Longitude = 106.7032,
+                    Rating = 4.5f,
+                    ReceptionSchedule = "Tiêm chủng định kỳ vào sáng Thứ 4 và Thứ 6 hằng tuần.",
+                    IsEmergency = false,
+                    OrderIndex = 2
+                },
+                new AgencyDirectory
+                {
+                    Id = 3,
+                    Name = "Công ty Cấp nước Bến Thành",
+                    Type = "Hạ tầng",
+                    Phone = "19001224",
+                    Email = "cskh@capnuocbenthanh.com",
+                    Address = "194 Pasteur, Phường Võ Thị Sáu, Quận 3, TPHCM",
+                    WorkingHours = "08:00 - 17:00 (Thứ 2 - Thứ 6)",
+                    Latitude = 10.7830,
+                    Longitude = 106.6940,
+                    Rating = 4.0f,
+                    ReceptionSchedule = "Tiếp nhận hồ sơ lắp đặt mới tại quầy vào giờ hành chính.",
+                    IsEmergency = false,
+                    OrderIndex = 3
+                },
+                new AgencyDirectory
+                {
+                    Id = 4,
+                    Name = "Lịch tiếp dân Chủ tịch UBND Phường Bến Nghé",
+                    Type = "Hành chính",
+                    Phone = "02838290290",
+                    Email = "bennghe.q1@tphcm.gov.vn",
+                    Address = "29 Nguyễn Trung Ngạn, Bến Nghé, Quận 1, TPHCM",
+                    WorkingHours = "Sáng Thứ 3 & Thứ 5 hằng tuần",
+                    Latitude = 10.7811,
+                    Longitude = 106.7051,
+                    Rating = 5.0f,
+                    ReceptionSchedule = "Đồng chí Chủ tịch UBND Phường tiếp công dân định kỳ để giải quyết khiếu nại, tố cáo và các vấn đề dân sinh phức tạp.",
+                    IsEmergency = false,
+                    OrderIndex = 0
                 }
             );
         }
