@@ -4,6 +4,7 @@ using CivicConnect.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CivicConnect.Web.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260612123628_Phase6_Community")]
+    partial class Phase6_Community
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,9 +284,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<string>("CitizenId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CitizenPoints")
-                        .HasColumnType("int");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -308,29 +308,14 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<string>("GovernmentUnitId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("IdCardBackUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IdCardFrontUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsOnline")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsPhoneVerified")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsRestricted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("KYCLevel")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("datetime2");
@@ -361,17 +346,9 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<string>("ProvinceCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("RestrictedUntil")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RestrictionReason")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SelfieUrl")
-                        .HasColumnType("nvarchar(max)");
                     b.Property<int>("TrustScore")
                         .HasColumnType("int");
 
@@ -398,38 +375,6 @@ namespace CivicConnect.Web.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.AuditLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IPAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Comment", b =>
@@ -858,17 +803,11 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("InternalNotes")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsAnonymous")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Labels")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("float");
@@ -893,10 +832,6 @@ namespace CivicConnect.Web.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ResolutionDocumentUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResolutionImageUrl")
                     b.Property<DateTime?>("RatedAt")
                         .HasColumnType("datetime2");
 
@@ -1262,7 +1197,6 @@ namespace CivicConnect.Web.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Shift", b =>
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Poll", b =>
                 {
                     b.Property<int>("Id")
@@ -1274,7 +1208,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("EndTime")
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1285,24 +1218,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Shifts");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.SmartRoutingRule", b =>
                     b.Property<string>("Question")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1320,75 +1235,6 @@ namespace CivicConnect.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DistrictCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("SLADays")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TargetUnitId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("WardCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TargetUnitId");
-
-                    b.ToTable("SmartRoutingRules");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.SystemSetting", b =>
-                {
-                    b.Property<string>("SettingKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SettingValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SettingKey");
-
-                    b.ToTable("SystemSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            SettingKey = "MaintenanceMode",
-                            Description = "Bật/Tắt chế độ bảo trì hệ thống",
-                            SettingValue = "False",
-                            UpdatedAt = new DateTime(2026, 6, 12, 10, 49, 47, 988, DateTimeKind.Utc).AddTicks(3718)
-                        },
-                        new
-                        {
-                            SettingKey = "OrganizationName",
-                            Description = "Tên tổ chức vận hành chính thức",
-                            SettingValue = "CivicConnect",
-                            UpdatedAt = new DateTime(2026, 6, 12, 10, 49, 47, 988, DateTimeKind.Utc).AddTicks(3719)
-                        },
-                        new
-                        {
-                            SettingKey = "SystemLogoUrl",
-                            Description = "Đường dẫn URL ảnh logo hệ thống",
-                            SettingValue = "",
-                            UpdatedAt = new DateTime(2026, 6, 12, 10, 49, 47, 988, DateTimeKind.Utc).AddTicks(3720)
-                        });
                     b.Property<int>("PollId")
                         .HasColumnType("int");
 
@@ -1710,16 +1556,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("GovernmentUnit");
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.AuditLog", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Comment", b =>
                 {
                     b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "Author")
@@ -1885,26 +1721,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("Issue");
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Shift", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.SmartRoutingRule", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.GovernmentUnit", "TargetUnit")
-                        .WithMany()
-                        .HasForeignKey("TargetUnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("TargetUnit");
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.PetitionSignature", b =>
                 {
                     b.HasOne("CivicConnect.Web.Models.Entities.Petition", "Petition")

@@ -50,6 +50,10 @@ namespace CivicConnect.Web.Models.Entities
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        // Đánh giá kết quả xử lý
+        public int? Rating { get; set; }              // Từ 1-5 sao
+        public string? RatingFeedback { get; set; }   // Nội dung nhận xét
+        public DateTime? RatedAt { get; set; }
 
         // Tự liên kết hỗ trợ luồng Chuyển cấp (Escalation)
         public int? ParentIssueId { get; set; }

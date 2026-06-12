@@ -1,0 +1,139 @@
+@{
+    ViewData["Title"] = "Cộng đồng Dân sinh";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-lg-6 mb-3 mb-lg-0">
+        <h2 class="fw-bold mb-1 text-dark">Cộng đồng Dân sinh</h2>
+        <p class="text-muted mb-0">Nơi kết nối, chia sẻ và đóng góp ý kiến xây dựng địa phương.</p>
+    </div>
+    <div class="col-lg-6 text-lg-end">
+        <a asp-action="Forum" class="btn btn-outline-primary rounded-pill px-4 me-2"><i class="bi bi-chat-square-text me-2"></i>Diễn đàn</a>
+        <a asp-action="Petitions" class="btn btn-primary rounded-pill px-4"><i class="bi bi-pen me-2"></i>Kiến nghị điện tử</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Cột trái: Bảng tin diễn đàn & Khảo sát -->
+    <div class="col-lg-8">
+        <!-- Khảo sát nổi bật -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-bar-chart-fill text-warning me-2"></i>Thăm dò ý kiến</h5>
+            <a asp-action="Polls" class="text-decoration-none small fw-semibold">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-3 mb-5">
+            @if (ViewBag.ActivePolls != null)
+            {
+                foreach (var poll in ViewBag.ActivePolls)
+                {
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                            <div class="card-body p-4">
+                                <div class="badge bg-warning text-dark mb-3 rounded-pill">Đang diễn ra</div>
+                                <h6 class="fw-bold mb-2">@poll.Question</h6>
+                                <p class="text-muted small mb-4">Kết thúc: @poll.EndDate.ToString("dd/MM/yyyy")</p>
+                                <a asp-action="Polls" class="btn btn-light w-100 rounded-pill text-primary fw-semibold">Tham gia ngay</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Diễn đàn nổi bật -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-fire text-danger me-2"></i>Thảo luận sôi nổi</h5>
+            <a asp-action="Forum" class="text-decoration-none small fw-semibold">Vào diễn đàn <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush rounded-4">
+                    @if (ViewBag.TopPosts != null)
+                    {
+                        foreach (var post in ViewBag.TopPosts)
+                        {
+                            <a asp-action="Forum" class="list-group-item list-group-item-action p-4 border-bottom-0">
+                                <div class="d-flex gap-3">
+                                    <div class="flex-shrink-0 text-center" style="width: 50px;">
+                                        <div class="bg-light rounded-3 py-2">
+                                            <i class="bi bi-caret-up-fill text-muted d-block"></i>
+                                            <span class="fw-bold text-dark">@post.Upvotes</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">@post.Title</h6>
+                                        <div class="d-flex align-items-center gap-3 text-muted small">
+                                            <span><i class="bi bi-person-circle me-1"></i>@post.Author.FullName</span>
+                                            <span><i class="bi bi-clock me-1"></i>@post.CreatedAt.ToString("dd/MM HH:mm")</span>
+                                            <span><i class="bi bi-chat-dots me-1"></i>@post.Comments.Count bình luận</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột phải: Sự kiện & Thống kê -->
+    <div class="col-lg-4">
+        <!-- Sự kiện sắp tới -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-calendar-event text-success me-2"></i>Sự kiện sắp tới</h5>
+            <a asp-action="Events" class="text-decoration-none small fw-semibold">Lịch <i class="bi bi-arrow-right"></i></a>
+        </div>
+        
+        <div class="d-flex flex-column gap-3 mb-5">
+            @if (ViewBag.UpcomingEvents != null)
+            {
+                foreach (var ev in ViewBag.UpcomingEvents)
+                {
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden hover-lift">
+                        <div class="row g-0">
+                            <div class="col-4 bg-primary text-white d-flex flex-column justify-content-center align-items-center p-2 text-center">
+                                <span class="fs-4 fw-bold">@ev.StartTime.ToString("dd")</span>
+                                <span class="small text-white-50">Thg @ev.StartTime.ToString("MM")</span>
+                            </div>
+                            <div class="col-8">
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold mb-1 text-truncate">@ev.Title</h6>
+                                    <p class="text-muted small mb-0 text-truncate"><i class="bi bi-geo-alt me-1"></i>@ev.Location</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Thống kê cộng đồng -->
+        <div class="card border-0 bg-primary text-white rounded-4 shadow-lg mb-4" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+            <div class="card-body p-4 text-center">
+                <i class="bi bi-people-fill display-4 mb-3 opacity-75"></i>
+                <h5 class="fw-bold mb-4">Cộng đồng của chúng ta</h5>
+                <div class="row g-3 text-center">
+                    <div class="col-6">
+                        <h3 class="fw-bold mb-0">12.4K</h3>
+                        <span class="small text-white-50">Thành viên</span>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="fw-bold mb-0">450+</h3>
+                        <span class="small text-white-50">Bài thảo luận</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>

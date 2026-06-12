@@ -1,0 +1,258 @@
+════════════════════════════════════════════════════════════════════════════════
+PHẦN A – PHÂN HỆ NGƯỜI DÂN (Public / Citizen Web)
+════════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────────
+│ A.1. TRANG CHỦ (HomeController)
+└──────────────────────────────────────────────────────────────────────────────
+
+  A.1.1 Hero Section – Động lực tham gia
+    • Slider tự động: 5 banner xoay, mỗi banner là 1 câu chuyện thành công kèm
+      nút CTA ("Xem kết quả", "Gửi phản ánh tương tự").
+    • Đếm ngược thời gian thực (JS) số phản ánh được giải quyết HÔM NAY.
+    • Nút "Gửi phản ánh khẩn" màu đỏ nổi bật – luôn hiển thị fixed trên mobile.
+
+  A.1.2 Bảng thống kê minh bạch (Live KPIs)
+    • Tổng phản ánh đã tiếp nhận (kể từ ngày ra mắt).
+    • Tỷ lệ giải quyết đúng hạn (%).
+    • Thời gian xử lý trung bình (giờ).
+    • Điểm hài lòng trung bình (1–5 sao).
+    • Top 3 danh mục phản ánh nhiều nhất tuần này.
+    • Số lượng cán bộ đang trực tuyến (Online).
+    ➔ Tất cả cập nhật real-time qua SignalR Hub.
+
+  A.1.3 Section Before/After – Tạo niềm tin
+    • Slider so sánh ảnh (CSS clip-path kéo tay): Trước xử lý / Sau xử lý.
+    • Mỗi case kèm: Tên phường, Loại vấn đề, Thời gian xử lý, Điểm đánh giá.
+    • Nút "Xem toàn bộ 100+ kết quả" dẫn sang trang Success Stories.
+
+  A.1.4 Feed phản ánh nổi bật (Hot Issues)
+    • Lưới masonry: 9 card phản ánh đang nhận nhiều Upvote nhất.
+    • Tag trạng thái màu sắc: Đỏ = Chờ xử lý / Cam = Đang xử lý / Xanh = Hoàn tất.
+    • Hover card: hiện nhanh tóm tắt + nút "Ủng hộ".
+
+  A.1.5 Bản đồ thu nhỏ (Mini-Map Preview) (Phần này đã xong)
+    • Leaflet.js nhúng vào Home, hiển thị điểm nóng 7 ngày qua.
+    • Tích hợp thêm nút tự động lấy vị trí hiện tại của người dân khi gửi phản ánh
+
+  A.1.6 Chiến dịch đang gây quỹ (Featured Campaigns) (Phần này đã xong)
+    • 3 card chiến dịch nổi bật: Ảnh bìa, tên, mô tả ngắn, % đạt mục tiêu,
+      số ngày còn lại, nút "Ủng hộ ngay".
+
+  A.1.7 Tin tức & Chính sách
+    • 6 card tin mới nhất từ CMS.
+    • Widget "Văn bản pháp luật mới": 5 văn bản mới nhất, link tải PDF.
+
+  A.1.8 Widget Chatbot trợ lý (AI Assistant)
+    • Nút chat nổi góc phải màn hình.
+    • Gợi ý câu hỏi nhanh: "Tôi muốn gửi phản ánh", "Tra cứu phản ánh",
+      "Hướng dẫn sử dụng".
+    • Tích hợp câu trả lời tự động từ Knowledge Base + leo thang lên cán bộ
+      nếu câu hỏi không giải quyết được.
+
+
+┌──────────────────────────────────────────────────────────────────────────────
+│ A.2. MODULE PHẢN ÁNH HIỆN TRƯỜNG (IssueController)
+└──────────────────────────────────────────────────────────────────────────────
+
+  A.2.1 Trang Danh sách (Index)
+    • Chế độ xem: Grid / List / Map – người dùng tự chọn, lưu vào localStorage.
+    • Bộ lọc đa chiều:
+        - Trạng thái: Chờ / Đang xử lý / Hoàn tất / Quá hạn / Từ chối.
+        - Danh mục: Giao thông, Môi trường, An ninh trật tự, Hạ tầng,
+                    Chiếu sáng, Thoát nước, Công viên cây xanh, Y tế,
+                    Giáo dục, Thương mại – dịch vụ, Khác.
+        - Địa bàn: Chọn theo Quận/Huyện → Phường/Xã.
+        - Thời gian: Hôm nay / 7 ngày / 30 ngày / Tùy chọn.
+        - Độ ưu tiên: Khẩn cấp / Bình thường.
+        - Sắp xếp: Mới nhất / Nhiều vote / Sắp hết hạn / Gần vị trí tôi.
+    • Phân trang (Pagination) + Infinite scroll tùy chọn.
+    • Thanh tìm kiếm toàn văn (Full-text search) theo từ khóa mô tả.
+    • Badge số lượng trên từng tab bộ lọc cập nhật real-time.
+
+  A.2.2 Tạo phản ánh (Create) – Wizard 4 bước
+    Bước 1: Chọn danh mục
+      • Lưới icon lớn 12 danh mục – chọn bằng một click.
+    Bước 2: Vị trí & Hình ảnh
+      • Bản đồ Leaflet: click chọn tọa độ HOẶC "Dùng vị trí hiện tại" (GPS).
+      • Hiển thị địa chỉ dạng text ngược (Reverse Geocoding – OpenStreetMap).
+      • Upload ảnh/video: tối đa 5 file, preview thumbnail, kéo sắp xếp lại.
+      • Chú thích từng ảnh.
+      • Tùy chọn: Quét QR code của biển số công trình để tự điền thông tin.
+    Bước 3: Mô tả chi tiết
+      • Tiêu đề (bắt buộc, tối đa 100 ký tự).
+      • Mô tả chi tiết (rich text cơ bản: in đậm, xuống dòng, danh sách).
+      • Đánh dấu "Khẩn cấp" nếu có nguy hiểm trực tiếp.
+      • Tùy chọn ẩn danh (không hiện tên thật trên public).
+      • Tag liên quan (VD: #ngậpnước #q7 #đườnghỏng).
+    Bước 4: Xác nhận & Gửi
+      • Tóm tắt toàn bộ nội dung.
+      • CAPTCHA (hCaptcha) chống spam.
+      • Checkbox đồng ý điều khoản sử dụng.
+      • Nút gửi → spinner → toast "Phản ánh #XXXX đã tiếp nhận!"
+      • Tự động chuyển sang trang chi tiết phản ánh vừa tạo.
+
+  A.2.3 Chi tiết phản ánh (Details)
+    • Header: Ảnh hero (ảnh đầu tiên), badge trạng thái, danh mục icon.
+    • Thanh tiến trình Stepper:
+        [Tiếp nhận] → [Phân công] → [Đang xử lý] → [Hoàn tất]
+        Mỗi bước hiện thời gian, tên cán bộ phụ trách, ghi chú.
+    • Gallery ảnh/video minh chứng (lightbox).
+    • Map mini: vị trí phản ánh trên bản đồ.
+    • Thông tin phản ánh: Mã số, Ngày gửi, Hạn xử lý, Đơn vị tiếp nhận.
+    • Nút Upvote ("+1 Quan tâm") – giới hạn 1 lần/người/phản ánh.
+    • Nút "Chia sẻ lên Facebook/Zalo/Copy link".
+    • Nút "Theo dõi" – nhận thông báo khi có cập nhật.
+    • Luồng thảo luận (Discussion Thread):
+        - Comment của người dân và cán bộ.
+        - Upload ảnh bổ sung vào comment.
+        - Trả lời theo thread (reply).
+        - Emoji reaction (👍 📸 ⚠️).
+        - Chỉnh sửa/Xóa comment của chính mình (trong 30 phút).
+        - Ghim comment quan trọng (cán bộ).
+    • Section Kết quả xử lý (hiển thị sau khi Hoàn tất):
+        - Ảnh trước/sau (Before/After slider).
+        - Báo cáo kết quả từ cán bộ.
+        - Chi phí xử lý (nếu công khai).
+    • Widget đánh giá hài lòng (chỉ hiện sau khi Hoàn tất, chỉ người gửi):
+        - 5 ngôi sao + bình luận tối đa 200 ký tự.
+        - Gửi 1 lần duy nhất.
+
+  A.2.4 Trang Câu chuyện thành công (Success Stories) (Phần này nên xem xét phù hợp hay không?)
+    • Gallery dạng Timeline: các phản ánh đã giải quyết, sắp xếp theo thời gian.
+    • Bộ lọc theo danh mục và phường.
+    • Mỗi item: Ảnh Before/After, tiêu đề, thời gian xử lý, điểm đánh giá.
+    • Nút "Gửi phản ánh tương tự" ở mỗi item.
+
+
+┌──────────────────────────────────────────────────────────────────────────────
+│ A.3. BẢN ĐỒ SỐ (MapController)  ----- 
+└──────────────────────────────────────────────────────────────────────────────
+
+  • Giao diện toàn màn hình (100vh), sidebar thu gọn được.
+  • Nền bản đồ tùy chọn: OpenStreetMap / Satellite / Dark Mode.
+  • Các lớp dữ liệu (Layers) toggle bật/tắt:
+      Layer 1: Điểm phản ánh (theo màu trạng thái).
+      Layer 2: Heatmap cường độ phản ánh 30 ngày qua.
+      Layer 3: Ranh giới hành chính (Phường/Xã).
+      Layer 4: Điểm ngập lụt lịch sử (từ dữ liệu thành phố).
+      Layer 5: Camera giám sát công cộng (nếu được cấp phép API).
+      Layer 6: Địa điểm công cộng: trường học, bệnh viện, UBND.
+  • Clustering điểm (Leaflet.markercluster) – click vào cụm để zoom.
+  • Popup thông tin nhanh khi click điểm: ảnh thu nhỏ, tiêu đề, trạng thái,
+    nút "Xem chi tiết".
+  • Thanh tìm kiếm vị trí trên bản đồ.
+  • Nút "Định vị tôi" – zoom về vị trí hiện tại và hiện phản ánh trong bán kính.
+  • Bộ lọc thời gian: Slider kéo để xem phân bố phản ánh theo ngày/tháng.
+  • Xuất bản đồ ra PNG/PDF cho báo cáo.
+
+
+┌──────────────────────────────────────────────────────────────────────────────
+│ A.4. CỘNG ĐỒNG & DIỄN ĐÀN (CommunityController)
+└──────────────────────────────────────────────────────────────────────────────
+
+  A.4.1 Diễn đàn Dân sinh (Forum)
+    • Phân mục: Góc hỏi đáp / Đề xuất cải thiện / Chia sẻ kinh nghiệm /
+                Phản hồi chính sách / Thông báo cộng đồng.
+    • Tạo bài đăng: tiêu đề, nội dung richtext, tag, đính kèm file.
+    • Vote bài hay (Upvote/Downvote).
+    • Huy hiệu chuyên gia cộng đồng (Expert Badge).
+    • Gắn nhãn "Đã được cán bộ phản hồi chính thức" cho thread quan trọng.
+
+  A.4.2 Thăm dò ý kiến & Khảo sát (Polls & Surveys)
+    • Chính quyền tạo bỏ phiếu về các dự án đô thị.
+        Ví dụ: "Bạn ủng hộ xây dựng thêm bãi đậu xe ngầm ở khu vực này không?"
+    • Khảo sát nhiều câu hỏi: Trắc nghiệm / Thang điểm / Trả lời tự do.
+    • Yêu cầu xác minh tài khoản trước khi bỏ phiếu (chống gian lận).
+    • Hiển thị kết quả trực quan (biểu đồ cột/tròn) sau khi bỏ phiếu.
+    • Công khai kết quả và phân tích cho toàn cộng đồng.
+
+  A.4.3 Kiến nghị điện tử (E-Petitions)
+    • Người dân tạo kiến nghị: tiêu đề, mô tả, đề xuất giải pháp.
+    • Đặt ngưỡng chữ ký (VD: 500 người ký → buộc chính quyền phải phản hồi).
+    • Đếm chữ ký ngược (Countdown: còn X chữ ký nữa là đạt ngưỡng).
+    • Xác minh chữ ký bằng số điện thoại (OTP).
+    • Timeline trạng thái kiến nghị: Đang thu thập → Đã gửi lên UBND →
+      Chờ phản hồi → Có kết quả.
+
+  A.4.4 Sự kiện Cộng đồng (Events)
+    • Lịch sự kiện dạng Calendar (FullCalendar.js).
+    • Sự kiện do chính quyền tổ chức: Ngày hội vệ sinh, Trồng cây, Hiến máu...
+    • Đăng ký tham gia online, nhận QR code điểm danh.
+    • Nhắc nhở qua email/SMS trước 1 ngày.
+    • Sau sự kiện: Người dùng tích điểm Gamification nếu check-in.
+
+  A.4.5 Tình nguyện viên (Volunteer Hub)
+    • Tạo hồ sơ tình nguyện viên: kỹ năng, khu vực, thời gian rảnh.
+    • Chính quyền/NGO đăng chiến dịch cần tình nguyện viên.
+    • Matching tự động: tình nguyện viên phù hợp nhận thông báo.
+    • Ghi nhận giờ tình nguyện → tích lũy điểm công dân số.
+
+
+┌──────────────────────────────────────────────────────────────────────────────
+│ A.5. QUỸ CỘNG ĐỒNG (DonationController)
+└──────────────────────────────────────────────────────────────────────────────
+
+  A.5.1 Danh sách chiến dịch
+    • Bộ lọc: Đang gây quỹ / Gần đạt mục tiêu / Đã hoàn thành.
+    • Card chiến dịch: ảnh, tên, mô tả ngắn, thanh progress (% mục tiêu),
+      số người đóng góp, số ngày còn lại, nút "Ủng hộ".
+    • Tab "Đã hoàn thành": hiển thị báo cáo sử dụng vốn minh bạch.
+
+  A.5.2 Chi tiết chiến dịch
+    • Mô tả dự án chi tiết (richtext + ảnh/video).
+    • Cập nhật tiến độ (Campaign Updates) – cán bộ đăng log định kỳ.
+    • Bảng danh sách nhà hảo tâm (ẩn danh tùy chọn).
+    • Chia sẻ lên mạng xã hội kèm ảnh mẫu.
+    • FAQ về chiến dịch.
+
+  A.5.3 Thanh toán
+    • Cổng thanh toán: MoMo, VNPay, ZaloPay, chuyển khoản ngân hàng (QR).
+    • Đơn vị: 10.000 / 50.000 / 100.000 / 500.000 / Tự nhập.
+    • Gửi hóa đơn điện tử + email xác nhận ngay sau thanh toán.
+    • Tải biên lai PDF có mã xác thực.
+
+  A.5.4 Báo cáo tài chính minh bạch
+    • Trang công khai: Tổng tiền thu, Tổng tiền chi, Hóa đơn từng khoản chi.
+    • Ảnh minh chứng việc sử dụng vốn.
+    • Chứng nhận kiểm toán (nếu có).
+
+
+┌──────────────────────────────────────────────────────────────────────────────
+│ A.6. THƯ VIỆN TÀI LIỆU & DỊCH VỤ CÔNG (PublicServicesController)
+└──────────────────────────────────────────────────────────────────────────────
+
+  A.6.1 Tra cứu thủ tục hành chính
+    • Cơ sở dữ liệu 500+ thủ tục hành chính (đồng bộ từ CSDL Quốc gia).
+    • Tìm kiếm theo từ khóa, lĩnh vực, cơ quan thực hiện.
+    • Mỗi thủ tục: Tên, Cơ sở pháp lý, Hồ sơ cần chuẩn bị (checklist),
+      Thời gian giải quyết, Phí lệ phí, Nơi nộp hồ sơ, Link mẫu biểu.
+    • Nút "Hỏi Chatbot về thủ tục này".
+
+  A.6.2 Thư viện văn bản pháp luật
+    • Lưu trữ văn bản QPPL địa phương: Nghị quyết, Quyết định, Chỉ thị.
+    • Phân loại, tìm kiếm, tải về PDF.
+    • Thông báo khi có văn bản mới liên quan đến khu vực người dùng sinh sống.
+
+  A.6.3 Lịch tiếp dân
+    • Lịch tiếp dân của UBND các cấp.
+    • Đặt lịch hẹn trực tuyến, nhận mã xác nhận.
+    • Nhắc nhở tự động qua SMS/email.
+
+  A.6.4 Danh bạ cơ quan (Public Directory)
+    • Danh sách các cơ quan, phòng ban với SĐT, email, địa chỉ, giờ làm việc.
+    • Hiển thị trên bản đồ.
+    • Đánh giá chất lượng phục vụ (1–5 sao).
+
+
+┌──────────────────────────────────────────────────────────────────────────────
+│ A.7. TIN TỨC & THÔNG BÁO (NewsController)
+└──────────────────────────────────────────────────────────────────────────────
+
+  • Trang danh sách tin: Bộ lọc theo chuyên mục / Địa bàn / Thời gian.
+  • Trang chi tiết: Richtext, ảnh, video nhúng, chia sẻ.
+  • Tính năng Đọc to (Text-to-Speech) cho người cao tuổi, người khiếm thị.
+  • Cỡ chữ điều chỉnh được (Accessibility).
+  • RSS Feed để đọc trên ứng dụng đọc tin.
+  • Bản tin tóm tắt hàng tuần gửi email.
+  • Thông báo khẩn: Banner nổi bật khi có cảnh báo thiên tai / dịch bệnh.
