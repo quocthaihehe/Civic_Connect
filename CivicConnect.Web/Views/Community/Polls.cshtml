@@ -1,0 +1,98 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Poll>
+@{
+    ViewData["Title"] = "Thăm dò ý kiến";
+    var userVotes = ViewBag.UserVotes as List<int> ?? new List<int>();
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-lg-8">
+        <h2 class="fw-bold mb-1 text-dark">Thăm dò ý kiến cộng đồng</h2>
+        <p class="text-muted mb-0">Đóng góp tiếng nói của bạn vào các quyết định quan trọng của địa phương.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var poll in Model)
+        {
+            var totalVotes = poll.Options.Sum(o => o.VoteCount);
+            var isVoted = userVotes.Contains(poll.Id);
+            var isExpired = poll.EndDate < DateTime.UtcNow;
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            @if (isExpired)
+                            {
+                                <span class="badge bg-secondary text-white rounded-pill px-3">Đã kết thúc</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark rounded-pill px-3">Đang diễn ra</span>
+                            }
+                            <span class="text-muted small"><i class="bi bi-people-fill me-1"></i>@totalVotes lượt bình chọn</span>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-2">@poll.Question</h5>
+                        <p class="text-secondary small mb-4">@poll.Description</p>
+                        
+                        @if (isVoted || isExpired)
+                        {
+                            <!-- Kết quả -->
+                            <div class="d-flex flex-column gap-3 mb-3">
+                                @foreach (var option in poll.Options)
+                                {
+                                    var percentage = totalVotes > 0 ? (int)Math.Round((double)option.VoteCount / totalVotes * 100) : 0;
+                                    <div>
+                                        <div class="d-flex justify-content-between small fw-semibold mb-1">
+                                            <span>@option.Text</span>
+                                            <span>@percentage%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-primary rounded-pill" role="progressbar" style="width: @percentage%;" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @if (isVoted)
+                            {
+                                <div class="text-success small fw-bold mt-3 text-center"><i class="bi bi-check-circle-fill me-1"></i>Bạn đã tham gia bình chọn</div>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Form bình chọn -->
+                            <form asp-action="VotePoll" method="post">
+                                <input type="hidden" name="pollId" value="@poll.Id" />
+                                <div class="d-flex flex-column gap-2 mb-4">
+                                    @foreach (var option in poll.Options)
+                                    {
+                                        <label class="btn btn-outline-primary text-start rounded-3 py-2 px-3">
+                                            <input type="radio" name="optionId" value="@option.Id" class="me-2" required>
+                                            @option.Text
+                                        </label>
+                                    }
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold shadow-sm">Gửi bình chọn</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-bar-chart-fill display-1 text-muted opacity-25 mb-3 d-block"></i>
+            <h5 class="text-muted">Chưa có cuộc khảo sát nào</h5>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-lift { transition: transform 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-5px); }
+</style>

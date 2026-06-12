@@ -1,0 +1,161 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.AgencyDirectory>
+@{
+    ViewData["Title"] = "Danh bạ & Lịch tiếp dân";
+    var types = ViewBag.Types as List<string> ?? new List<string>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-arrow-left"></i></a>
+        <h2 class="fw-bold mb-0" style="font-family: var(--font-display);">Danh bạ cơ quan</h2>
+    </div>
+</div>
+
+<div class="glass-card p-4 rounded-4 shadow-sm mb-5 border-0">
+    <form asp-action="Directory" method="get" class="row g-3">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@ViewData["CurrentSearch"]" class="form-control border-start-0 ps-0" placeholder="Tìm tên cơ quan, địa chỉ..." />
+            </div>
+        </div>
+        <div class="col-md-5">
+            <select name="type" class="form-select">
+                <option value="">Tất cả loại hình</option>
+                @foreach (var type in types)
+                {
+                    var isSelected = ViewData["CurrentType"]?.ToString() == type ? "selected" : "";
+                    <!option value="@type" @isSelected>@type</!option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary rounded-pill fw-semibold"><i class="bi bi-funnel me-1"></i> Lọc</button>
+        </div>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-building-x display-1 text-muted opacity-50 mb-3 d-block"></i>
+        <h5 class="text-muted">Không tìm thấy cơ quan nào.</h5>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var agency in Model)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="glass-card h-100 rounded-4 shadow-sm border-top border-4 transition-hover @(agency.IsEmergency ? "border-danger" : "border-primary") p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge @(agency.IsEmergency ? "bg-danger" : "bg-primary") bg-opacity-10 @(agency.IsEmergency ? "text-danger" : "text-primary") rounded-pill px-3 py-2">
+                                <i class="bi bi-building me-1"></i> @agency.Type
+                            </span>
+                            @if (agency.IsEmergency)
+                            {
+                                <span class="badge bg-danger rounded-pill px-2 py-2" title="Khẩn cấp"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                            }
+                        </div>
+                        <div class="text-warning fw-bold d-flex align-items-center">
+                            <i class="bi bi-star-fill me-1"></i> @agency.Rating
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-3">@agency.Name</h5>
+
+                    <ul class="list-unstyled text-secondary small mb-4 flex-grow-1">
+                        <li class="mb-2 d-flex gap-2">
+                            <i class="bi bi-telephone-fill mt-1 @(agency.IsEmergency ? "text-danger" : "text-muted")"></i> 
+                            <a href="tel:@agency.Phone" class="text-decoration-none fw-bold @(agency.IsEmergency ? "text-danger" : "text-dark")">@agency.Phone</a>
+                        </li>
+                        <li class="mb-2 d-flex gap-2">
+                            <i class="bi bi-envelope-fill mt-1 text-muted"></i> 
+                            <span>@agency.Email</span>
+                        </li>
+                        <li class="mb-2 d-flex gap-2">
+                            <i class="bi bi-geo-alt-fill mt-1 text-muted"></i> 
+                            <span>@agency.Address</span>
+                        </li>
+                        <li class="mb-2 d-flex gap-2">
+                            <i class="bi bi-clock-fill mt-1 text-muted"></i> 
+                            <span>@agency.WorkingHours</span>
+                        </li>
+                    </ul>
+
+                    <div class="bg-light p-3 rounded-3 mb-4">
+                        <div class="fw-bold small text-dark mb-1"><i class="bi bi-calendar2-week me-1 text-primary"></i> Lịch tiếp dân:</div>
+                        <div class="small text-muted">@agency.ReceptionSchedule</div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-auto">
+                        <button class="btn btn-primary rounded-pill flex-grow-1 fw-semibold hover-scale" onclick="showBookingModal('@agency.Name')">
+                            <i class="bi bi-calendar-plus me-1"></i> Đặt lịch hẹn
+                        </button>
+                        <a href="https://maps.google.com/?q=@agency.Latitude,@agency.Longitude" target="_blank" class="btn btn-outline-secondary rounded-circle" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;" title="Xem bản đồ">
+                            <i class="bi bi-map"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Modal Đặt lịch hẹn (Mock) -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="font-family: var(--font-display);">Đặt lịch tiếp công dân</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info rounded-3 mb-4">
+                    <i class="bi bi-info-circle-fill me-2"></i> Bạn đang đặt lịch hẹn làm việc với: <strong id="modalAgencyName"></strong>
+                </div>
+                <form id="bookingForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Họ và tên</label>
+                        <input type="text" class="form-control rounded-3" placeholder="Nhập họ tên của bạn" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Số điện thoại</label>
+                        <input type="tel" class="form-control rounded-3" placeholder="Nhập số điện thoại liên hệ" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ngày hẹn mong muốn</label>
+                        <input type="date" class="form-control rounded-3" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Nội dung trình bày (Tóm tắt)</label>
+                        <textarea class="form-control rounded-3" rows="3" placeholder="Tóm tắt ngắn gọn vấn đề bạn cần giải quyết" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold hover-scale">Xác nhận đặt lịch</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showBookingModal(agencyName) {
+            document.getElementById('modalAgencyName').innerText = agencyName;
+            var myModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+            myModal.show();
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var myModalEl = document.getElementById('bookingModal');
+            var modal = bootstrap.Modal.getInstance(myModalEl);
+            modal.hide();
+
+            // Hiển thị toast thành công bằng SweetAlert2 hoặc alert cơ bản
+            alert('Đặt lịch hẹn thành công! Mã số lịch hẹn của bạn là: LH-' + Math.floor(Math.random() * 10000) + '. Vui lòng đến đúng giờ.');
+        });
+    </script>
+}

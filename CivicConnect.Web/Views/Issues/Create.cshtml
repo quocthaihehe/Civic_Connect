@@ -8,165 +8,219 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
-        #map-selector {
-            width: 100%;
-            height: 100%;
-            min-height: 320px;
-            background-color: var(--bg-main);
-        }
-        .leaflet-container {
-            font-family: inherit;
-        }
-        /* Custom styled draggable pin on selection map */
+        #map-selector { width: 100%; height: 100%; min-height: 350px; background-color: var(--bg-main); border-radius: 12px; }
+        .leaflet-container { font-family: inherit; }
         .selector-pin {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background-color: var(--primary-color, #da251d);
-            color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-            border: 2px solid white;
-            width: 38px !important;
-            height: 38px !important;
-            margin-left: -19px !important;
-            margin-top: -19px !important;
+            display: flex; align-items: center; justify-content: center; border-radius: 50%;
+            background-color: var(--primary-color, #da251d); color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); border: 2px solid white;
+            width: 38px !important; height: 38px !important; margin-left: -19px !important; margin-top: -19px !important;
         }
-        .selector-pin i {
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .selector-pin.marker-traffic { background-color: var(--primary-color, #da251d); }
-        .selector-pin.marker-environment { background-color: var(--success-color, #198754); }
-        .selector-pin.marker-security { background-color: var(--warning-color, #ffc107); color: #0f172a !important; }
-        .selector-pin.marker-infrastructure { background-color: #8b5cf6; }
-        .selector-pin.marker-administration { background-color: #06b6d4; }
-        .selector-pin.marker-other { background-color: #64748b; }
+        .selector-pin i { font-size: 1.25rem; }
 
-        /* Segmented control buttons for map style selector */
-        .btn-glass {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            padding: 0.3rem 0.75rem;
-            border-radius: var(--border-radius-sm);
-            font-size: 0.725rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .btn-glass:hover {
-            background-color: var(--bg-glass-hover);
-            color: var(--primary-color);
-        }
-        .btn-glass.active {
-            background-color: var(--primary-color);
-            color: white !important;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
-        }
+        /* Wizard Styles */
+        .wizard-stepper { display: flex; justify-content: space-between; margin-bottom: 2.5rem; position: relative; }
+        .wizard-stepper::before { content: ''; position: absolute; top: 15px; left: 10%; right: 10%; height: 2px; background: var(--gray-200); z-index: 1; }
+        .progress-bar-stepper { position: absolute; top: 15px; left: 10%; height: 2px; background: var(--primary-color); z-index: 2; transition: width 0.4s ease; width: 0%; }
+        .step { position: relative; z-index: 3; text-align: center; width: 25%; }
+        .step-icon { width: 32px; height: 32px; background: white; border: 2px solid var(--gray-300); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem auto; font-weight: 600; color: var(--gray-500); transition: all 0.3s; }
+        .step.active .step-icon { border-color: var(--primary-color); background: var(--primary-color); color: white; box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), 0.15); }
+        .step.completed .step-icon { border-color: var(--success-color, #10b981); background: var(--success-color, #10b981); color: white; }
+        .step-label { font-size: 0.85rem; color: var(--gray-500); font-weight: 500; }
+        .step.active .step-label { color: var(--text-main); font-weight: 700; }
+        
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeInRight 0.4s ease; }
+        @@keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Category Cards */
+        .category-card { border: 2px solid var(--border-glass); border-radius: 12px; padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-glass); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .category-card:hover { border-color: var(--primary-300); background: var(--bg-glass-hover); transform: translateY(-3px); }
+        .category-card.selected { border-color: var(--primary-color); background: rgba(var(--bs-primary-rgb), 0.05); box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.1); }
+        .category-card i { font-size: 2.2rem; margin-bottom: 0.5rem; display: block; color: var(--text-muted); transition: color 0.2s; }
+        .category-card.selected i { color: var(--primary-color); }
+        .category-card span { font-weight: 600; font-size: 0.9rem; color: var(--text-main); }
     </style>
 }
 
-<div class="row justify-content-center py-3">
-    <div class="col-12 col-xl-11">
-        <div class="glass-card p-4 shadow-sm">
-            <h4 class="fw-bold mb-4 text-primary"><i class="bi bi-send-fill me-2"></i> Gửi phản ánh đời sống dân sinh</h4>
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-xl-10 col-xxl-8">
+        <div class="glass-card p-4 p-md-5 shadow-sm">
+            <h3 class="fw-bold mb-4 text-center" style="color: var(--primary-900); font-family: var(--font-display);">Gửi phản ánh đời sống</h3>
             
-            <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+            <!-- Stepper UI -->
+            <div class="wizard-stepper">
+                <div class="progress-bar-stepper" id="wizardProgress"></div>
+                <div class="step active" data-step="1">
+                    <div class="step-icon">1</div>
+                    <div class="step-label">Lĩnh vực</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-icon">2</div>
+                    <div class="step-label">Vị trí & Hình ảnh</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-icon">3</div>
+                    <div class="step-label">Chi tiết</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-icon">4</div>
+                    <div class="step-label">Xác nhận</div>
+                </div>
+            </div>
 
-                <div class="row g-4">
-                    <!-- Left Column: Form Fields -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label asp-for="Title" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                            <input asp-for="Title" class="form-control rounded-3" placeholder="Ví dụ: Nắp hố ga bị hỏng gây nguy hiểm..." required />
-                            <span asp-validation-for="Title" class="text-danger" style="font-size: 0.75rem;"></span>
-                        </div>
+            <form asp-action="Create" method="post" enctype="multipart/form-data" id="issueWizardForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                        <div class="mb-2">
-                            <label asp-for="Description" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                            <textarea asp-for="Description" class="form-control rounded-3" rows="3" placeholder="Mô tả chi tiết sự việc, vị trí cụ thể, ảnh hưởng..." required></textarea>
-                            <span asp-validation-for="Description" class="text-danger" style="font-size: 0.75rem;"></span>
-                        </div>
-
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <label asp-for="Category" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                                <select asp-for="Category" class="form-select rounded-3" required>
-                                    <option value="">Chọn danh mục</option>
-                                    <option value="1">Giao thông</option>
-                                    <option value="2">Môi trường</option>
-                                    <option value="3">An ninh trật tự</option>
-                                    <option value="4">Hạ tầng công cộng</option>
-                                    <option value="5">Hành chính</option>
-                                    <option value="99">Khác</option>
-                                </select>
-                                <span asp-validation-for="Category" class="text-danger" style="font-size: 0.75rem;"></span>
-                            </div>
-                            <div class="col-6">
-                                <label asp-for="Priority" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                                <select asp-for="Priority" class="form-select rounded-3" required>
-                                    <option value="">Đề xuất mức ưu tiên</option>
-                                    <option value="1">Thấp (Low)</option>
-                                    <option value="2">Trung bình (Medium)</option>
-                                    <option value="3">Cao (High)</option>
-                                    <option value="4">Khẩn cấp (Critical)</option>
-                                </select>
-                                <span asp-validation-for="Priority" class="text-danger" style="font-size: 0.75rem;"></span>
+                <!-- STEP 1: CHỌN DANH MỤC -->
+                <div class="step-content active" id="step1">
+                    <h5 class="fw-bold mb-3 text-center">Vui lòng chọn lĩnh vực phản ánh</h5>
+                    <p class="text-muted text-center mb-4">Chọn danh mục phù hợp giúp cơ quan chức năng tiếp nhận và xử lý nhanh chóng hơn.</p>
+                    
+                    <input type="hidden" asp-for="Category" id="categoryInput" required />
+                    <div class="row g-3 justify-content-center">
+                        <div class="col-6 col-md-4">
+                            <div class="category-card" data-val="1">
+                                <i class="bi bi-car-front-fill"></i>
+                                <span>Giao thông</span>
                             </div>
                         </div>
-
-                        <div class="mb-2">
-                            <label asp-for="ImageFiles" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                            <input type="file" asp-for="ImageFiles" class="form-control rounded-3" multiple accept="image/*" id="image-upload-input" />
-                            <span asp-validation-for="ImageFiles" class="text-danger" style="font-size: 0.75rem;"></span>
-                            <div class="d-flex flex-wrap gap-2 mt-1" id="image-previews-container"></div>
+                        <div class="col-6 col-md-4">
+                            <div class="category-card" data-val="2">
+                                <i class="bi bi-tree-fill"></i>
+                                <span>Môi trường</span>
+                            </div>
                         </div>
+                        <div class="col-6 col-md-4">
+                            <div class="category-card" data-val="3">
+                                <i class="bi bi-shield-fill-exclamation"></i>
+                                <span>An ninh trật tự</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="category-card" data-val="4">
+                                <i class="bi bi-cone-striped"></i>
+                                <span>Hạ tầng</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="category-card" data-val="5">
+                                <i class="bi bi-file-earmark-person"></i>
+                                <span>Hành chính</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="category-card" data-val="99">
+                                <i class="bi bi-grid-fill"></i>
+                                <span>Khác</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-danger mt-2 text-center d-none" id="catError" style="font-size: 0.85rem;">Vui lòng chọn một lĩnh vực.</div>
+                </div>
 
-                        <div class="mb-2 form-check">
-                            <input asp-for="IsAnonymous" class="form-check-input" />
-                            <label asp-for="IsAnonymous" class="form-check-label text-muted" style="font-size: 0.85rem;"></label>
+                <!-- STEP 2: BẢN ĐỒ & ẢNH -->
+                <div class="step-content" id="step2">
+                    <h5 class="fw-bold mb-3">Vị trí & Minh chứng</h5>
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <label class="form-label fw-semibold">Vị trí trên bản đồ <span class="text-danger">*</span></label>
+                            <div class="input-group mb-2">
+                                <input asp-for="Address" id="address-input" class="form-control rounded-start-3" placeholder="Địa chỉ hiện trường..." required />
+                                <button type="button" class="btn btn-outline-secondary" id="btnLocateMe" title="Lấy vị trí hiện tại">
+                                    <i class="bi bi-geo-alt"></i>
+                                </button>
+                            </div>
+                            <div class="border rounded-3 position-relative" style="height: 300px; overflow: hidden;" id="map-container">
+                                <div id="map-selector"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label fw-semibold">Hình ảnh minh chứng <span class="text-danger">*</span></label>
+                            <div class="upload-dropzone border border-dashed rounded-3 p-4 text-center bg-light" style="cursor: pointer;" onclick="document.getElementById('image-upload-input').click()">
+                                <i class="bi bi-cloud-arrow-up text-primary fs-1 mb-2"></i>
+                                <h6 class="fw-bold mb-1">Click để tải ảnh lên</h6>
+                                <p class="text-muted small mb-0">Hỗ trợ JPG, PNG (Tối đa 5 ảnh)</p>
+                            </div>
+                            <input type="file" asp-for="ImageFiles" class="d-none" multiple accept="image/*" id="image-upload-input" />
+                            <div class="d-flex flex-wrap gap-2 mt-3" id="image-previews-container"></div>
+                            <div class="text-danger mt-1 d-none" id="imgError" style="font-size: 0.85rem;">Vui lòng tải lên ít nhất 1 ảnh minh chứng.</div>
                         </div>
                     </div>
 
-                    <!-- Right Column: Map Selector -->
-                    <div class="col-md-6 d-flex flex-column">
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold" style="font-size: 0.85rem;">Chọn vị trí sự cố trên bản đồ</label>
-                            <input asp-for="Address" id="address-input" class="form-control rounded-3 mb-2" placeholder="Nhập địa chỉ hoặc click/kéo ghim trên bản đồ..." required />
-                            <span asp-validation-for="Address" class="text-danger" style="font-size: 0.75rem;"></span>
-                        </div>
+                    <!-- Hidden fields -->
+                    <input type="hidden" asp-for="Latitude" id="lat-input" value="10.7769" />
+                    <input type="hidden" asp-for="Longitude" id="lng-input" value="106.7009" />
+                    <input type="hidden" asp-for="ProvinceCode" id="prov-code" />
+                    <input type="hidden" asp-for="ProvinceName" id="prov-name" />
+                    <input type="hidden" asp-for="DistrictCode" id="dist-code" />
+                    <input type="hidden" asp-for="DistrictName" id="dist-name" />
+                    <input type="hidden" asp-for="WardCode" id="ward-code" />
+                    <input type="hidden" asp-for="WardName" id="ward-name" />
+                </div>
 
-                        <!-- Map Display Panel -->
-                        <div class="flex-grow-1 border rounded-3 position-relative" style="min-height: 250px; border: 1px solid var(--border-glass) !important; overflow: hidden;" id="map-container">
-                            <div id="map-selector" class="position-absolute w-100 h-100" style="top: 0; left: 0;"></div>
-                            
-                            <!-- Map Style Selector overlay -->
-                            <div id="style-panel" class="map-overlay top-right glass-panel p-1 d-flex gap-1" style="position: absolute; right: 0.5rem; top: 0.5rem; z-index: 1000; border-radius: var(--border-radius-md);">
-                                <button type="button" class="btn-glass active" data-style="current">Mặc định</button>
-                                <button type="button" class="btn-glass" data-style="terrain">Địa hình</button>
-                                <button type="button" class="btn-glass" data-style="satellite">Vệ tinh</button>
-                            </div>
-                        </div>
-
-                        <!-- Hidden Inputs for Geolocation properties -->
-                        <input type="hidden" asp-for="Latitude" id="lat-input" value="10.7769" />
-                        <input type="hidden" asp-for="Longitude" id="lng-input" value="106.7009" />
-                        <input type="hidden" asp-for="ProvinceCode" id="prov-code" value="79" />
-                        <input type="hidden" asp-for="ProvinceName" id="prov-name" value="TP. Hồ Chí Minh" />
-                        <input type="hidden" asp-for="DistrictCode" id="dist-code" value="760" />
-                        <input type="hidden" asp-for="DistrictName" id="dist-name" value="Quận 1" />
-                        <input type="hidden" asp-for="WardCode" id="ward-code" value="26734" />
-                        <input type="hidden" asp-for="WardName" id="ward-name" value="Phường Bến Nghé" />
+                <!-- STEP 3: CHI TIẾT -->
+                <div class="step-content" id="step3">
+                    <h5 class="fw-bold mb-3">Thông tin chi tiết</h5>
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-semibold">Tiêu đề phản ánh <span class="text-danger">*</span></label>
+                        <input asp-for="Title" id="titleInput" class="form-control rounded-3" placeholder="Nhập tiêu đề ngắn gọn..." required />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-semibold">Mô tả nội dung <span class="text-danger">*</span></label>
+                        <textarea asp-for="Description" id="descInput" class="form-control rounded-3" rows="5" placeholder="Mô tả chi tiết sự việc, tác động đến đời sống..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Priority" class="form-label fw-semibold">Mức độ ưu tiên <span class="text-danger">*</span></label>
+                        <select asp-for="Priority" id="priorityInput" class="form-select rounded-3" required>
+                            <option value="">Chọn mức độ ưu tiên</option>
+                            <option value="1">Thấp</option>
+                            <option value="2">Trung bình</option>
+                            <option value="3">Cao</option>
+                            <option value="4">Khẩn cấp (Nguy hiểm trực tiếp)</option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mt-4">
+                        <input asp-for="IsAnonymous" class="form-check-input" type="checkbox" id="anonSwitch" role="switch">
+                        <label class="form-check-label ms-2" for="anonSwitch">
+                            <span class="fw-bold d-block text-dark">Gửi ẩn danh</span>
+                            <small class="text-muted">Thông tin cá nhân của bạn sẽ được bảo mật với công chúng.</small>
+                        </label>
                     </div>
                 </div>
 
-                <div class="mt-3 pt-2 border-top border-light d-flex justify-content-end gap-2">
-                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Hủy Bỏ</a>
-                    <button type="submit" class="btn btn-primary rounded-2 px-4">Gửi Phản Ánh</button>
+                <!-- STEP 4: XÁC NHẬN -->
+                <div class="step-content text-center py-4" id="step4">
+                    <div class="mb-4">
+                        <i class="bi bi-clipboard2-check text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark">Kiểm tra lại thông tin</h4>
+                    <p class="text-muted mx-auto" style="max-width: 500px;">
+                        Bạn chuẩn bị gửi 1 phản ánh thuộc lĩnh vực <strong id="lblCat" class="text-primary"></strong>.<br/>
+                        Vui lòng đảm bảo thông tin hình ảnh và mô tả đã phản ánh đúng sự thật. Phản ánh sai sự thật có thể bị khóa tài khoản.
+                    </p>
+                    <div class="bg-light p-3 rounded-3 text-start mx-auto mt-4" style="max-width: 500px; font-size: 0.9rem;">
+                        <div class="mb-2"><strong>Tiêu đề:</strong> <span id="lblTitle"></span></div>
+                        <div class="mb-2"><strong>Địa chỉ:</strong> <span id="lblAddress"></span></div>
+                        <div><strong>Ưu tiên:</strong> <span id="lblPriority"></span></div>
+                    </div>
                 </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 d-none" id="btnPrev">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </button>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnNext">
+                            Tiếp tục <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 d-none" id="btnSubmit">
+                            <i class="bi bi-send-fill me-1"></i> Gửi Phản Ánh
+                        </button>
+                    </div>
+                </div>
+
             </form>
         </div>
     </div>
@@ -174,8 +228,122 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <!-- Map selection logic script -->
     <script src="~/js/issue-create.js" asp-append-version="true"></script>
+    
+    <!-- Wizard Logic -->
+    <script>
+        $(document).ready(function() {
+            let currentStep = 1;
+            const totalSteps = 4;
+
+            // Category Selection
+            $('.category-card').click(function() {
+                $('.category-card').removeClass('selected');
+                $(this).addClass('selected');
+                $('#categoryInput').val($(this).data('val'));
+                $('#catError').addClass('d-none');
+            });
+
+            function updateWizard() {
+                // Update content visibility
+                $('.step-content').removeClass('active');
+                $('#step' + currentStep).addClass('active');
+
+                // Update stepper UI
+                $('.step').removeClass('active completed');
+                $('.step').each(function() {
+                    const stepNum = parseInt($(this).data('step'));
+                    if (stepNum === currentStep) $(this).addClass('active');
+                    else if (stepNum < currentStep) $(this).addClass('completed');
+                });
+
+                // Update progress bar
+                const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+                $('#wizardProgress').css('width', progress + '%');
+
+                // Update buttons
+                if (currentStep === 1) {
+                    $('#btnPrev').addClass('d-none');
+                } else {
+                    $('#btnPrev').removeClass('d-none');
+                }
+
+                if (currentStep === totalSteps) {
+                    $('#btnNext').addClass('d-none');
+                    $('#btnSubmit').removeClass('d-none');
+                    populateSummary();
+                } else {
+                    $('#btnNext').removeClass('d-none');
+                    $('#btnSubmit').addClass('d-none');
+                }
+
+                // Invalidate Leaflet Map size when map step is shown
+                if (currentStep === 2 && window.map) {
+                    setTimeout(() => window.map.invalidateSize(), 100);
+                }
+            }
+
+            function validateStep() {
+                if (currentStep === 1) {
+                    if (!$('#categoryInput').val()) {
+                        $('#catError').removeClass('d-none');
+                        return false;
+                    }
+                    return true;
+                }
+                if (currentStep === 2) {
+                    if (!$('#address-input').val()) {
+                        $('#address-input').addClass('is-invalid');
+                        return false;
+                    } else {
+                        $('#address-input').removeClass('is-invalid');
+                    }
+                    
+                    const files = $('#image-upload-input')[0].files;
+                    if (files.length === 0) {
+                        $('#imgError').removeClass('d-none');
+                        return false;
+                    } else {
+                        $('#imgError').addClass('d-none');
+                    }
+                    return true;
+                }
+                if (currentStep === 3) {
+                    let isValid = true;
+                    if (!$('#titleInput').val()) { $('#titleInput').addClass('is-invalid'); isValid = false; } else $('#titleInput').removeClass('is-invalid');
+                    if (!$('#descInput').val()) { $('#descInput').addClass('is-invalid'); isValid = false; } else $('#descInput').removeClass('is-invalid');
+                    if (!$('#priorityInput').val()) { $('#priorityInput').addClass('is-invalid'); isValid = false; } else $('#priorityInput').removeClass('is-invalid');
+                    return isValid;
+                }
+                return true;
+            }
+
+            function populateSummary() {
+                const catText = $('.category-card.selected span').text();
+                const title = $('#titleInput').val();
+                const address = $('#address-input').val();
+                const priority = $('#priorityInput option:selected').text();
+
+                $('#lblCat').text(catText);
+                $('#lblTitle').text(title);
+                $('#lblAddress').text(address);
+                $('#lblPriority').text(priority);
+            }
+
+            $('#btnNext').click(function() {
+                if (validateStep() && currentStep < totalSteps) {
+                    currentStep++;
+                    updateWizard();
+                }
+            });
+
+            $('#btnPrev').click(function() {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateWizard();
+                }
+            });
+        });
+    </script>
 }

@@ -266,5 +266,40 @@ namespace CivicConnect.Web.Controllers
                 isOfficial = comment.IsOfficialResponse
             });
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Rate(int id, int rating, string? feedback)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            if (rating < 1 || rating > 5) return BadRequest("Đánh giá không hợp lệ.");
+
+            var issue = await _context.Issues.FirstOrDefaultAsync(i => i.Id == id);
+            if (issue == null) return NotFound();
+
+            if (issue.AuthorId != userId) return Forbid("Chỉ tác giả mới được đánh giá.");
+            if (issue.Status != IssueStatus.Resolved && issue.Status != IssueStatus.Closed) return BadRequest("Phản ánh chưa hoàn tất.");
+            if (issue.Rating.HasValue) return BadRequest("Bạn đã đánh giá phản ánh này rồi.");
+
+            issue.Rating = rating;
+            issue.RatingFeedback = feedback;
+            issue.RatedAt = DateTime.UtcNow;
+
+            _context.Entry(issue).State = EntityState.Modified;
+
+            // Cộng điểm uy tín khi đánh giá (+2 điểm)
+            var author = await _userManager.FindByIdAsync(issue.AuthorId);
+            if (author != null)
+            {
+                author.TrustScore += 2;
+                _context.Entry(author).State = EntityState.Modified;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
     }
 }

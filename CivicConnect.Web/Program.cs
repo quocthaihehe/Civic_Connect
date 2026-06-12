@@ -1,4 +1,4 @@
-﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Repositories;
 
 using CivicConnect.Web.Services;
@@ -33,10 +33,9 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
 });
 
-// Cáº¥u hÃ¬nh Database Connection
+// Cấu hình Database Connection
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("CivicConnect.Web.Models")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Cáº¥u hÃ¬nh ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

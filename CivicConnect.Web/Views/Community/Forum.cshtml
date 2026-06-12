@@ -1,0 +1,181 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.ForumPost>
+@{
+    ViewData["Title"] = "Diễn đàn Dân sinh";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-lg-6 mb-3 mb-lg-0">
+        <h2 class="fw-bold mb-1 text-dark">Diễn đàn Dân sinh</h2>
+        <p class="text-muted mb-0">Thảo luận, chia sẻ và đóng góp ý kiến về các vấn đề địa phương.</p>
+    </div>
+    <div class="col-lg-6 text-lg-end">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                <i class="bi bi-pencil-square me-2"></i>Tạo bài viết mới
+            </button>
+        }
+        else
+        {
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary rounded-pill px-4 shadow-sm">Đăng nhập để đăng bài</a>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var post in Model)
+            {
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0 text-center me-4">
+                                <div class="bg-light rounded-4 px-3 py-2 d-flex flex-column align-items-center">
+                                    <button class="btn btn-link text-muted p-0 text-decoration-none fs-5"><i class="bi bi-caret-up-fill"></i></button>
+                                    <span class="fw-bold fs-5 text-dark my-1">@post.Upvotes</span>
+                                    <button class="btn btn-link text-muted p-0 text-decoration-none fs-5"><i class="bi bi-caret-down-fill"></i></button>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold mb-2 text-dark">@post.Title</h5>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    @if (!string.IsNullOrEmpty(post.Tags))
+                                    {
+                                        foreach (var tag in post.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="badge bg-light text-primary rounded-pill border border-primary-subtle">#@tag.Trim()</span>
+                                        }
+                                    }
+                                </div>
+                                <p class="text-secondary mb-3">@post.Content</p>
+                                
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center text-muted small gap-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-person-circle fs-5"></i>
+                                            <span class="fw-semibold">@post.Author.FullName</span>
+                                        </div>
+                                        <span>&bull;</span>
+                                        <span>@post.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                    <button class="btn btn-light btn-sm rounded-pill fw-semibold text-primary px-3" type="button" data-bs-toggle="collapse" data-bs-target="#comments-@post.Id">
+                                        <i class="bi bi-chat-dots me-2"></i>@post.Comments.Count bình luận
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Khu vực bình luận -->
+                        <div class="collapse mt-3 pt-3 border-top" id="comments-@post.Id">
+                            <div class="d-flex flex-column gap-3 mb-3">
+                                @foreach (var comment in post.Comments)
+                                {
+                                    <div class="d-flex gap-3">
+                                        <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                        <div class="bg-light p-3 rounded-4 flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span class="fw-bold small">@(comment.Author?.FullName ?? "Người dùng")</span>
+                                                <span class="text-muted" style="font-size: 0.75rem;">@comment.CreatedAt.ToString("dd/MM HH:mm")</span>
+                                            </div>
+                                            <p class="mb-0 text-secondary small">@comment.Content</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <form asp-action="AddComment" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="postId" value="@post.Id" />
+                                    <input type="text" name="content" class="form-control rounded-pill bg-light border-0 px-4" placeholder="Viết bình luận..." required />
+                                    <button type="submit" class="btn btn-primary rounded-circle" style="width: 40px; height: 40px;"><i class="bi bi-send-fill"></i></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-secondary rounded-4 text-center small mb-0 py-2">
+                                    Vui lòng <a asp-area="Identity" asp-page="/Account/Login" class="fw-bold text-decoration-none">Đăng nhập</a> để bình luận.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-chat-square-dots display-1 text-muted opacity-25 mb-3 d-block"></i>
+                <h5 class="text-muted">Chưa có bài đăng nào</h5>
+                <p class="text-secondary small">Hãy là người đầu tiên tạo thảo luận!</p>
+            </div>
+        }
+    </div>
+
+    <!-- Sidebar phải -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-hash text-primary me-2"></i>Chủ đề phổ biến</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-2 border hover-lift cursor-pointer">#giaothong</span>
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-2 border hover-lift cursor-pointer">#moitruong</span>
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-2 border hover-lift cursor-pointer">#anninh</span>
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-2 border hover-lift cursor-pointer">#gopy</span>
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-2 border hover-lift cursor-pointer">#hoidap</span>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 bg-primary bg-gradient text-white rounded-4 shadow-sm">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-2"><i class="bi bi-shield-check me-2"></i>Quy tắc cộng đồng</h6>
+                <ul class="small mb-0 opacity-75 ps-3" style="line-height: 1.8;">
+                    <li>Tôn trọng người khác, không dùng từ ngữ thô tục.</li>
+                    <li>Không chia sẻ thông tin sai lệch, tin giả.</li>
+                    <li>Không quảng cáo, spam thương mại.</li>
+                    <li>Nội dung vi phạm sẽ bị xóa và khóa tài khoản.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tạo Bài Viết -->
+<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold" id="createPostModalLabel">Tạo bài thảo luận mới</h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CreatePost" method="post">
+                <div class="modal-body px-4 py-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tiêu đề <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control rounded-3 py-2" placeholder="Nhập tiêu đề ngắn gọn..." required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nội dung <span class="text-danger">*</span></label>
+                        <textarea name="content" class="form-control rounded-3 py-2" rows="5" placeholder="Chia sẻ chi tiết vấn đề của bạn..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Thẻ tag (Tags)</label>
+                        <input type="text" name="tags" class="form-control rounded-3 py-2" placeholder="Ví dụ: giaothong, moitruong (cách nhau bởi dấu phẩy)" />
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Đăng bài</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .hover-lift { transition: transform 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-3px); }
+</style>
