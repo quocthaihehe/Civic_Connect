@@ -41,6 +41,13 @@ namespace CivicConnect.Web.Models.Entities
         public bool IsAnonymous { get; set; } = false;// Gửi ẩn danh
         public bool IsVerified { get; set; } = false; // Đã xác minh thực tế
         public int ViewCount { get; set; } = 0;
+        
+        // Nâng cấp: Xử lý và Ghi chú nâng cao
+        public string? InternalNotes { get; set; }
+        public string? ResolutionDocumentUrl { get; set; }
+        public string? ResolutionImageUrl { get; set; }
+        public string? Labels { get; set; } // Khẩn cấp, Quan trọng, Tái phát, Cần giám sát
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         // Đánh giá kết quả xử lý

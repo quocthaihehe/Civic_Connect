@@ -8,3 +8,7 @@ obj/
 
 # Bỏ qua thư mục hệ thống của Visual Studio (tránh lỗi file bị khóa)
 .vs/
+
+# Bỏ qua thư mục node_modules
+node_modules/
+**/node_modules/

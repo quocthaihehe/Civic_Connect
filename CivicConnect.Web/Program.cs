@@ -1,11 +1,8 @@
 using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Repositories;
-
 using CivicConnect.Web.Services;
 using CivicConnect.Web.Services.BackgroundJobs;
 using CivicConnect.Web.Data;
-using CivicConnect.Web.Repositories;
-using CivicConnect.Web.Services;
 using CivicConnect.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Cáº¥u hÃ¬nh MVC
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
 builder.Services.AddRazorPages();
 
 // Cáº¥u hÃ¬nh giá»›i háº¡n upload file (tá»‘i Ä‘a 5 áº£nh x 5MB = 25MB + overhead)
@@ -35,6 +31,8 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Cấu hình Database Connection
 builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("CivicConnect.Web")));
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Cáº¥u hÃ¬nh ASP.NET Core Identity
@@ -123,18 +121,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}");
-
-app.MapRazorPages();
-
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 

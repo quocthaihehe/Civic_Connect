@@ -1,0 +1,76 @@
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Gửi thông báo hàng loạt";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Gửi thông báo hàng loạt</h2>
+            <div class="text-muted small mt-1">Truyền thông đại chúng, thông báo khẩn cấp và cảnh báo đô thị hàng loạt</div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <div class="col-lg-6 mx-auto">
+        <div class="card">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-send text-primary me-2"></i>Thiết lập chiến dịch thông báo</h3>
+            </div>
+            <div class="card-body">
+                <form action="/Admin/Content/SendBulk" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Kênh truyền thông đẩy *</label>
+                        <select name="channel" class="form-select" required>
+                            <option value="inapp">Thông báo trong hệ thống (SignalR)</option>
+                            <option value="push">Cảnh báo đẩy trình duyệt (Web Push API)</option>
+                            <option value="sms">Gửi tin nhắn SMS hàng loạt</option>
+                            <option value="email">Gửi thư điện tử Email (SMTP/SendGrid)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Đối tượng tiếp nhận (Phân khúc) *</label>
+                        <select name="targetSegment" class="form-select" required>
+                            <option value="all">Toàn bộ công dân đã xác minh</option>
+                            <option value="district1">Cư dân Quận 1</option>
+                            <option value="ward_bennghe">Cư dân Phường Bến Nghé</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Tiêu đề thông báo *</label>
+                        <input type="text" name="title" class="form-control" placeholder="VD: Ra quân tổng vệ sinh môi trường kênh Nhiêu Lộc..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Nội dung thông báo (SMS sẽ tự động cắt ngắn) *</label>
+                        <textarea name="message" rows="4" class="form-control" placeholder="Viết nội dung tin nhắn gửi đi..." required></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Bạn có chắc chắn muốn gửi hàng loạt thông báo này đi?')">
+                            <i class="bi bi-broadcast me-2"></i>Bắt đầu gửi hàng loạt
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

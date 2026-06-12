@@ -1,0 +1,169 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Policy>
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Quản lý chính sách & tin tức";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Tin tức & Văn bản chính sách</h2>
+            <div class="text-muted small mt-1">Đăng tải thông báo, hướng dẫn nghiệp vụ và nghị định đô thị chính thức</div>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <button class="btn btn-primary" id="btnOpenDrawer"><i class="bi bi-plus-lg me-2"></i>Thêm văn bản mới</button>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- Roster list -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-file-earmark-text text-primary me-2"></i>Lịch sử bài đăng</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Tiêu đề văn bản chính sách</th>
+                            <th>Số hiệu</th>
+                            <th>Cơ quan ban hành</th>
+                            <th>Người ký</th>
+                            <th>Phân loại</th>
+                            <th>Ngày ban hành</th>
+                            <th class="w-1">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">Chưa có bài đăng tin tức hay văn bản chính sách nào</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var policy in Model)
+                            {
+                                <tr>
+                                    <td>#@policy.Id</td>
+                                    <td class="font-weight-bold text-body">@policy.Title</td>
+                                    <td class="font-mono small">@(policy.DocumentNumber ?? "N/A")</td>
+                                    <td>@policy.IssuingUnit</td>
+                                    <td>@(policy.Signer ?? "N/A")</td>
+                                    <td>
+                                        <span class="badge bg-blue-lt">@policy.Tag</span>
+                                    </td>
+                                    <td>@policy.PublishedDate.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <a href="/Policy/Details/@policy.Id" target="_blank" class="btn btn-white btn-sm">Xem</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Right Drawer Form (Tabler modal backdrop style) -->
+<div class="modal fade modal-blur" id="createPolicyDrawer" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form action="/Admin/Policies/Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold"><i class="bi bi-file-earmark-plus text-primary me-2"></i>Đăng tin tức / chính sách mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body space-y-3">
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Tiêu đề văn bản *</label>
+                        <input type="text" name="title" class="form-control" placeholder="Tiêu đề thông báo, chỉ thị, tin tức..." required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Phân loại *</label>
+                            <select name="tag" class="form-select" required>
+                                <option value="Thông báo">Thông báo</option>
+                                <option value="Tin tức">Tin tức</option>
+                                <option value="Hướng dẫn">Hướng dẫn</option>
+                                <option value="Văn bản pháp luật">Văn bản pháp luật</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Cơ quan ban hành *</label>
+                            <input type="text" name="issuingUnit" class="form-control" placeholder="VD: UBND TP.HCM" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Số hiệu văn bản</label>
+                            <input type="text" name="documentNumber" class="form-control" placeholder="VD: 45/2026/NĐ-CP">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Người ký duyệt</label>
+                            <input type="text" name="signer" class="form-control" placeholder="VD: Nguyễn Văn A">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Ngày có hiệu lực</label>
+                            <input type="date" name="effectiveDate" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">URL liên kết ngoài</label>
+                            <input type="url" name="sourceUrl" class="form-control" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Tóm tắt ngắn *</label>
+                        <textarea name="excerpt" rows="2" class="form-control" placeholder="Tóm tắt ngắn gọn nội dung..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Nội dung chi tiết *</label>
+                        <textarea name="content" rows="6" class="form-control" placeholder="Nội dung toàn văn chính sách..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-2"></i>Đăng tải ngay</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#btnOpenDrawer').on('click', function () {
+                var modal = new bootstrap.Modal(document.getElementById('createPolicyDrawer'));
+                modal.show();
+            });
+        });
+    </script>
+}

@@ -19,6 +19,16 @@ namespace CivicConnect.Web.Models.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastLoginAt { get; set; }
 
+        // Nâng cấp: KYC & Vi phạm & Trực tuyến
+        public int CitizenPoints { get; set; } = 100; // Điểm công dân mặc định
+        public CivicConnect.Web.Models.Enums.KYCLevel KYCLevel { get; set; } = CivicConnect.Web.Models.Enums.KYCLevel.Unverified;
+        public string? IdCardFrontUrl { get; set; }
+        public string? IdCardBackUrl { get; set; }
+        public string? SelfieUrl { get; set; }
+        public bool IsRestricted { get; set; } = false;
+        public string? RestrictionReason { get; set; }
+        public DateTime? RestrictedUntil { get; set; }
+        public bool IsOnline { get; set; } = false;
         public string BadgeLevel => TrustScore switch
         {
             >= 500 => "Kim cương",
