@@ -1,5 +1,6 @@
-using CivicConnect.Core.Entities;
-using CivicConnect.Core.Interfaces;
+﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Repositories;
+using CivicConnect.Web.Services;
 using CivicConnect.Web.Models.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

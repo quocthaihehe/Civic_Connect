@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CivicConnect.Infrastructure.Data;
-using CivicConnect.Core.Enums;
-using CivicConnect.Core.Entities;
+using CivicConnect.Web.Data;
+using CivicConnect.Web.Models.Enums;
+using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Models.Home;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -180,6 +180,12 @@ namespace CivicConnect.Web.Controllers
         public IActionResult Privacy()
         {
             ViewData["PageHeader"] = "Chính Sách & Điều Khoản";
+            return View();
+        }
+
+        public IActionResult About()
+        {
+            ViewData["PageHeader"] = "Giới Thiệu Hệ Thống";
             return View();
         }
     }

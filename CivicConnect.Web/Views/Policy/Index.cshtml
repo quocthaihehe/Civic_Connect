@@ -1,4 +1,4 @@
-@model IEnumerable<CivicConnect.Core.Entities.Policy>
+﻿@model IEnumerable<CivicConnect.Web.Models.Entities.Policy>
 @{
     ViewData["Title"] = "Chính sách & Tin tức";
     var laws = Model.Where(p => p.Tag == "Nghị định" || p.Tag == "Thông tư" || p.Tag == "Chính sách");

@@ -1,8 +1,9 @@
-using CivicConnect.Core.Interfaces;
+﻿using CivicConnect.Web.Repositories;
+using CivicConnect.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using CivicConnect.Core.Entities;
+using CivicConnect.Web.Models.Entities;
 using System.Threading.Tasks;
 
 namespace CivicConnect.Web.Controllers.Api

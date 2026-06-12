@@ -1,6 +1,7 @@
-using CivicConnect.Core.Entities;
-using CivicConnect.Core.Enums;
-using CivicConnect.Core.Interfaces;
+﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Enums;
+using CivicConnect.Web.Repositories;
+using CivicConnect.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

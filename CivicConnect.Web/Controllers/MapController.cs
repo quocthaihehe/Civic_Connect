@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CivicConnect.Infrastructure.Data;
-using CivicConnect.Core.Enums;
+using CivicConnect.Web.Data;
+using CivicConnect.Web.Models.Enums;
 using System.Threading.Tasks;
 using System.Linq;
 

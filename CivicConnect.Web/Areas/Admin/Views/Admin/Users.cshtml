@@ -1,0 +1,82 @@
+﻿@model IEnumerable<CivicConnect.Web.Models.Entities.ApplicationUser>
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="d-flex flex-column gap-4">
+    <div>
+        <a asp-action="Dashboard" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="bi bi-arrow-left me-1"></i> Quay lại Admin</a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(successMsg))
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 mb-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @successMsg
+            <button type="button" class="btn-close" data-bs-dismiss="close" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Bảng danh sách tài khoản -->
+    <div class="glass-card p-4 p-md-5">
+        <h5 class="fw-bold mb-4 text-white"><i class="bi bi-people-fill text-primary me-2"></i> Quản lý danh sách tài khoản</h5>
+
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0">
+                <thead class="table-light">
+                    <tr style="font-size: 0.85rem;">
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Khu vực (Ward/District)</th>
+                        <th>Trạng thái hoạt động</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody style="font-size: 0.85rem;">
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-white">@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>@user.PhoneNumber</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(user.WardCode) || !string.IsNullOrEmpty(user.DistrictCode))
+                                {
+                                    <span>P. @(user.WardCode ?? "N/A") / Q. @(user.DistrictCode ?? "N/A")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="badge bg-success-light text-success rounded-pill px-3 py-1" style="background: rgba(16,185,129,0.08);">Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-light text-danger rounded-pill px-3 py-1" style="background: rgba(239,68,68,0.08);">Đã bị khoá</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="LockUser" asp-route-id="@user.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    @if (user.IsActive)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Khoá tài khoản</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">Kích hoạt</button>
+                                    }
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

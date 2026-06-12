@@ -1,9 +1,7 @@
-using CivicConnect.Core.Entities;
-using CivicConnect.Core.Interfaces;
-using CivicConnect.Infrastructure.BackgroundJobs;
-using CivicConnect.Infrastructure.Data;
-using CivicConnect.Infrastructure.Repositories;
-using CivicConnect.Infrastructure.Services;
+using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Repositories;
+using CivicConnect.Web.Services;
+using CivicConnect.Web.Data;
 using CivicConnect.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +30,7 @@ builder.WebHost.ConfigureKestrel(options =>
 // Cấu hình Database Connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("CivicConnect.Infrastructure")));
+        b => b.MigrationsAssembly("CivicConnect.Web")));
 
 // Cấu hình ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -66,7 +64,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Đăng ký các Repository và Service chuyên biệt
-builder.Services.Configure<CivicConnect.Infrastructure.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.Configure<CivicConnect.Web.Models.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 builder.Services.AddScoped<IIssueService, IssueService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
@@ -118,6 +116,12 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Cấu hình Route cho Area Admin
+app.MapAreaControllerRoute(
+    name: "admin",
+    areaName: "Admin",
+    pattern: "Admin/{controller=Admin}/{action=Dashboard}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

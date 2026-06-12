@@ -1,5 +1,5 @@
-@model CivicConnect.Web.Models.Home.HomeViewModel
-@using CivicConnect.Core.Enums
+﻿@model CivicConnect.Web.Models.Home.HomeViewModel
+@using CivicConnect.Web.Models.Enums
 @{
     ViewData["Title"] = "Trang chủ";
     ViewData["IsFullWidth"] = true;
@@ -169,8 +169,8 @@
                               <!-- Horizontal Stepper -->
                               @{
                                   bool step1 = true;
-                                  bool step2 = issue.Status >= CivicConnect.Core.Enums.IssueStatus.Assigned && issue.Status != CivicConnect.Core.Enums.IssueStatus.Rejected;
-                                  bool step3 = issue.Status == CivicConnect.Core.Enums.IssueStatus.Resolved || issue.Status == CivicConnect.Core.Enums.IssueStatus.Closed;
+                                  bool step2 = issue.Status >= CivicConnect.Web.Models.Enums.IssueStatus.Assigned && issue.Status != CivicConnect.Web.Models.Enums.IssueStatus.Rejected;
+                                  bool step3 = issue.Status == CivicConnect.Web.Models.Enums.IssueStatus.Resolved || issue.Status == CivicConnect.Web.Models.Enums.IssueStatus.Closed;
                                   string progressWidth = step3 ? "100%" : (step2 ? "50%" : "0%");
                               }
                               <div class="stepper-wrapper d-flex justify-content-between position-relative px-4 mt-2 mb-4">
