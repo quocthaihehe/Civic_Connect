@@ -1,0 +1,152 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Issue>
+@using CivicConnect.Web.Models.Enums
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Bảng Kanban phản ánh";
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Bảng Kanban điều hành</h2>
+            <div class="text-muted small mt-1">Kéo thả các phản ánh để cập nhật trạng thái xử lý nhanh chóng</div>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <a href="/Admin/Issues" class="btn btn-white"><i class="bi bi-list-task me-2"></i>Xem dạng danh sách</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3" style="overflow-x: auto; min-height: calc(100vh - 220px); align-items: start;">
+    
+    <!-- Column 1: Mới nhận (Pending) -->
+    <div class="col" style="min-width: 250px; max-width: 320px;">
+        <div class="card bg-light">
+            <div class="card-header py-2 bg-blue-lt d-flex justify-content-between align-items-center">
+                <h3 class="card-title font-weight-bold text-xs">MỚI NHẬN (@Model.Count(i => i.Status == IssueStatus.Pending))</h3>
+            </div>
+            <div class="card-body p-2 kanban-column" data-status="@IssueStatus.Pending" style="min-height: 450px;">
+                @foreach (var issue in Model.Where(i => i.Status == IssueStatus.Pending))
+                {
+                    @await Html.PartialAsync("_KanbanCard", issue)
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 2: Đã phân công (Assigned) -->
+    <div class="col" style="min-width: 250px; max-width: 320px;">
+        <div class="card bg-light">
+            <div class="card-header py-2 bg-cyan-lt d-flex justify-content-between align-items-center">
+                <h3 class="card-title font-weight-bold text-xs">ĐÃ PHÂN CÔNG (@Model.Count(i => i.Status == IssueStatus.Assigned))</h3>
+            </div>
+            <div class="card-body p-2 kanban-column" data-status="@IssueStatus.Assigned" style="min-height: 450px;">
+                @foreach (var issue in Model.Where(i => i.Status == IssueStatus.Assigned))
+                {
+                    @await Html.PartialAsync("_KanbanCard", issue)
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 3: Đang xử lý (Processing) -->
+    <div class="col" style="min-width: 250px; max-width: 320px;">
+        <div class="card bg-light">
+            <div class="card-header py-2 bg-yellow-lt d-flex justify-content-between align-items-center">
+                <h3 class="card-title font-weight-bold text-xs">ĐANG XỬ LÝ (@Model.Count(i => i.Status == IssueStatus.Processing))</h3>
+            </div>
+            <div class="card-body p-2 kanban-column" data-status="@IssueStatus.Processing" style="min-height: 450px;">
+                @foreach (var issue in Model.Where(i => i.Status == IssueStatus.Processing))
+                {
+                    @await Html.PartialAsync("_KanbanCard", issue)
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 4: Từ chối (Rejected) -->
+    <div class="col" style="min-width: 250px; max-width: 320px;">
+        <div class="card bg-light">
+            <div class="card-header py-2 bg-red-lt d-flex justify-content-between align-items-center">
+                <h3 class="card-title font-weight-bold text-xs">TỪ CHỐI (@Model.Count(i => i.Status == IssueStatus.Rejected))</h3>
+            </div>
+            <div class="card-body p-2 kanban-column" data-status="@IssueStatus.Rejected" style="min-height: 450px;">
+                @foreach (var issue in Model.Where(i => i.Status == IssueStatus.Rejected))
+                {
+                    @await Html.PartialAsync("_KanbanCard", issue)
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 5: Hoàn tất (Resolved / Closed) -->
+    <div class="col" style="min-width: 250px; max-width: 320px;">
+        <div class="card bg-light">
+            <div class="card-header py-2 bg-green-lt d-flex justify-content-between align-items-center">
+                <h3 class="card-title font-weight-bold text-xs">HOÀN TẤT (@Model.Count(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed))</h3>
+            </div>
+            <div class="card-body p-2 kanban-column" data-status="@IssueStatus.Resolved" style="min-height: 450px;">
+                @foreach (var issue in Model.Where(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed))
+                {
+                    @await Html.PartialAsync("_KanbanCard", issue)
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Drag Start
+            $('.kanban-card').on('dragstart', function (e) {
+                e.originalEvent.dataTransfer.setData('text/plain', $(this).data('id'));
+                $(this).addClass('opacity-50');
+            });
+
+            // Drag End
+            $('.kanban-card').on('dragend', function () {
+                $(this).removeClass('opacity-50');
+            });
+
+            // Drag Over column
+            $('.kanban-column').on('dragover', function (e) {
+                e.preventDefault();
+                $(this).addClass('bg-white-lt');
+            });
+
+            // Drag Leave column
+            $('.kanban-column').on('dragleave', function () {
+                $(this).removeClass('bg-white-lt');
+            });
+
+            // Drop card into column
+            $('.kanban-column').on('drop', function (e) {
+                e.preventDefault();
+                $(this).removeClass('bg-white-lt');
+                
+                const issueId = e.originalEvent.dataTransfer.getData('text/plain');
+                const newStatus = $(this).data('status');
+                const $card = $(`.kanban-card[data-id="${issueId}"]`);
+
+                if ($card.length > 0) {
+                    // Update layout
+                    $(this).append($card);
+
+                    // Call AJAX to update CSDL
+                    $.post('/Admin/Issues/UpdateKanbanStatus', { issueId: issueId, newStatus: newStatus }, function (res) {
+                        if (res.success) {
+                            console.log(`Updated issue ${issueId} to status ${newStatus}`);
+                            // Reload page or dynamically update badge numbers to make it seamless
+                            location.reload();
+                        } else {
+                            alert('Cập nhật trạng thái thất bại!');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

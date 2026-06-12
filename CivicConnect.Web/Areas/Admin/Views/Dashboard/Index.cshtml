@@ -1,0 +1,356 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Issue>
+@using CivicConnect.Web.Models.Enums
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Tổng quan điều hành";
+}
+
+<!-- Page header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Tổng quan điều hành</h2>
+            <div class="text-muted small mt-1">Hệ thống thông tin chỉ đạo và giám sát phản ánh hiện trường</div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 1: KPI Stats Cards -->
+<div class="row row-cards mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-blue text-white avatar"><i class="bi bi-file-earmark-text"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-lg">@ViewBag.NewToday phản ánh</div>
+                        <div class="text-muted small">
+                            Mới nhận hôm nay
+                            <span class="@(ViewBag.CompareYesterdayPct >= 0 ? "text-green" : "text-red") d-inline-flex align-items-center">
+                                (@(ViewBag.CompareYesterdayPct >= 0 ? "+" : "")@ViewBag.CompareYesterdayPct%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-yellow text-white avatar"><i class="bi bi-arrow-repeat"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-lg">@ViewBag.ProcessingCount phản ánh</div>
+                        <div class="text-muted small">Đang xử lý (nhiều nhất ở @ViewBag.TopUnitName)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-red text-white avatar"><i class="bi bi-clock-history"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-lg text-danger">@ViewBag.OverdueCount phản ánh</div>
+                        <div class="text-muted small">Quá hạn chưa giải quyết</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-green text-white avatar"><i class="bi bi-star"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-lg">@ViewBag.AvgSatisfaction / 5.0</div>
+                        <div class="text-muted small">Hài lòng TB tuần qua</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Charts -->
+<div class="row row-cards mb-4">
+    <!-- Trend Line Chart -->
+    <div class="col-lg-8">
+        <div class="card" style="height: 350px;">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-graph-up text-primary me-2"></i>Xu hướng phản ánh 30 ngày</h3>
+            </div>
+            <div class="card-body">
+                <div style="height: 270px; width: 100%;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLA Compliance Gauge -->
+    <div class="col-lg-4">
+        <div class="card" style="height: 350px;">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-patch-check text-primary me-2"></i>Tỷ lệ giải quyết đúng hạn</h3>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                <div class="position-relative d-flex align-items-center justify-content-center" style="width: 180px; height: 180px;">
+                    <canvas id="slaGaugeCanvas"></canvas>
+                    <div class="position-absolute text-center">
+                        <span class="display-6 font-weight-bold">@ViewBag.SlaComplianceRate%</span>
+                        <div class="text-muted small">Đúng SLA</div>
+                    </div>
+                </div>
+                <div class="text-muted small text-center mt-3">Mục tiêu hệ thống đặt ra đạt tối thiểu 95% tỷ lệ đúng hạn</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 3: Heatmap and Categories -->
+<div class="row row-cards mb-4">
+    <!-- Mini Heatmap -->
+    <div class="col-lg-8">
+        <div class="card" style="height: 400px;">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-map text-primary me-2"></i>Bản đồ điểm nóng 7 ngày qua</h3>
+            </div>
+            <div class="card-body p-0">
+                <div id="heatmapContainer" style="height: 345px; width: 100%; z-index: 1;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Distribution -->
+    <div class="col-lg-4">
+        <div class="card" style="height: 400px;">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-pie-chart text-primary me-2"></i>Cơ cấu danh mục</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center" style="height: 250px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 4: Action Table & Online Staff -->
+<div class="row row-cards">
+    <!-- Critical Issues Table -->
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-lightning text-danger me-2"></i>Phản ánh cần hành động ngay</h3>
+                <span class="badge bg-red-lt">Hạn xử lý khẩn cấp</span>
+            </div>
+            <div class="table-responsive" style="max-height: 400px;">
+                <table class="table table-vcenter card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tiêu đề</th>
+                            <th>Độ khẩn</th>
+                            <th>Đơn vị</th>
+                            <th>Hạn xử lý</th>
+                            <th class="w-1">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Không có phản ánh khẩn cấp nào cần hành động ngay</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var issue in Model)
+                            {
+                                var isOverdue = issue.DueDate < DateTime.UtcNow;
+                                <tr class="@(isOverdue ? "bg-red-lt" : "")">
+                                    <td>#@issue.Id</td>
+                                    <td>
+                                        <a href="/Admin/Issues/Details/@issue.Id" class="font-weight-bold text-body">@issue.Title</a>
+                                        <div class="text-muted small">@issue.Address</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(issue.Priority == IssuePriority.Critical ? "bg-red" : "bg-orange")">
+                                            @issue.Priority
+                                        </span>
+                                    </td>
+                                    <td>@(issue.AssignedUnit?.Name ?? "Chưa phân công")</td>
+                                    <td class="@(isOverdue ? "text-danger font-weight-bold" : "")">
+                                        @issue.DueDate?.ToString("dd/MM/yyyy HH:mm")
+                                        @if (isOverdue)
+                                        {
+                                            <span class="d-block small text-danger font-weight-bold">(Quá hạn)</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-list flex-nowrap">
+                                            <a href="/Admin/Issues/Details/@issue.Id" class="btn btn-white btn-sm">Chỉ đạo</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Online Staff Widget -->
+    <div class="col-lg-3">
+        <div class="card" style="max-height: 460px;">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-person-badge text-primary me-2"></i>Cán bộ trực tuyến</h3>
+            </div>
+            <div class="card-body overflow-y-auto">
+                <div class="space-y-3">
+                    @foreach (var staff in ViewBag.OnlineStaff)
+                    {
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar bg-green-lt text-green rounded-circle">@staff.FullName.Substring(0, 1)</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-bold">@staff.FullName</div>
+                                <div class="text-muted small text-truncate">@staff.Email</div>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-green badge-empty" title="Đang online"></span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Trend Line Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            const trendLabels = @Html.Raw(Json.Serialize(ViewBag.TrendLabels));
+            const trendValues = @Html.Raw(Json.Serialize(ViewBag.TrendValues));
+            
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendLabels.length > 0 ? trendLabels : ['D1', 'D2', 'D3', 'D4', 'D5'],
+                    datasets: [{
+                        label: 'Số phản ánh tiếp nhận',
+                        data: trendValues.length > 0 ? trendValues : [2, 5, 8, 4, 10],
+                        borderColor: '#206bc4',
+                        backgroundColor: 'rgba(32, 107, 196, 0.05)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#eef0f3' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // SLA Gauge Chart
+            const gaugeCtx = document.getElementById('slaGaugeCanvas').getContext('2d');
+            const compliance = @ViewBag.SlaComplianceRate;
+            new Chart(gaugeCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [compliance, 100 - compliance],
+                        backgroundColor: ['#2fb344', '#eef0f3'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    rotation: -90,
+                    circumference: 180,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+
+            // Categories Chart
+            const catCtx = document.getElementById('categoryChart').getContext('2d');
+            const catKeys = [];
+            const catVals = [];
+            @foreach (var entry in ViewBag.CatData)
+            {
+                var catName = entry.Key switch
+                {
+                    IssueCategory.Traffic => "Giao thông",
+                    IssueCategory.Environment => "Môi trường",
+                    IssueCategory.Security => "An ninh",
+                    IssueCategory.Infrastructure => "Hạ tầng",
+                    IssueCategory.Administration => "Hành chính",
+                    _ => "Khác"
+                };
+                <text>
+                    catKeys.push("@catName");
+                    catVals.push(@entry.Value);
+                </text>
+            }
+
+            new Chart(catCtx, {
+                type: 'pie',
+                data: {
+                    labels: catKeys.length > 0 ? catKeys : ['Giao thông', 'Môi trường', 'An ninh', 'Khác'],
+                    datasets: [{
+                        data: catVals.length > 0 ? catVals : [12, 15, 6, 4],
+                        backgroundColor: ['#206bc4', '#2fb344', '#d63939', '#f76707', '#ae3ec9', '#17a2b8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+
+            // Leaflet map setup for heatmap spots
+            var map = L.map('heatmapContainer').setView([10.7769, 106.7009], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            const hotSpots = @Html.Raw(Json.Serialize(ViewBag.HotSpots));
+            hotSpots.forEach(function (spot) {
+                L.circle([spot.lat, spot.lng], {
+                    color: '#d63939',
+                    fillColor: '#d63939',
+                    fillOpacity: 0.5,
+                    radius: 120
+                }).addTo(map).bindPopup(spot.title);
+            });
+        });
+    </script>
+}

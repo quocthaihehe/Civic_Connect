@@ -1,0 +1,441 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    bool isDashboardActive = currentPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/Admin/Dashboard", StringComparison.OrdinalIgnoreCase);
+    bool isIssuesActive = currentPath.StartsWith("/Admin/Issues", StringComparison.OrdinalIgnoreCase);
+    bool isOrgActive = currentPath.StartsWith("/Admin/Units", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/Admin/Officials", StringComparison.OrdinalIgnoreCase);
+    bool isUsersActive = currentPath.StartsWith("/Admin/Users", StringComparison.OrdinalIgnoreCase);
+    bool isContentActive = currentPath.StartsWith("/Admin/Policies", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/Admin/Content", StringComparison.OrdinalIgnoreCase);
+    bool isReportsActive = currentPath.StartsWith("/Admin/Reports", StringComparison.OrdinalIgnoreCase);
+    bool isSystemActive = currentPath.StartsWith("/Admin/System", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản trị CivicConnect</title>
+    <!-- Tabler CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.0.0-beta20/dist/css/tabler.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        .theme-dark {
+            --tb-body-bg: #1a2234;
+        }
+        .page {
+            min-height: 100vh;
+        }
+        .nav-link.active {
+            font-weight: 700;
+            background: rgba(32, 107, 196, 0.08) !important;
+            border-left: 3px solid #206bc4;
+        }
+        @@media (min-width: 992px) {
+            .navbar-vertical.navbar-expand-lg {
+                width: 17.5rem; /* Make sidebar wider and more balanced */
+            }
+            .page-wrapper {
+                margin-left: 17.5rem; /* Offset content for the wider sidebar */
+            }
+        }
+        .navbar-vertical .navbar-brand-autodark {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+        .navbar-vertical .nav-item {
+            padding: 2px 8px;
+        }
+        .navbar-vertical .nav-link {
+            border-radius: 4px;
+            padding: 0.6rem 0.8rem;
+        }
+        .navbar-vertical .dropdown-item {
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+        .navbar-vertical .dropdown-item.active, .navbar-vertical .dropdown-item:active {
+            background-color: rgba(32, 107, 196, 0.12) !important;
+            color: #206bc4 !important;
+            font-weight: 600;
+        }
+        /* Search Icon positioning fix */
+        .input-icon {
+            position: relative;
+        }
+        .input-icon .input-icon-addon {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            color: #627d98;
+            z-index: 4;
+        }
+        .input-icon .form-control {
+            padding-left: 2.5rem;
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="layout-fluid">
+    <script>
+        // Restoring dark mode preference
+        const theme = localStorage.getItem('tablerTheme') || 'light';
+        if (theme === 'dark') {
+            document.body.classList.add('theme-dark');
+        } else {
+            document.body.classList.remove('theme-dark');
+        }
+    </script>
+    
+    <div class="page">
+        <!-- Sidebar -->
+        <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark d-print-none">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <h1 class="navbar-brand navbar-brand-autodark">
+                    <a href="/Admin/Dashboard">
+                        <i class="bi bi-building-fill text-primary me-2"></i>CivicConnect
+                    </a>
+                </h1>
+                
+                <div class="navbar-nav flex-row d-lg-none">
+                    <!-- Notifications button for small screen -->
+                    <div class="nav-item dropdown d-none d-md-flex me-3">
+                        <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1">
+                            <i class="bi bi-bell fs-2 text-white"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="collapse navbar-collapse" id="sidebar-menu">
+                    <ul class="navbar-nav pt-lg-3">
+                        
+                        <!-- Dashboard -->
+                        <li class="nav-item dropdown @(isDashboardActive ? "show" : "")">
+                            <a class="nav-link dropdown-toggle @(isDashboardActive ? "active" : "")" href="#menu-dashboards" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-speedometer2"></i></span>
+                                <span class="nav-link-title">Bảng điều hành</span>
+                            </a>
+                            <div class="dropdown-menu @(isDashboardActive ? "show" : "")">
+                                <a class="dropdown-item" href="/Admin/Dashboard">Tổng quan điều hành</a>
+                                <a class="dropdown-item" href="/Admin/Dashboard/Analytics">Phân tích chuyên sâu</a>
+                                <a class="dropdown-item" href="/Admin/Dashboard/Finance">Quỹ & Tài chính</a>
+                            </div>
+                        </li>
+
+                        <!-- Issues -->
+                        <li class="nav-item dropdown @(isIssuesActive ? "show" : "")">
+                            <a class="nav-link dropdown-toggle @(isIssuesActive ? "active" : "")" href="#menu-issues" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-exclamation-octagon"></i></span>
+                                <span class="nav-link-title">Quản lý phản ánh</span>
+                            </a>
+                            <div class="dropdown-menu @(isIssuesActive ? "show" : "")">
+                                <a class="dropdown-item" href="/Admin/Issues">Bảng dữ liệu phản ánh</a>
+                                <a class="dropdown-item" href="/Admin/Issues/Kanban">Bảng Kanban</a>
+                                <a class="dropdown-item" href="/Admin/Issues/RoutingRules">Quy tắc phân luồng</a>
+                            </div>
+                        </li>
+
+                        <!-- Organization -->
+                        <li class="nav-item dropdown @(isOrgActive ? "show" : "")">
+                            <a class="nav-link dropdown-toggle @(isOrgActive ? "active" : "")" href="#menu-org" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-diagram-3"></i></span>
+                                <span class="nav-link-title">Tổ chức & Cán bộ</span>
+                            </a>
+                            <div class="dropdown-menu @(isOrgActive ? "show" : "")">
+                                <a class="dropdown-item" href="/Admin/Units">Cơ quan liên kết</a>
+                                <a class="dropdown-item" href="/Admin/Officials">Danh sách cán bộ</a>
+                                <a class="dropdown-item" href="/Admin/Officials/Shifts">Lịch trực & Phân ca</a>
+                            </div>
+                        </li>
+
+                        <!-- Users -->
+                        <li class="nav-item">
+                            <a class="nav-link @(isUsersActive ? "active" : "")" href="/Admin/Users">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-people"></i></span>
+                                <span class="nav-link-title">Quản lý người dùng</span>
+                            </a>
+                        </li>
+
+                        <!-- Content -->
+                        <li class="nav-item dropdown @(isContentActive ? "show" : "")">
+                            <a class="nav-link dropdown-toggle @(isContentActive ? "active" : "")" href="#menu-content" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-journal-text"></i></span>
+                                <span class="nav-link-title">Quản lý nội dung</span>
+                            </a>
+                            <div class="dropdown-menu @(isContentActive ? "show" : "")">
+                                <a class="dropdown-item" href="/Admin/Policies">Tin tức & Chính sách</a>
+                                <a class="dropdown-item" href="/Admin/Content/Notifications">Gửi thông báo hàng loạt</a>
+                                <a class="dropdown-item" href="/Admin/Content/Categories">Danh mục & SLA</a>
+                            </div>
+                        </li>
+
+                        <!-- Reports -->
+                        <li class="nav-item">
+                            <a class="nav-link @(isReportsActive ? "active" : "")" href="/Admin/Reports">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-bar-chart-line"></i></span>
+                                <span class="nav-link-title">Báo cáo thống kê</span>
+                            </a>
+                        </li>
+
+                        <!-- System Settings -->
+                        <li class="nav-item dropdown @(isSystemActive ? "show" : "")">
+                            <a class="nav-link dropdown-toggle @(isSystemActive ? "active" : "")" href="#menu-system" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-gear"></i></span>
+                                <span class="nav-link-title">Cấu hình hệ thống</span>
+                            </a>
+                            <div class="dropdown-menu @(isSystemActive ? "show" : "")">
+                                <a class="dropdown-item" href="/Admin/System/Settings">Cài đặt chung</a>
+                                <a class="dropdown-item" href="/Admin/System/Logs">Nhật ký hoạt động</a>
+                                <a class="dropdown-item" href="/Admin/System/Health">Giám sát hiệu năng</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Top Header -->
+        <header class="navbar navbar-expand-md navbar-light d-none d-lg-flex d-print-none sticky-top">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-nav flex-row order-md-last">
+                    <!-- Toggle Dark Mode -->
+                    <div class="nav-item d-none d-md-flex me-3">
+                        <a href="javascript:void(0)" class="nav-link px-0" onclick="toggleDarkMode()" title="Đổi chế độ sáng tối">
+                            <i class="bi bi-moon fs-3" id="dark-mode-icon"></i>
+                        </a>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="nav-item dropdown d-none d-md-flex me-3" id="notif-dropdown-wrapper">
+                        <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications" aria-expanded="false" id="notif-trigger">
+                            <i class="bi bi-bell fs-3"></i>
+                            <span class="badge bg-red badge-notification" id="notif-counter" style="display: none;">0</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="width: 380px;">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center py-2 bg-light">
+                                    <h3 class="card-title text-xs font-weight-bold">Thông báo mới nhận</h3>
+                                    <button class="btn btn-link btn-sm p-0 text-decoration-none text-primary" id="mark-all-read" style="font-size: 11px;">Đọc tất cả</button>
+                                </div>
+                                <div class="list-group list-group-flush list-group-hoverable overflow-y-auto" style="max-height: 300px;" id="notif-container">
+                                    <div class="list-group-item text-center py-4 text-muted" id="notif-empty-state">
+                                        <i class="bi bi-bell-slash fs-2 mb-2 d-block"></i>
+                                        Không có thông báo mới
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User menu -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+                            <span class="avatar avatar-sm bg-blue text-white rounded-circle">A</span>
+                            <div class="d-none d-xl-block ps-2">
+                                <div>Quản trị viên</div>
+                                <div class="mt-1 small text-muted">QUẢN TRỊ VIÊN CẤP CAO</div>
+                            </div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            <a href="/Identity/Account/Profile" class="dropdown-item">Hồ sơ cá nhân</a>
+                            <div class="dropdown-divider"></div>
+                            <form action="/Identity/Account/Logout" method="post" id="logoutForm">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapse navbar-collapse" id="navbar-menu">
+                    <div>
+                        <div class="input-icon">
+                            <span class="input-icon-addon">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" value="" class="form-control" placeholder="Tìm kiếm nhanh..." aria-label="Search" style="width: 250px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="page-wrapper">
+            <div class="page-body">
+                <div class="container-fluid">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabler Core JS & Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.0.0-beta20/dist/js/tabler.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        // Dark Mode toggle function
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('theme-dark');
+            localStorage.setItem('tablerTheme', isDark ? 'dark' : 'light');
+            updateDarkModeIcon(isDark);
+        }
+
+        function updateDarkModeIcon(isDark) {
+            const icon = document.getElementById('dark-mode-icon');
+            if (icon) {
+                if (isDark) {
+                    icon.className = 'bi bi-sun fs-3';
+                } else {
+                    icon.className = 'bi bi-moon fs-3';
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            // Set initial state of dark mode icon
+            updateDarkModeIcon(document.body.classList.contains('theme-dark'));
+
+            // Automatically set active class for vertical menu dropdown-item matching current URL path
+            const currentPath = window.location.pathname;
+            $(".navbar-vertical .dropdown-item, .navbar-vertical .nav-link").each(function () {
+                const href = $(this).attr("href");
+                if (href) {
+                    // Normalize paths for comparison
+                    const normalizedHref = href.toLowerCase().replace(/\/$/, "");
+                    const normalizedPath = currentPath.toLowerCase().replace(/\/$/, "");
+                    
+                    if (normalizedPath === normalizedHref || (normalizedHref !== "" && normalizedHref !== "/admin" && normalizedPath.startsWith(normalizedHref))) {
+                        $(this).addClass("active");
+                        // If it is inside a dropdown, make sure the dropdown is shown
+                        const $dropdown = $(this).closest(".dropdown-menu");
+                        if ($dropdown.length) {
+                            $dropdown.addClass("show");
+                            $dropdown.prev(".dropdown-toggle").addClass("active");
+                            $dropdown.closest(".nav-item").addClass("show");
+                        }
+                    }
+                }
+            });
+
+            // SignalR notifications logic
+            const $badge = $('#notif-counter');
+            const $container = $('#notif-container');
+            const $trigger = $('#notif-trigger');
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/notification")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("LoadNotifications", function (notifications) {
+                renderNotifications(notifications);
+            });
+
+            connection.on("IssueStatusChanged", function (n) {
+                addNewNotification(n);
+            });
+
+            connection.on("IssueAssigned", function (n) {
+                addNewNotification(n);
+            });
+
+            connection.start()
+                .then(() => console.log("SignalR connected to NotificationHub (Tabler Layout)"))
+                .catch(err => console.error(err.toString()));
+
+            // Mark all read
+            $('#mark-all-read').on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $.post('/api/notifications/mark-all-read', function () {
+                    $badge.hide().text('0');
+                    $container.html(`
+                        <div class="list-group-item text-center py-4 text-muted" id="notif-empty-state">
+                            <i class="bi bi-bell-slash fs-2 mb-2 d-block"></i>
+                            Không có thông báo mới
+                        </div>
+                    `);
+                });
+            });
+
+            function renderNotifications(notifications) {
+                if (!notifications || notifications.length === 0) {
+                    $badge.hide().text('0');
+                    return;
+                }
+
+                $badge.show().text(notifications.length);
+                $container.empty();
+
+                notifications.forEach(n => {
+                    $container.append(createNotifHtml(n));
+                });
+            }
+
+            function addNewNotification(n) {
+                let count = parseInt($badge.text()) || 0;
+                count++;
+                $badge.show().text(count);
+
+                const notifData = {
+                    id: n.id || 0,
+                    title: n.title,
+                    message: n.message,
+                    relatedIssueId: n.issueId || n.relatedIssueId
+                };
+
+                $('#notif-empty-state').remove();
+                $container.prepend(createNotifHtml(notifData));
+            }
+
+            function createNotifHtml(n) {
+                const link = n.relatedIssueId ? `/Admin/Issues/Details/${n.relatedIssueId}` : '#';
+                return `
+                    <a href="${link}" class="list-group-item list-group-item-action notif-item" data-id="${n.id}">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar bg-blue-lt"><i class="bi bi-info-circle text-primary"></i></span>
+                            </div>
+                            <div class="col text-truncate">
+                                <div class="text-body d-block font-weight-bold text-truncate">${n.title}</div>
+                                <div class="text-muted text-xs text-truncate mt-1">${n.message}</div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }
+
+            // Click single notification
+            $container.on('click', '.notif-item', function () {
+                const id = $(this).data('id');
+                if (id && id > 0) {
+                    $.post(`/api/notifications/${id}/mark-read`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

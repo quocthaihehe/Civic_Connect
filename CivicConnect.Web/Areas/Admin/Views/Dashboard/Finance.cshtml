@@ -1,0 +1,138 @@
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Quỹ & Tài chính quyên góp";
+}
+
+<!-- Page header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Quỹ & Tài chính quyên góp</h2>
+            <div class="text-muted small mt-1">Giám sát tài chính xã hội hóa cho các dự án chỉnh trang đô thị</div>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards mb-4">
+    <!-- Total Inbound Cards -->
+    <div class="col-sm-6 col-lg-4">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-green text-white avatar"><i class="bi bi-wallet2"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-lg">43,300,000 đ</div>
+                        <div class="text-muted small">Tổng số tiền quyên góp nhận được</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-blue text-white avatar"><i class="bi bi-gift"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-lg">3 chiến dịch</div>
+                        <div class="text-muted small">Đang mở kêu gọi xã hội hóa</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-yellow text-white avatar"><i class="bi bi-percent"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-lg">24.5%</div>
+                        <div class="text-muted small">Tỷ lệ hoàn thành mục tiêu trung bình</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards mb-4">
+    <!-- Financial Flow Bar Chart -->
+    <div class="col-lg-7">
+        <div class="card" style="height: 350px;">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-graph-up text-primary me-2"></i>Dòng tiền đóng góp theo tháng</h3>
+            </div>
+            <div class="card-body">
+                <div style="height: 270px; width: 100%;">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Campaigns and progress -->
+    <div class="col-lg-5">
+        <div class="card" style="height: 350px;">
+            <div class="card-header py-2 bg-light">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-check2-circle text-primary me-2"></i>Chiến dịch kêu gọi tốt nhất</h3>
+            </div>
+            <div class="card-body overflow-y-auto">
+                <div class="space-y-4">
+                    @foreach (var campaign in ViewBag.Campaigns)
+                    {
+                        var pct = campaign.TargetAmount == 0 ? 0 : (int)Math.Round((double)(campaign.CurrentAmount / campaign.TargetAmount) * 100);
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="font-weight-bold">@campaign.Name</span>
+                                <span class="text-muted small">@campaign.CurrentAmount.ToString("N0") / @campaign.TargetAmount.ToString("N0") đ</span>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-green" style="width: @(pct)%">@(pct)%</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Finance cashflow bar chart
+            const finCtx = document.getElementById('financeChart').getContext('2d');
+            const months = @Html.Raw(Json.Serialize(ViewBag.DonationMonths));
+            const totals = @Html.Raw(Json.Serialize(ViewBag.DonationTotals));
+
+            new Chart(finCtx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Số tiền quyên góp (đ)',
+                        data: totals,
+                        backgroundColor: '#2fb344',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#eef0f3' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+}

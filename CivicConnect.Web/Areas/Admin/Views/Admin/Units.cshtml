@@ -1,0 +1,75 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.GovernmentUnit>
+@using CivicConnect.Web.Models.Enums
+@{
+    ViewData["Title"] = "Quản lý cơ quan";
+}
+
+<div class="space-y-6">
+    <!-- Back Button -->
+    <div>
+        <a asp-action="Dashboard" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> Quay lại Trang tổng quan
+        </a>
+    </div>
+
+    <!-- Units List Card -->
+    <div class="bg-white shadow-sm rounded-lg border border-gray-100 p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-building text-primary mr-2"></i> Danh sách cơ quan hành chính liên kết
+        </h3>
+
+        <div class="overflow-x-auto border border-gray-100 rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tên cơ quan</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Cấp cơ quan</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Địa chỉ</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Điện thoại</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var unit in Model)
+                    {
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-500">#@unit.Id</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">@unit.Name</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2 py-0.5 inline-flex text-[10px] font-bold rounded-full bg-blue-50 text-primary border border-blue-150">
+                                    @GetUnitTypeName(unit.Type)
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="@unit.Address">@unit.Address</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@(string.IsNullOrEmpty(unit.Phone) ? "Chưa cập nhật" : unit.Phone)</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@unit.Email</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if (unit.IsActive)
+                                {
+                                    <span class="px-2.5 py-1 inline-flex text-[11px] font-bold rounded-full bg-green-50 text-green-700 border border-green-150">Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="px-2.5 py-1 inline-flex text-[11px] font-bold rounded-full bg-red-50 text-red-700 border border-red-150">Ngừng hoạt động</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetUnitTypeName(GovernmentUnitType type) => type switch
+    {
+        GovernmentUnitType.Province => "Cấp Tỉnh/Thành phố",
+        GovernmentUnitType.District => "Cấp Quận/Huyện",
+        GovernmentUnitType.Ward => "Cấp Phường/Xã",
+        GovernmentUnitType.Department => "Phòng ban chuyên môn",
+        _ => "Khác"
+    };
+}

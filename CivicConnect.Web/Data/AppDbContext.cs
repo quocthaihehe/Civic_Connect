@@ -24,6 +24,10 @@ namespace CivicConnect.Web.Data
         public DbSet<Policy> Policies { get; set; }
         public DbSet<DonationCategory> DonationCategories { get; set; }
         public DbSet<Donation> Donations { get; set; }
+        public DbSet<SmartRoutingRule> SmartRoutingRules { get; set; }
+        public DbSet<Shift> Shifts { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<SystemSetting> SystemSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -277,6 +281,36 @@ namespace CivicConnect.Web.Data
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Entity<SmartRoutingRule>(entity =>
+            {
+                entity.HasOne(r => r.TargetUnit)
+                    .WithMany()
+                    .HasForeignKey(r => r.TargetUnitId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Shift>(entity =>
+            {
+                entity.HasOne(s => s.User)
+                    .WithMany()
+                    .HasForeignKey(s => s.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasOne(a => a.User)
+                    .WithMany()
+                    .HasForeignKey(a => a.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<SystemSetting>().HasData(
+                new SystemSetting { SettingKey = "MaintenanceMode", SettingValue = "False", Description = "Bật/Tắt chế độ bảo trì hệ thống" },
+                new SystemSetting { SettingKey = "OrganizationName", SettingValue = "CivicConnect", Description = "Tên tổ chức vận hành chính thức" },
+                new SystemSetting { SettingKey = "SystemLogoUrl", SettingValue = "", Description = "Đường dẫn URL ảnh logo hệ thống" }
+            );
 
             // Seed các Quỹ Quyên Góp mẫu
             modelBuilder.Entity<DonationCategory>().HasData(

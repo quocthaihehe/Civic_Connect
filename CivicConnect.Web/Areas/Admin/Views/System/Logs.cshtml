@@ -1,0 +1,68 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.AuditLog>
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Nhật ký hệ thống";
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Nhật ký hệ thống (Audit Logs)</h2>
+            <div class="text-muted small mt-1">Giám sát và kiểm toán toàn bộ thao tác tác động dữ liệu của Cán bộ</div>
+        </div>
+    </div>
+</div>
+
+<!-- Search box -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" action="/Admin/System/Logs" class="row g-2 align-items-center">
+            <div class="col-md-9">
+                <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Tìm kiếm hành động, nội dung chi tiết log...">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-2"></i>Tìm kiếm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Logs Table -->
+<div class="card">
+    <div class="card-header py-2 bg-light">
+        <h3 class="card-title font-weight-bold"><i class="bi bi-shield-lock text-primary me-2"></i>Dữ liệu kiểm toán vận hành</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table table-hover">
+            <thead>
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Tài khoản thực hiện</th>
+                    <th>Hành động</th>
+                    <th>Chi tiết nội dung</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Không tìm thấy nhật ký hoạt động nào khớp điều kiện</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var log in Model)
+                    {
+                        <tr>
+                            <td class="text-nowrap text-xs text-muted font-mono">@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td class="font-weight-bold">@(log.User?.FullName ?? "Hệ thống / Ẩn danh")</td>
+                            <td><span class="badge bg-blue-lt">@log.Action</span></td>
+                            <td><span class="text-muted small">@log.Details</span></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
