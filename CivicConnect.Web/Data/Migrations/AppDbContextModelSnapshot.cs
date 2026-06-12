@@ -94,7 +94,7 @@ namespace CivicConnect.Web.Data.Migrations
                             Id = 1,
                             Category = "Hộ tịch",
                             Code = "TTHC-01",
-                            CreatedAt = new DateTime(2026, 6, 12, 12, 36, 26, 895, DateTimeKind.Utc).AddTicks(1599),
+                            CreatedAt = new DateTime(2026, 6, 12, 13, 38, 0, 588, DateTimeKind.Utc).AddTicks(9798),
                             Description = "Cán bộ tư pháp xuống tận nhà dân để làm thủ tục đăng ký khai sinh đối với các trường hợp đặc biệt khó khăn, khuyết tật.",
                             Fee = "Miễn phí",
                             IsActive = true,
@@ -110,7 +110,7 @@ namespace CivicConnect.Web.Data.Migrations
                             Id = 2,
                             Category = "Hộ tịch",
                             Code = "TTHC-02",
-                            CreatedAt = new DateTime(2026, 6, 12, 12, 36, 26, 895, DateTimeKind.Utc).AddTicks(1604),
+                            CreatedAt = new DateTime(2026, 6, 12, 13, 38, 0, 588, DateTimeKind.Utc).AddTicks(9801),
                             Description = "Cấp giấy xác nhận tình trạng hôn nhân để làm thủ tục vay vốn, mua bán đất, hoặc đăng ký kết hôn.",
                             Fee = "15.000 VNĐ",
                             IsActive = true,
@@ -126,7 +126,7 @@ namespace CivicConnect.Web.Data.Migrations
                             Id = 3,
                             Category = "Hộ tịch",
                             Code = "TTHC-03",
-                            CreatedAt = new DateTime(2026, 6, 12, 12, 36, 26, 895, DateTimeKind.Utc).AddTicks(1605),
+                            CreatedAt = new DateTime(2026, 6, 12, 13, 38, 0, 588, DateTimeKind.Utc).AddTicks(9803),
                             Description = "Cấp bản sao trích lục từ sổ gốc hộ tịch (Khai sinh, Kết hôn, Khai tử).",
                             Fee = "8.000 VNĐ/bản",
                             IsActive = true,
@@ -372,6 +372,7 @@ namespace CivicConnect.Web.Data.Migrations
 
                     b.Property<string>("SelfieUrl")
                         .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("TrustScore")
                         .HasColumnType("int");
 
@@ -893,10 +894,6 @@ namespace CivicConnect.Web.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ResolutionDocumentUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResolutionImageUrl")
                     b.Property<DateTime?>("RatedAt")
                         .HasColumnType("datetime2");
 
@@ -904,6 +901,12 @@ namespace CivicConnect.Web.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("RatingFeedback")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResolutionDocumentUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResolutionImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ResolvedAt")
@@ -1262,7 +1265,6 @@ namespace CivicConnect.Web.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Shift", b =>
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Poll", b =>
                 {
                     b.Property<int>("Id")
@@ -1274,12 +1276,95 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("EndTime")
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Polls");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PollId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoteCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PollId");
+
+                    b.ToTable("PollOptions");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollVote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PollId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("VotedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OptionId");
+
+                    b.HasIndex("PollId");
+
+                    b.HasIndex("UserId", "PollId")
+                        .IsUnique();
+
+                    b.ToTable("PollVotes");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Shift", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
@@ -1303,16 +1388,6 @@ namespace CivicConnect.Web.Data.Migrations
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.SmartRoutingRule", b =>
-                    b.Property<string>("Question")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Polls");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollOption", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1373,70 +1448,22 @@ namespace CivicConnect.Web.Data.Migrations
                             SettingKey = "MaintenanceMode",
                             Description = "Bật/Tắt chế độ bảo trì hệ thống",
                             SettingValue = "False",
-                            UpdatedAt = new DateTime(2026, 6, 12, 10, 49, 47, 988, DateTimeKind.Utc).AddTicks(3718)
+                            UpdatedAt = new DateTime(2026, 6, 12, 13, 38, 0, 588, DateTimeKind.Utc).AddTicks(9733)
                         },
                         new
                         {
                             SettingKey = "OrganizationName",
                             Description = "Tên tổ chức vận hành chính thức",
                             SettingValue = "CivicConnect",
-                            UpdatedAt = new DateTime(2026, 6, 12, 10, 49, 47, 988, DateTimeKind.Utc).AddTicks(3719)
+                            UpdatedAt = new DateTime(2026, 6, 12, 13, 38, 0, 588, DateTimeKind.Utc).AddTicks(9735)
                         },
                         new
                         {
                             SettingKey = "SystemLogoUrl",
                             Description = "Đường dẫn URL ảnh logo hệ thống",
                             SettingValue = "",
-                            UpdatedAt = new DateTime(2026, 6, 12, 10, 49, 47, 988, DateTimeKind.Utc).AddTicks(3720)
+                            UpdatedAt = new DateTime(2026, 6, 12, 13, 38, 0, 588, DateTimeKind.Utc).AddTicks(9735)
                         });
-                    b.Property<int>("PollId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("VoteCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PollId");
-
-                    b.ToTable("PollOptions");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PollVote", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OptionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PollId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("VotedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OptionId");
-
-                    b.HasIndex("PollId");
-
-                    b.HasIndex("UserId", "PollId")
-                        .IsUnique();
-
-                    b.ToTable("PollVotes");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.UnitCategory", b =>
@@ -1885,26 +1912,6 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("Issue");
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Shift", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.SmartRoutingRule", b =>
-                {
-                    b.HasOne("CivicConnect.Web.Models.Entities.GovernmentUnit", "TargetUnit")
-                        .WithMany()
-                        .HasForeignKey("TargetUnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("TargetUnit");
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.PetitionSignature", b =>
                 {
                     b.HasOne("CivicConnect.Web.Models.Entities.Petition", "Petition")
@@ -1960,6 +1967,28 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("Poll");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Shift", b =>
+                {
+                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.SmartRoutingRule", b =>
+                {
+                    b.HasOne("CivicConnect.Web.Models.Entities.GovernmentUnit", "TargetUnit")
+                        .WithMany()
+                        .HasForeignKey("TargetUnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TargetUnit");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.UnitCategory", b =>

@@ -33,7 +33,6 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("CivicConnect.Web")));
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Cáº¥u hÃ¬nh ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
