@@ -101,7 +101,7 @@
 <form action="/Admin/Issues/BulkAction" method="post" id="bulkActionForm">
     @Html.AntiForgeryToken()
     <div class="card">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-3">
             <div class="d-flex align-items-center gap-2">
                 <select name="actionType" id="actionType" class="form-select form-select-sm" style="width: 180px;">
                     <option value="">-- Hành động loạt --</option>
@@ -123,7 +123,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table table-vcenter card-table table-hover">
+            <table class="table table-vcenter table-hover mb-0">
                 <thead>
                     <tr>
                         <th class="w-1"><input type="checkbox" id="selectAllCheckbox"></th>
@@ -172,12 +172,12 @@
                                 </td>
                                 <td>@(issue.AssignedUnit?.Name ?? "Chưa gán")</td>
                                 <td>
-                                    <span class="badge @GetStatusBadgeClass(issue.Status)">
+                                    <span class="badge @GetStatusBadgeClass(issue.Status) rounded-pill px-3 py-2">
                                         @GetStatusName(issue.Status)
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="/Admin/Issues/Details/@issue.Id" class="btn btn-white btn-sm">Xem</a>
+                                    <a href="/Admin/Issues/Details/@issue.Id" class="btn btn-white btn-sm px-3 rounded-pill">Xem</a>
                                 </td>
                             </tr>
                         }

@@ -6,21 +6,21 @@
 
 <div class="space-y-6">
     <!-- Filters & Search Card -->
-    <div class="bg-white shadow-sm rounded-lg border border-gray-100 p-5">
+    <div class="bg-white shadow-sm rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:shadow-md">
         <form method="get" action="/Admin/Issues" class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5 items-end">
             <!-- Search -->
             <div class="md:col-span-2">
                 <label for="search" class="block text-xs font-semibold text-gray-500 uppercase mb-2">Tìm kiếm</label>
                 <div class="relative flex items-center">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
-                    <input type="text" name="search" id="search" value="@Context.Request.Query["search"]" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm" placeholder="Tiêu đề, nội dung, địa chỉ...">
+                    <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
+                    <input type="text" name="search" id="search" value="@Context.Request.Query["search"]" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm" placeholder="Tiêu đề, nội dung, địa chỉ...">
                 </div>
             </div>
 
             <!-- Category -->
             <div>
                 <label for="category" class="block text-xs font-semibold text-gray-500 uppercase mb-2">Danh mục</label>
-                <select name="category" id="category" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                <select name="category" id="category" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm">
                     <option value="">Tất cả danh mục</option>
                     @foreach (IssueCategory cat in Enum.GetValues(typeof(IssueCategory)))
                     {
@@ -33,7 +33,7 @@
             <!-- Status -->
             <div>
                 <label for="status" class="block text-xs font-semibold text-gray-500 uppercase mb-2">Trạng thái</label>
-                <select name="status" id="status" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                <select name="status" id="status" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm">
                     <option value="">Tất cả trạng thái</option>
                     @foreach (IssueStatus stat in Enum.GetValues(typeof(IssueStatus)))
                     {
@@ -45,10 +45,10 @@
 
             <!-- Action Buttons -->
             <div class="flex space-x-2">
-                <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none transition-colors">
+                <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-xl text-sm font-medium hover:bg-[#0E2B22] focus:outline-none transition-colors">
                     Lọc
                 </button>
-                <a href="/Admin/Issues" class="bg-gray-100 text-gray-700 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-250 focus:outline-none text-center transition-colors">
+                <a href="/Admin/Issues" class="bg-gray-100 text-gray-700 py-2 px-4 rounded-xl text-sm font-medium hover:bg-gray-250 focus:outline-none text-center transition-colors">
                     Xoá
                 </a>
             </div>
@@ -56,9 +56,9 @@
     </div>
 
     <!-- Data Table -->
-    <div class="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+    <div class="bg-white shadow-sm rounded-2xl border border-gray-100 overflow-hidden mt-6 transition-all duration-300 hover:shadow-md">
         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 class="text-base font-semibold text-gray-900">Danh sách Phản ánh hiện trường</h3>
+            <h3 class="text-base font-serif font-semibold text-gray-900">Danh sách Phản ánh hiện trường</h3>
             <span class="text-xs text-gray-500 font-medium">Tổng số: @Model.Count() bản ghi</span>
         </div>
         <div class="overflow-x-auto">
@@ -98,7 +98,7 @@
                                     @(issue.IsAnonymous ? "Ẩn danh" : issue.Author?.FullName ?? "Không rõ")
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-primary">
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-[#EAF1EE] text-primary">
                                         @GetCategoryName(issue.Category)
                                     </span>
                                 </td>
@@ -114,7 +114,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="/Admin/Issues/Details/@issue.Id" class="text-primary hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors">Chi tiết</a>
+                                    <a href="/Admin/Issues/Details/@issue.Id" class="text-primary hover:text-[#0E2B22] bg-[#EAF1EE] hover:bg-[#D5E3DD] px-3 py-1.5 rounded-md transition-colors">Chi tiết</a>
                                 </td>
                             </tr>
                         }

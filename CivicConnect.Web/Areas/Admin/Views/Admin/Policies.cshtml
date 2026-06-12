@@ -6,13 +6,13 @@
 
 <div class="space-y-6 relative">
     <!-- Header Actions -->
-    <div class="flex justify-between items-center bg-white shadow-sm rounded-lg border border-gray-100 p-5">
+    <div class="flex justify-between items-center bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md border border-gray-100 p-5">
         <div>
-            <h2 class="text-base font-bold text-gray-900">Quản lý Chính sách & Tin tức</h2>
+            <h2 class="text-base font-serif font-bold text-gray-900">Quản lý Chính sách & Tin tức</h2>
             <p class="text-xs text-gray-500 mt-1">Quản lý các thông báo điều hành và chính sách pháp luật của đô thị</p>
         </div>
-        <button id="open-drawer-btn" class="bg-primary hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md text-sm transition-colors flex items-center">
-            <i class="fas fa-plus mr-2"></i> Thêm chính sách mới
+        <button id="open-drawer-btn" class="bg-[#133B2F] hover:bg-[#0E2B22] text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-colors flex items-center">
+            <i class="bi bi-plus mr-2"></i> Thêm chính sách mới
         </button>
     </div>
 
@@ -20,13 +20,13 @@
     @if (!string.IsNullOrEmpty(successMsg))
     {
         <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center shadow-sm">
-            <i class="fas fa-check-circle mr-2 text-green-500"></i>
+            <i class="bi bi-check-circle mr-2 text-green-500"></i>
             <span class="text-sm font-medium">@successMsg</span>
         </div>
     }
 
     <!-- Table -->
-    <div class="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+    <div class="bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -69,7 +69,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@policy.PublishedDate.ToString("dd/MM/yyyy")</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="/Policy/Details/@policy.Id" target="_blank" class="text-primary hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors mr-2">Xem</a>
+                                    <a href="/Policy/Details/@policy.Id" target="_blank" class="text-[#133B2F] hover:text-[#0E2B22] bg-[#EAF1EE] hover:bg-[#D5E3DD] px-3 py-1.5 rounded-xl transition-colors mr-2">Xem</a>
                                 </td>
                             </tr>
                         }
@@ -86,9 +86,9 @@
         <div class="w-screen max-w-md bg-white shadow-xl flex flex-col">
             <!-- Drawer Header -->
             <div class="px-4 py-5 bg-gray-50 border-b border-gray-100 sm:px-6 flex justify-between items-center">
-                <h2 class="text-base font-bold text-gray-900">Thêm Chính sách / Thông báo mới</h2>
+                <h2 class="text-base font-serif font-bold text-gray-900">Thêm Chính sách / Thông báo mới</h2>
                 <button id="close-drawer-btn" class="text-gray-400 hover:text-gray-500 focus:outline-none">
-                    <i class="fas fa-times text-lg"></i>
+                    <i class="bi bi-x text-lg"></i>
                 </button>
             </div>
 
@@ -98,13 +98,13 @@
                 
                 <div>
                     <label for="title" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Tiêu đề văn bản *</label>
-                    <input type="text" name="title" id="title" required class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="Nhập tiêu đề công văn, chỉ thị, tin tức...">
+                    <input type="text" name="title" id="title" required class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="Nhập tiêu đề công văn, chỉ thị, tin tức...">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label for="tag" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Phân loại *</label>
-                        <select name="tag" id="tag" required class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <select name="tag" id="tag" required class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary">
                             <option value="Thông báo">Thông báo</option>
                             <option value="Tin tức">Tin tức</option>
                             <option value="Hướng dẫn">Hướng dẫn</option>
@@ -113,48 +113,48 @@
                     </div>
                     <div>
                         <label for="issuingUnit" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Cơ quan ban hành *</label>
-                        <input type="text" name="issuingUnit" id="issuingUnit" required class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="VD: UBND TP.HCM">
+                        <input type="text" name="issuingUnit" id="issuingUnit" required class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="VD: UBND TP.HCM">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label for="documentNumber" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Số hiệu văn bản</label>
-                        <input type="text" name="documentNumber" id="documentNumber" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="VD: 100/2026/NĐ-CP">
+                        <input type="text" name="documentNumber" id="documentNumber" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="VD: 100/2026/NĐ-CP">
                     </div>
                     <div>
                         <label for="signer" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Người ký duyệt</label>
-                        <input type="text" name="signer" id="signer" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="VD: Nguyễn Văn A">
+                        <input type="text" name="signer" id="signer" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="VD: Nguyễn Văn A">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label for="effectiveDate" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Ngày có hiệu lực</label>
-                        <input type="date" name="effectiveDate" id="effectiveDate" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <input type="date" name="effectiveDate" id="effectiveDate" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary">
                     </div>
                     <div>
                         <label for="sourceUrl" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">URL liên kết ngoài (nếu có)</label>
-                        <input type="url" name="sourceUrl" id="sourceUrl" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://...">
+                        <input type="url" name="sourceUrl" id="sourceUrl" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://...">
                     </div>
                 </div>
 
                 <div>
                     <label for="excerpt" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Tóm tắt ngắn *</label>
-                    <textarea name="excerpt" id="excerpt" rows="2" required class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="Tóm tắt ngắn gọn nội dung văn bản chính sách..."></textarea>
+                    <textarea name="excerpt" id="excerpt" rows="2" required class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="Tóm tắt ngắn gọn nội dung văn bản chính sách..."></textarea>
                 </div>
 
                 <div>
                     <label for="content" class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Nội dung chi tiết *</label>
-                    <textarea name="content" id="content" rows="6" required class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="Điền toàn văn nội dung chính sách pháp lý hoặc thông báo điều hành..."></textarea>
+                    <textarea name="content" id="content" rows="6" required class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" placeholder="Điền toàn văn nội dung chính sách pháp lý hoặc thông báo điều hành..."></textarea>
                 </div>
 
                 <!-- Footer button inside drawer -->
                 <div class="border-t border-gray-150 pt-4 flex space-x-3">
-                    <button type="button" id="cancel-drawer-btn" class="flex-1 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none text-center transition-colors">
+                    <button type="button" id="cancel-drawer-btn" class="flex-1 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-xl text-sm font-medium hover:bg-gray-50 focus:outline-none text-center transition-colors">
                         Huỷ bỏ
                     </button>
-                    <button type="submit" class="flex-1 bg-primary hover:bg-blue-700 text-white py-2.5 px-4 rounded-md text-sm font-medium focus:outline-none transition-colors">
+                    <button type="submit" class="flex-1 bg-[#133B2F] hover:bg-[#0E2B22] text-white py-2.5 px-4 rounded-xl text-sm font-medium focus:outline-none transition-colors">
                         Đăng tải
                     </button>
                 </div>

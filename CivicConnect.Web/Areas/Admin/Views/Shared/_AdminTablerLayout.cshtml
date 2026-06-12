@@ -23,8 +23,16 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Leaflet.js -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Google Fonts: EB Garamond & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Admin Custom Theme (Base Design System) -->
+    <link rel="stylesheet" href="~/css/admin-theme.css" asp-append-version="true" />
     
     <style>
         .theme-dark {
@@ -33,39 +41,17 @@
         .page {
             min-height: 100vh;
         }
-        .nav-link.active {
-            font-weight: 700;
-            background: rgba(32, 107, 196, 0.08) !important;
-            border-left: 3px solid #206bc4;
-        }
         @@media (min-width: 992px) {
             .navbar-vertical.navbar-expand-lg {
-                width: 17.5rem; /* Make sidebar wider and more balanced */
+                width: 15rem;
             }
             .page-wrapper {
-                margin-left: 17.5rem; /* Offset content for the wider sidebar */
+                margin-left: 15rem;
             }
         }
         .navbar-vertical .navbar-brand-autodark {
             font-size: 1.4rem;
             font-weight: 800;
-        }
-        .navbar-vertical .nav-item {
-            padding: 2px 8px;
-        }
-        .navbar-vertical .nav-link {
-            border-radius: 4px;
-            padding: 0.6rem 0.8rem;
-        }
-        .navbar-vertical .dropdown-item {
-            padding: 0.5rem 1.25rem;
-            border-radius: 4px;
-            margin: 2px 0;
-        }
-        .navbar-vertical .dropdown-item.active, .navbar-vertical .dropdown-item:active {
-            background-color: rgba(32, 107, 196, 0.12) !important;
-            color: #206bc4 !important;
-            font-weight: 600;
         }
         /* Search Icon positioning fix */
         .input-icon {

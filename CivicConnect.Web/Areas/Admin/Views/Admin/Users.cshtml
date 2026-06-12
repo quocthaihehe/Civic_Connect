@@ -8,7 +8,7 @@
     <!-- Back Button -->
     <div>
         <a asp-action="Dashboard" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i> Quay lại Trang tổng quan
+            <i class="bi bi-arrow-left mr-2"></i> Quay lại Trang tổng quan
         </a>
     </div>
 
@@ -16,15 +16,15 @@
     @if (!string.IsNullOrEmpty(successMsg))
     {
         <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center shadow-sm">
-            <i class="fas fa-check-circle mr-2 text-green-500"></i>
+            <i class="bi bi-check-circle mr-2 text-green-500"></i>
             <span class="text-sm font-medium">@successMsg</span>
         </div>
     }
 
     <!-- User List Card -->
-    <div class="bg-white shadow-sm rounded-lg border border-gray-100 p-6">
-        <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-users text-primary mr-2"></i> Quản lý danh sách tài khoản hệ thống
+    <div class="bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md border border-gray-100 p-6">
+        <h3 class="text-base font-serif font-bold text-gray-900 mb-4 flex items-center">
+            <i class="bi bi-people text-primary mr-2"></i> Quản lý danh sách tài khoản hệ thống
         </h3>
 
         <div class="overflow-x-auto border border-gray-100 rounded-lg">
@@ -71,11 +71,11 @@
                                     @Html.AntiForgeryToken()
                                     @if (user.IsActive)
                                     {
-                                        <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors">Khoá tài khoản</button>
+                                        <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors">Khoá tài khoản</button>
                                     }
                                     else
                                     {
-                                        <button type="submit" class="bg-green-50 hover:bg-green-100 text-green-600 border border-green-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors">Kích hoạt</button>
+                                        <button type="submit" class="bg-green-50 hover:bg-green-100 text-green-600 border border-green-200 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors">Kích hoạt</button>
                                     }
                                 </form>
                             </td>

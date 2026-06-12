@@ -20,7 +20,7 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-green text-white avatar"><i class="bi bi-wallet2"></i></span>
+                        <span class="bg-green avatar"><i class="bi bi-wallet2"></i></span>
                     </div>
                     <div class="col">
                         <div class="font-weight-bold text-lg">43,300,000 đ</div>
@@ -35,7 +35,7 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-blue text-white avatar"><i class="bi bi-gift"></i></span>
+                        <span class="bg-blue avatar"><i class="bi bi-gift"></i></span>
                     </div>
                     <div class="col">
                         <div class="font-weight-bold text-lg">3 chiến dịch</div>
@@ -50,7 +50,7 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-yellow text-white avatar"><i class="bi bi-percent"></i></span>
+                        <span class="bg-yellow avatar"><i class="bi bi-percent"></i></span>
                     </div>
                     <div class="col">
                         <div class="font-weight-bold text-lg">24.5%</div>
@@ -66,7 +66,7 @@
     <!-- Financial Flow Bar Chart -->
     <div class="col-lg-7">
         <div class="card" style="height: 350px;">
-            <div class="card-header py-2 bg-light">
+            <div class="card-header py-3 bg-transparent border-0">
                 <h3 class="card-title font-weight-bold"><i class="bi bi-graph-up text-primary me-2"></i>Dòng tiền đóng góp theo tháng</h3>
             </div>
             <div class="card-body">
@@ -80,7 +80,7 @@
     <!-- Active Campaigns and progress -->
     <div class="col-lg-5">
         <div class="card" style="height: 350px;">
-            <div class="card-header py-2 bg-light">
+            <div class="card-header py-3 bg-transparent border-0">
                 <h3 class="card-title font-weight-bold"><i class="bi bi-check2-circle text-primary me-2"></i>Chiến dịch kêu gọi tốt nhất</h3>
             </div>
             <div class="card-body overflow-y-auto">
@@ -119,8 +119,8 @@
                     datasets: [{
                         label: 'Số tiền quyên góp (đ)',
                         data: totals,
-                        backgroundColor: '#2fb344',
-                        borderRadius: 4
+                        backgroundColor: '#133B2F',
+                        borderRadius: 6
                     }]
                 },
                 options: {
@@ -128,7 +128,7 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: '#eef0f3' } },
+                        y: { beginAtZero: true, grid: { display: false } },
                         x: { grid: { display: false } }
                     }
                 }

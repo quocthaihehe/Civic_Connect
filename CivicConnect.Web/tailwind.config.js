@@ -10,11 +10,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'primary': '#2563EB',
+        'primary': '#133B2F',
         'success': '#22C55E',
-        'warning': '#F59E0B',
+        'warning': '#E6C200',
         'danger': '#EF4444',
-        'background': '#F8FAFC',
+        'background': '#FDFBF7',
+        'text-main': '#2C3531'
+      },
+      fontFamily: {
+        'sans': ['Inter', 'sans-serif'],
+        'serif': ['"EB Garamond"', 'serif']
       }
     },
   },

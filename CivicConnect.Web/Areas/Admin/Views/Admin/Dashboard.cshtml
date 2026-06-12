@@ -12,11 +12,11 @@
     <!-- Row 1: KPI Statistics Cards -->
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Card 1 -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-100">
+        <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-blue-100 rounded-md p-3">
-                        <i class="fas fa-file-alt text-primary text-xl"></i>
+                    <div class="flex-shrink-0 bg-[#EAF1EE] rounded-xl p-3">
+                        <i class="bi bi-file-text text-primary text-xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
@@ -31,11 +31,11 @@
         </div>
 
         <!-- Card 2 -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-100">
+        <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-yellow-100 rounded-md p-3">
-                        <i class="fas fa-spinner text-warning text-xl"></i>
+                    <div class="flex-shrink-0 bg-yellow-50 rounded-xl p-3">
+                        <i class="bi bi-arrow-repeat text-warning text-xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
@@ -50,11 +50,11 @@
         </div>
 
         <!-- Card 3 -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-100">
+        <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
-                        <i class="fas fa-check-circle text-success text-xl"></i>
+                    <div class="flex-shrink-0 bg-green-50 rounded-xl p-3">
+                        <i class="bi bi-check-circle text-success text-xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
@@ -69,11 +69,11 @@
         </div>
 
         <!-- Card 4 -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-100">
+        <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-red-100 rounded-md p-3">
-                        <i class="fas fa-exclamation-triangle text-danger text-xl"></i>
+                    <div class="flex-shrink-0 bg-red-50 rounded-xl p-3">
+                        <i class="bi bi-exclamation-triangle text-danger text-xl"></i>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
@@ -89,11 +89,11 @@
     </div>
 
     <!-- Row 2: Central Heatmap Section -->
-    <div class="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+    <div class="bg-white shadow-sm rounded-2xl border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h3 class="text-lg leading-6 font-bold text-gray-900">Bản đồ nhiệt phản ánh hiện trường</h3>
+            <h3 class="text-lg leading-6 font-serif font-bold text-gray-900">Bản đồ nhiệt phản ánh hiện trường</h3>
             <div class="flex space-x-2">
-                <select class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                <select class="block w-full pl-3 pr-10 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-primary focus:border-primary rounded-xl">
                     <option>Tất cả danh mục</option>
                     <option>Giao thông</option>
                     <option>Môi trường</option>
@@ -109,16 +109,16 @@
     <!-- Row 3: Analytics Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Left Panel: Bar Chart -->
-        <div class="bg-white shadow-sm rounded-lg border border-gray-100 p-6">
-            <h3 class="text-base font-bold text-gray-900 mb-4">Thống kê phản ánh theo Danh mục</h3>
+        <div class="bg-white shadow-sm rounded-2xl border border-gray-100 p-6 transition-all duration-300 hover:shadow-md">
+            <h3 class="text-base font-serif font-bold text-gray-900 mb-4">Thống kê phản ánh theo Danh mục</h3>
             <div class="h-64">
                 <canvas id="categoryChart"></canvas>
             </div>
         </div>
 
         <!-- Right Panel: Pie Chart -->
-        <div class="bg-white shadow-sm rounded-lg border border-gray-100 p-6">
-            <h3 class="text-base font-bold text-gray-900 mb-4">Tình hình xử lý phản ánh</h3>
+        <div class="bg-white shadow-sm rounded-2xl border border-gray-100 p-6 transition-all duration-300 hover:shadow-md">
+            <h3 class="text-base font-serif font-bold text-gray-900 mb-4">Tình hình xử lý phản ánh</h3>
             <div class="h-64 flex justify-center">
                 <canvas id="statusChart"></canvas>
             </div>
@@ -126,9 +126,9 @@
     </div>
     
     <!-- Row 4: Recent Issues -->
-    <div class="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+    <div class="bg-white shadow-sm rounded-2xl border border-gray-100 overflow-hidden mt-6 transition-all duration-300 hover:shadow-md">
         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-            <h3 class="text-lg leading-6 font-bold text-gray-900">Phản ánh mới nhận</h3>
+            <h3 class="text-lg leading-6 font-serif font-bold text-gray-900">Phản ánh mới nhận</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -228,7 +228,7 @@
                     datasets: [{
                         label: 'Số lượng phản ánh',
                         data: [12, 19, 3, 5, 2],
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: '#133B2F',
                         borderRadius: 4
                     }]
                 },
@@ -246,7 +246,7 @@
                     labels: ['Đã giải quyết', 'Đang xử lý', 'Chờ tiếp nhận'],
                     datasets: [{
                         data: [60, 25, 15],
-                        backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b']
+                        backgroundColor: ['#22c55e', '#133B2F', '#E6C200']
                     }]
                 },
                 options: {
