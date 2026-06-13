@@ -90,7 +90,7 @@
         }
         else
         {
-            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-2">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-2">
                 <i class="bi bi-person"></i> Đăng nhập
             </a>
         }
@@ -176,7 +176,7 @@
 
     @if (SignInManager.IsSignedIn(User)) {
         <div class="mt-auto pt-4 border-top">
-            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="m-0">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-light w-100 rounded-3 text-danger fw-medium py-2 d-flex align-items-center justify-content-center gap-2" style="background: var(--gray-50); border: 1px solid var(--gray-200);">
                     <i class="bi bi-box-arrow-right"></i> Đăng xuất
@@ -185,7 +185,7 @@
         </div>
     } else {
         <div class="mt-auto pt-4 border-top">
-            <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-3 fw-medium py-2 d-flex align-items-center justify-content-center gap-2">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary w-100 rounded-3 fw-medium py-2 d-flex align-items-center justify-content-center gap-2">
                 <i class="bi bi-person"></i> Đăng nhập
             </a>
         </div>

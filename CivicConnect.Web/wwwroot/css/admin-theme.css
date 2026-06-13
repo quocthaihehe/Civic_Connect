@@ -204,7 +204,7 @@ h1, h2, h3, h4, h5, h6,
   border-radius: var(--tblr-border-radius-lg);
   box-shadow: var(--tblr-box-shadow);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #ffffff;
+  background: var(--tblr-bg-surface);
 }
 .card:hover {
   transform: translateY(-4px);
@@ -295,9 +295,84 @@ h1, h2, h3, h4, h5, h6,
 .form-select, .form-control {
   border-radius: 10px;
   border-color: var(--tblr-border-color);
-  background-color: #ffffff;
+  background-color: var(--tblr-bg-surface);
+  color: var(--tblr-body-color);
 }
 .form-select:focus, .form-control:focus {
   border-color: #133B2F;
   box-shadow: 0 0 0 0.25rem rgba(19, 59, 47, 0.1);
+}
+
+/* === DARK MODE OVERRIDES === */
+body.theme-dark, [data-bs-theme="dark"] {
+  --tblr-body-bg: #0B0F19;
+  --tblr-body-bg-rgb: 11, 15, 25;
+  --tblr-body-color: #E2E8F0;
+  --tblr-bg-surface: #151D30;
+  --tblr-border-color: rgba(255, 255, 255, 0.08);
+  --tblr-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.theme-dark h1, body.theme-dark h2, body.theme-dark h3, body.theme-dark h4, body.theme-dark h5, body.theme-dark h6,
+body.theme-dark .page-title, body.theme-dark .card-title, body.theme-dark .form-label {
+  color: #FFFFFF !important;
+}
+
+body.theme-dark .text-muted, body.theme-dark .text-secondary {
+  color: #94A3B8 !important;
+}
+
+body.theme-dark .navbar-light {
+  background: transparent !important;
+}
+
+body.theme-dark .navbar-light .nav-link {
+  color: #E2E8F0 !important;
+}
+
+body.theme-dark .table thead th {
+  background: #1C253B !important;
+  color: #E6C200;
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+body.theme-dark .table tbody td {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: #E2E8F0;
+}
+
+body.theme-dark .table-hover tbody tr:hover {
+  background-color: #1C253B !important;
+}
+
+body.theme-dark .dropdown-menu {
+  background-color: #151D30 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+body.theme-dark .dropdown-item {
+  color: #E2E8F0 !important;
+}
+
+body.theme-dark .dropdown-item:hover {
+  background-color: #1C253B !important;
+  color: #FFFFFF !important;
+}
+
+body.theme-dark .form-select, body.theme-dark .form-control {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.theme-dark .form-select:focus, body.theme-dark .form-control:focus {
+  border-color: #E6C200;
+  box-shadow: 0 0 0 0.25rem rgba(230, 194, 0, 0.15);
+}
+
+body.theme-dark .card-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Sidebar styling overrides in dark mode */
+body.theme-dark .navbar-vertical {
+  background: #102A20 !important; /* Mức xanh đậm tối hơn trong dark mode */
 }

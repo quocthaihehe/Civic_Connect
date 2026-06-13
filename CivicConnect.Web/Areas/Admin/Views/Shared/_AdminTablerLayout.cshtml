@@ -81,8 +81,10 @@
         const theme = localStorage.getItem('tablerTheme') || 'light';
         if (theme === 'dark') {
             document.body.classList.add('theme-dark');
+            document.body.setAttribute('data-bs-theme', 'dark');
         } else {
             document.body.classList.remove('theme-dark');
+            document.body.removeAttribute('data-bs-theme');
         }
     </script>
     
@@ -285,6 +287,11 @@
         // Dark Mode toggle function
         function toggleDarkMode() {
             const isDark = document.body.classList.toggle('theme-dark');
+            if (isDark) {
+                document.body.setAttribute('data-bs-theme', 'dark');
+            } else {
+                document.body.removeAttribute('data-bs-theme');
+            }
             localStorage.setItem('tablerTheme', isDark ? 'dark' : 'light');
             updateDarkModeIcon(isDark);
         }

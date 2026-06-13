@@ -1,6 +1,7 @@
 using CivicConnect.Web.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -26,6 +27,20 @@ namespace CivicConnect.Web.Hubs
 
             if (!string.IsNullOrEmpty(userId))
             {
+                try
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                    if (user != null)
+                    {
+                        user.IsOnline = true;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log or handle error silently to not break connection
+                }
+
                 var notifications = await _context.Notifications
                     .Where(n => n.UserId == userId && !n.IsRead)
                     .OrderByDescending(n => n.CreatedAt)
@@ -44,6 +59,34 @@ namespace CivicConnect.Web.Hubs
             }
 
             await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                userId = Context.UserIdentifier;
+            }
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                try
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                    if (user != null)
+                    {
+                        user.IsOnline = false;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log or handle error silently
+                }
+            }
+
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }

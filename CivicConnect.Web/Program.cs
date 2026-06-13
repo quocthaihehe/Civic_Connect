@@ -96,11 +96,23 @@ using (var scope = app.Services.CreateScope())
     {
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         await DbInitializer.SeedUsersAsync(userManager);
+        
+        // Reset online status of all users to offline at startup
+        var dbContext = services.GetRequiredService<AppDbContext>();
+        var onlineUsers = await dbContext.Users.Where(u => u.IsOnline).ToListAsync();
+        if (onlineUsers.Any())
+        {
+            foreach (var user in onlineUsers)
+            {
+                user.IsOnline = false;
+            }
+            await dbContext.SaveChangesAsync();
+        }
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Lá»—i xáº£y ra khi cháº¡y seeding dá»¯ liá»‡u tÃ i khoáº£n máº«u.");
+        logger.LogError(ex, "Lỗi xảy ra khi chạy seeding dữ liệu tài khoản mẫu hoặc reset trạng thái online.");
     }
 }
 

@@ -261,7 +261,7 @@
                     <div class="glass-card p-4 text-center mb-5" style="border-style: dashed;">
                         <i class="bi bi-person-lock fs-1 text-muted mb-2 d-block"></i>
                         <p class="mb-3 text-secondary">Bạn cần đăng nhập để tham gia thảo luận cùng cộng đồng.</p>
-                        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Issues/Details/@Model.Id" class="btn btn-primary rounded-pill px-4">
+                        <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Issues/Details/@Model.Id" class="btn btn-primary rounded-pill px-4">
                             Đăng nhập ngay
                         </a>
                     </div>
