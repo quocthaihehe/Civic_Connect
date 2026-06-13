@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CivicConnect.Web.Data;
@@ -161,6 +162,7 @@ namespace CivicConnect.Web.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AskAI([FromBody] AskAIRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.Question))

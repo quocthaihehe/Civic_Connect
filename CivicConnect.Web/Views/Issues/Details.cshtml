@@ -391,6 +391,12 @@
         $(document).ready(function() {
             // 1. AJAX Biểu quyết
             $('.vote-btn').on('click', function() {
+                const isAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+                if (!isAuthenticated) {
+                    window.location.href = `/Identity/Account/Login?ReturnUrl=${encodeURIComponent(window.location.pathname)}`;
+                    return;
+                }
+
                 const issueId = $(this).data('id');
                 const voteType = $(this).data('type');
                 const btn = $(this);

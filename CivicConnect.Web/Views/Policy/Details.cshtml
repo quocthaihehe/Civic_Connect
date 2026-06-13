@@ -383,23 +383,31 @@
                 </div>
             </div>
             
-            <!-- Gợi ý câu hỏi nhanh -->
-            <div class="mb-2 d-flex flex-wrap gap-1">
-                <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Tóm tắt nội dung chính')">Tóm tắt chính</button>
-                <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Ngày có hiệu lực của văn bản?')">Ngày hiệu lực?</button>
-                @if (isOfficialDoc || Model.Title.Contains("45/2026/NĐ-CP"))
-                {
-                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Hành vi vứt rác bừa bãi bị phạt bao nhiêu?')">Mức phạt?</button>
-                }
-            </div>
+            <!-- Gợi ý câu hỏi nhanh và Ô nhập câu hỏi (Yêu cầu đăng nhập) -->
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="mb-2 d-flex flex-wrap gap-1">
+                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Tóm tắt nội dung chính')">Tóm tắt chính</button>
+                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Ngày có hiệu lực của văn bản?')">Ngày hiệu lực?</button>
+                    @if (isOfficialDoc || Model.Title.Contains("45/2026/NĐ-CP"))
+                    {
+                        <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Hành vi vứt rác bừa bãi bị phạt bao nhiêu?')">Mức phạt?</button>
+                    }
+                </div>
 
-            <!-- Ô nhập câu hỏi -->
-            <div class="input-group">
-                <input type="text" id="aiQuestionInput" class="form-control form-control-sm" placeholder="Nhập câu hỏi của bạn..." style="font-size: 0.85rem; border-radius: 8px 0 0 8px;" onkeypress="if(event.key === 'Enter') sendQuestion();" />
-                <button class="btn btn-primary btn-sm" type="button" id="sendAiBtn" style="border-radius: 0 8px 8px 0;" onclick="sendQuestion()">
-                    <i class="bi bi-send-fill"></i>
-                </button>
-            </div>
+                <div class="input-group">
+                    <input type="text" id="aiQuestionInput" class="form-control form-control-sm" placeholder="Nhập câu hỏi của bạn..." style="font-size: 0.85rem; border-radius: 8px 0 0 8px;" onkeypress="if(event.key === 'Enter') sendQuestion();" />
+                    <button class="btn btn-primary btn-sm" type="button" id="sendAiBtn" style="border-radius: 0 8px 8px 0;" onclick="sendQuestion()">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-3 rounded bg-light border border-dashed text-secondary" style="font-size: 0.8rem; background-color: var(--tblr-body-bg) !important; border-color: var(--tblr-border-color) !important;">
+                    <i class="bi bi-lock-fill me-1 text-primary"></i> Vui lòng <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="fw-bold text-decoration-none">Đăng nhập</a> để sử dụng Trợ lý Pháp luật AI.
+                </div>
+            }
         </div>
     </div>
 </div>

@@ -74,10 +74,19 @@
                         }
                         else
                         {
-                            <form asp-action="RegisterEvent" method="post">
-                                <input type="hidden" name="eventId" value="@ev.Id" />
-                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">Đăng ký tham gia</button>
-                            </form>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-action="RegisterEvent" method="post">
+                                    <input type="hidden" name="eventId" value="@ev.Id" />
+                                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">Đăng ký tham gia</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-primary w-100 rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-lock-fill me-2"></i>Đăng nhập để đăng ký
+                                </a>
+                            }
                         }
                     </div>
                 </div>

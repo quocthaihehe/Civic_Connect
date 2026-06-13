@@ -53,12 +53,21 @@
                         }
                         else
                         {
-                            <form asp-action="SignPetition" method="post">
-                                <input type="hidden" name="petitionId" value="@petition.Id" />
-                                <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold shadow-sm">
-                                    <i class="bi bi-pen me-2"></i>Ký tên ủng hộ ngay
-                                </button>
-                            </form>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-action="SignPetition" method="post">
+                                    <input type="hidden" name="petitionId" value="@petition.Id" />
+                                    <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold shadow-sm">
+                                        <i class="bi bi-pen me-2"></i>Ký tên ủng hộ ngay
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-danger w-100 rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-lock-fill me-2"></i>Đăng nhập để ký tên
+                                </a>
+                            }
                         }
                     </div>
                 </div>

@@ -64,19 +64,36 @@
                         else
                         {
                             <!-- Form bình chọn -->
-                            <form asp-action="VotePoll" method="post">
-                                <input type="hidden" name="pollId" value="@poll.Id" />
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-action="VotePoll" method="post">
+                                    <input type="hidden" name="pollId" value="@poll.Id" />
+                                    <div class="d-flex flex-column gap-2 mb-4">
+                                        @foreach (var option in poll.Options)
+                                        {
+                                            <label class="btn btn-outline-primary text-start rounded-3 py-2 px-3">
+                                                <input type="radio" name="optionId" value="@option.Id" class="me-2" required>
+                                                @option.Text
+                                            </label>
+                                        }
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold shadow-sm">Gửi bình chọn</button>
+                                </form>
+                            }
+                            else
+                            {
                                 <div class="d-flex flex-column gap-2 mb-4">
                                     @foreach (var option in poll.Options)
                                     {
-                                        <label class="btn btn-outline-primary text-start rounded-3 py-2 px-3">
-                                            <input type="radio" name="optionId" value="@option.Id" class="me-2" required>
+                                        <div class="border rounded-3 py-2 px-3 text-muted bg-light border-light opacity-75">
                                             @option.Text
-                                        </label>
+                                        </div>
                                     }
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold shadow-sm">Gửi bình chọn</button>
-                            </form>
+                                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-primary w-100 rounded-pill fw-semibold shadow-sm">
+                                    <i class="bi bi-lock-fill me-1"></i> Đăng nhập để bình chọn
+                                </a>
+                            }
                         }
                     </div>
                 </div>

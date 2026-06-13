@@ -4,6 +4,7 @@ using CivicConnect.Web.Services;
 using CivicConnect.Web.Models;
 using CivicConnect.Web.Data;
 using CivicConnect.Web.Hubs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +68,7 @@ namespace CivicConnect.Web.Controllers
         }
 
         // GET: /Donation/Donate/{id}
+        [Authorize]
         public async Task<IActionResult> Donate(int id)
         {
             var category = await _context.DonationCategories
@@ -82,6 +84,7 @@ namespace CivicConnect.Web.Controllers
 
         // POST: /Donation/SubmitDonation
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitDonation(DonationOrderModel model)
         {
