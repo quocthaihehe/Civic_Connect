@@ -120,7 +120,7 @@
 
                         <div class="mb-2">
                             <label asp-for="ImageFiles" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                            <input type="file" asp-for="ImageFiles" class="form-control rounded-3" multiple accept="image/*" id="image-upload-input" />
+                            <input type="file" asp-for="ImageFiles" class="form-control rounded-3" multiple accept="image/*, .heic, .HEIC" id="image-upload-input" />
                             <span asp-validation-for="ImageFiles" class="text-danger" style="font-size: 0.75rem;"></span>
                             <div class="d-flex flex-wrap gap-2 mt-1" id="image-previews-container"></div>
                         </div>
@@ -176,6 +176,8 @@
     <partial name="_ValidationScriptsPartial" />
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- heic2any for HEIC decoding client-side -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
     <!-- Map selection logic script -->
     <script src="~/js/issue-create.js" asp-append-version="true"></script>
 }

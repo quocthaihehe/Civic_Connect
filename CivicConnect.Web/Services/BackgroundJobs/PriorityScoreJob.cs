@@ -1,4 +1,4 @@
-﻿using CivicConnect.Web.Repositories;
+using CivicConnect.Web.Repositories;
 using CivicConnect.Web.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,6 +23,9 @@ namespace CivicConnect.Web.Services.BackgroundJobs
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("PriorityScoreJob background task is starting.");
+
+            // Đợi 5 giây để migrations chạy xong
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 
             while (!stoppingToken.IsCancellationRequested)
             {

@@ -166,6 +166,78 @@ namespace CivicConnect.Web.Data
                     Address = "29 Nguyễn Trung Ngạn, Bến Nghé, Quận 1, TP. Hồ Chí Minh",
                     Phone = "02838290290",
                     Email = "bennghe.q1@tphcm.gov.vn"
+                },
+                new GovernmentUnit
+                {
+                    Id = "UBND_BIENHOA",
+                    Name = "UBND TP. Biên Hòa",
+                    Type = GovernmentUnitType.District,
+                    ProvinceCode = "36",
+                    DistrictCode = "297",
+                    Address = "Biên Hòa, Đồng Nai",
+                    Phone = "02513822501",
+                    Email = "bienhoa@dongnai.gov.vn"
+                },
+                new GovernmentUnit
+                {
+                    Id = "UBND_LONGHUNG",
+                    Name = "UBND Phường Long Hưng",
+                    Type = GovernmentUnitType.Ward,
+                    ParentUnitId = "UBND_BIENHOA",
+                    ProvinceCode = "36",
+                    DistrictCode = "297",
+                    WardCode = "10834",
+                    Address = "Long Hưng, Biên Hòa, Đồng Nai",
+                    Phone = "02513822502",
+                    Email = "longhung.bienhoa@dongnai.gov.vn"
+                },
+                new GovernmentUnit
+                {
+                    Id = "UBND_THUDAUMOT",
+                    Name = "UBND TP. Thủ Dầu Một",
+                    Type = GovernmentUnitType.District,
+                    ProvinceCode = "37",
+                    DistrictCode = "300",
+                    Address = "Thủ Dầu Một, Bình Dương",
+                    Phone = "02743822001",
+                    Email = "thudaumot@binhduong.gov.vn"
+                },
+                new GovernmentUnit
+                {
+                    Id = "UBND_PHUCUONG",
+                    Name = "UBND Phường Phú Cường",
+                    Type = GovernmentUnitType.Ward,
+                    ParentUnitId = "UBND_THUDAUMOT",
+                    ProvinceCode = "37",
+                    DistrictCode = "300",
+                    WardCode = "11000",
+                    Address = "Phú Cường, Thủ Dầu Một, Bình Dương",
+                    Phone = "02743822002",
+                    Email = "phucuong.tdm@binhduong.gov.vn"
+                },
+                new GovernmentUnit
+                {
+                    Id = "UBND_HOANKIEM",
+                    Name = "UBND Quận Hoàn Kiếm",
+                    Type = GovernmentUnitType.District,
+                    ProvinceCode = "01",
+                    DistrictCode = "001",
+                    Address = "Hoàn Kiếm, Hà Nội",
+                    Phone = "02438252601",
+                    Email = "hoankiem@hanoi.gov.vn"
+                },
+                new GovernmentUnit
+                {
+                    Id = "UBND_TRANGTIEN",
+                    Name = "UBND Phường Tràng Tiền",
+                    Type = GovernmentUnitType.Ward,
+                    ParentUnitId = "UBND_HOANKIEM",
+                    ProvinceCode = "01",
+                    DistrictCode = "001",
+                    WardCode = "00001",
+                    Address = "Tràng Tiền, Hoàn Kiếm, Hà Nội",
+                    Phone = "02438252602",
+                    Email = "trangtien.hk@hanoi.gov.vn"
                 }
             );
 
@@ -179,7 +251,37 @@ namespace CivicConnect.Web.Data
                 new UnitCategory { GovernmentUnitId = "UBND_Q1", Category = IssueCategory.Environment },
                 new UnitCategory { GovernmentUnitId = "UBND_Q1", Category = IssueCategory.Security },
                 new UnitCategory { GovernmentUnitId = "UBND_Q1", Category = IssueCategory.Infrastructure },
-                new UnitCategory { GovernmentUnitId = "UBND_Q1", Category = IssueCategory.Administration }
+                new UnitCategory { GovernmentUnitId = "UBND_Q1", Category = IssueCategory.Administration },
+
+                new UnitCategory { GovernmentUnitId = "UBND_LONGHUNG", Category = IssueCategory.Traffic },
+                new UnitCategory { GovernmentUnitId = "UBND_LONGHUNG", Category = IssueCategory.Environment },
+                new UnitCategory { GovernmentUnitId = "UBND_LONGHUNG", Category = IssueCategory.Security },
+                new UnitCategory { GovernmentUnitId = "UBND_LONGHUNG", Category = IssueCategory.Infrastructure },
+                new UnitCategory { GovernmentUnitId = "UBND_BIENHOA", Category = IssueCategory.Traffic },
+                new UnitCategory { GovernmentUnitId = "UBND_BIENHOA", Category = IssueCategory.Environment },
+                new UnitCategory { GovernmentUnitId = "UBND_BIENHOA", Category = IssueCategory.Security },
+                new UnitCategory { GovernmentUnitId = "UBND_BIENHOA", Category = IssueCategory.Infrastructure },
+                new UnitCategory { GovernmentUnitId = "UBND_BIENHOA", Category = IssueCategory.Administration },
+
+                new UnitCategory { GovernmentUnitId = "UBND_PHUCUONG", Category = IssueCategory.Traffic },
+                new UnitCategory { GovernmentUnitId = "UBND_PHUCUONG", Category = IssueCategory.Environment },
+                new UnitCategory { GovernmentUnitId = "UBND_PHUCUONG", Category = IssueCategory.Security },
+                new UnitCategory { GovernmentUnitId = "UBND_PHUCUONG", Category = IssueCategory.Infrastructure },
+                new UnitCategory { GovernmentUnitId = "UBND_THUDAUMOT", Category = IssueCategory.Traffic },
+                new UnitCategory { GovernmentUnitId = "UBND_THUDAUMOT", Category = IssueCategory.Environment },
+                new UnitCategory { GovernmentUnitId = "UBND_THUDAUMOT", Category = IssueCategory.Security },
+                new UnitCategory { GovernmentUnitId = "UBND_THUDAUMOT", Category = IssueCategory.Infrastructure },
+                new UnitCategory { GovernmentUnitId = "UBND_THUDAUMOT", Category = IssueCategory.Administration },
+
+                new UnitCategory { GovernmentUnitId = "UBND_TRANGTIEN", Category = IssueCategory.Traffic },
+                new UnitCategory { GovernmentUnitId = "UBND_TRANGTIEN", Category = IssueCategory.Environment },
+                new UnitCategory { GovernmentUnitId = "UBND_TRANGTIEN", Category = IssueCategory.Security },
+                new UnitCategory { GovernmentUnitId = "UBND_TRANGTIEN", Category = IssueCategory.Infrastructure },
+                new UnitCategory { GovernmentUnitId = "UBND_HOANKIEM", Category = IssueCategory.Traffic },
+                new UnitCategory { GovernmentUnitId = "UBND_HOANKIEM", Category = IssueCategory.Environment },
+                new UnitCategory { GovernmentUnitId = "UBND_HOANKIEM", Category = IssueCategory.Security },
+                new UnitCategory { GovernmentUnitId = "UBND_HOANKIEM", Category = IssueCategory.Infrastructure },
+                new UnitCategory { GovernmentUnitId = "UBND_HOANKIEM", Category = IssueCategory.Administration }
             );
 
             // Seed sample policies/announcements with legal metadata

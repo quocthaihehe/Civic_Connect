@@ -56,6 +56,7 @@ namespace CivicConnect.Web.Models.Home
         public string AuthorName { get; set; } = string.Empty;
         public string AuthorAvatar { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public bool IsVerified { get; set; }
     }
 
     public class MyIssueRowDto
@@ -70,5 +71,6 @@ namespace CivicConnect.Web.Models.Home
         public DateTime? DueDate { get; set; }
         public bool IsOverdue => DueDate.HasValue && DueDate < DateTime.Now && Status != IssueStatus.Resolved;
         public int DaysLeft => DueDate.HasValue ? (int)Math.Max(0, (DueDate.Value - DateTime.Now).TotalDays) : 0;
+        public bool IsVerified { get; set; }
     }
 }

@@ -12,35 +12,84 @@ $(document).ready(function() {
         blobUrls = [];
     }
 
-    fileInput.on('change', function() {
+    fileInput.on('change', async function() {
         // Giải phóng blob URLs cũ trước khi tạo mới
         revokeAllBlobUrls();
         previewsContainer.empty();
-        const files = this.files;
+        const originalFiles = Array.from(this.files);
 
-        if (!files || files.length === 0) return;
+        if (!originalFiles || originalFiles.length === 0) return;
 
-        if (files.length > 5) {
+        if (originalFiles.length > 5) {
             alert("Chỉ cho phép tải lên tối đa 5 hình ảnh.");
             fileInput.val(''); // Clear input
             return;
         }
 
+        const containsHeic = originalFiles.some(f => {
+            const name = f.name.toLowerCase();
+            return name.endsWith('.heic') || name.endsWith('.heif');
+        });
+
+        if (containsHeic) {
+            previewsContainer.html('<div class="text-primary fs-7" id="heic-loading"><span class="spinner-border spinner-border-sm me-1"></span> Đang giải mã ảnh HEIC...</div>');
+        }
+
+        const processedFiles = [];
+        try {
+            for (let file of originalFiles) {
+                const fileName = file.name.toLowerCase();
+                if (fileName.endsWith('.heic') || fileName.endsWith('.heif')) {
+                    const conversionResult = await heic2any({
+                        blob: file,
+                        toType: 'image/jpeg',
+                        quality: 0.8
+                    });
+                    
+                    const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    const resultBlob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
+                    
+                    const convertedFile = new File([resultBlob], baseName + ".jpg", {
+                        type: "image/jpeg"
+                    });
+                    processedFiles.push(convertedFile);
+                } else {
+                    processedFiles.push(file);
+                }
+            }
+        } catch (e) {
+            console.error("Lỗi giải mã HEIC:", e);
+            alert("Không thể giải mã ảnh HEIC trên trình duyệt.");
+            fileInput.val('');
+            previewsContainer.empty();
+            return;
+        }
+
+        $('#heic-loading').remove();
+
         // Kiểm tra kích thước từng file trước khi tạo preview
-        for (let i = 0; i < files.length; i++) {
-            if (files[i].size > 5 * 1024 * 1024) {
-                alert('Tệp ' + files[i].name + ' vượt quá dung lượng tối đa cho phép (5MB).');
+        for (let i = 0; i < processedFiles.length; i++) {
+            if (processedFiles[i].size > 5 * 1024 * 1024) {
+                alert('Tệp ' + processedFiles[i].name + ' vượt quá dung lượng tối đa cho phép (5MB).');
                 fileInput.val('');
                 previewsContainer.empty();
                 return;
             }
         }
 
+        try {
+            const dataTransfer = new DataTransfer();
+            processedFiles.forEach(file => dataTransfer.items.add(file));
+            fileInput[0].files = dataTransfer.files;
+        } catch (e) {
+            console.error("Lỗi cập nhật files cho input:", e);
+        }
+
         // Sử dụng DocumentFragment để batch DOM updates — tránh trigger
         // Browser Link DOM mutation observer nhiều lần gây crash kết nối VS
         var fragment = document.createDocumentFragment();
-        for (let i = 0; i < files.length; i++) {
-            var imgUrl = URL.createObjectURL(files[i]);
+        for (let i = 0; i < processedFiles.length; i++) {
+            var imgUrl = URL.createObjectURL(processedFiles[i]);
             blobUrls.push(imgUrl);
 
             var wrapper = document.createElement('div');

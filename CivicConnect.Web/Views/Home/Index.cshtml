@@ -153,7 +153,13 @@
                               <div class="d-flex w-100 align-items-center flex-wrap gap-2">
                                   <div style="flex: 2; min-width: 250px;">
                                       <span class="badge bg-secondary mb-1 fw-medium px-2 py-1 rounded-1" style="font-size: 0.7rem;">@issue.CategoryLabel</span>
-                                      <h6 class="fw-bold mb-0 text-dark">@issue.Title</h6>
+                                      <h6 class="fw-bold mb-0 text-dark">
+                                          @issue.Title
+                                          @if (issue.IsVerified)
+                                          {
+                                              <i class="bi bi-patch-check-fill text-primary ms-1" title="Đã xác thực"></i>
+                                          }
+                                      </h6>
                                   </div>
                                   <div style="flex: 1; min-width: 120px;" class="text-muted small">
                                       <i class="bi bi-clock"></i> @issue.CreatedAt.ToString("dd/MM/yyyy")

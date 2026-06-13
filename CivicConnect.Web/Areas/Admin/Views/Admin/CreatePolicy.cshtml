@@ -1,0 +1,76 @@
+@model CivicConnect.Web.Models.Entities.Policy
+@{
+    ViewData["Title"] = "Đăng chính sách / Tin tức";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-10 col-lg-8">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold mb-4 text-primary"><i class="bi bi-file-earmark-medical-fill me-2"></i> Đăng Tin Tức / Văn Bản Chính Sách Mới</h4>
+
+            <form asp-action="CreatePolicy" method="post" class="needs-validation">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label asp-for="Title" class="form-label fw-semibold" style="font-size: 0.85rem;">Tiêu đề bài viết / văn bản</label>
+                        <input asp-for="Title" class="form-control rounded-3 text-dark" placeholder="Ví dụ: Thông báo dọn dẹp vệ sinh khu phố..." required />
+                        <span asp-validation-for="Title" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Tag" class="form-label fw-semibold" style="font-size: 0.85rem;">Phân loại (Tag)</label>
+                        <select asp-for="Tag" class="form-select rounded-3 text-dark" required>
+                            <option value="Thông báo">Thông báo</option>
+                            <option value="Nghị định">Nghị định</option>
+                            <option value="Thông tư">Thông tư</option>
+                            <option value="Tin tức">Tin tức</option>
+                        </select>
+                        <span asp-validation-for="Tag" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IssuingUnit" class="form-label fw-semibold" style="font-size: 0.85rem;">Cơ quan ban hành</label>
+                        <input asp-for="IssuingUnit" class="form-control rounded-3 text-dark" placeholder="Ví dụ: UBND Phường Bến Nghé" required />
+                        <span asp-validation-for="IssuingUnit" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Signer" class="form-label fw-semibold" style="font-size: 0.85rem;">Người ký duyệt (nếu có)</label>
+                        <input asp-for="Signer" class="form-control rounded-3 text-dark" placeholder="Ví dụ: Chủ tịch UBND Nguyễn Văn A" />
+                        <span asp-validation-for="Signer" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DocumentNumber" class="form-label fw-semibold" style="font-size: 0.85rem;">Số hiệu văn bản (nếu có)</label>
+                        <input asp-for="DocumentNumber" class="form-control rounded-3 text-dark" placeholder="Ví dụ: 124/TB-UBND" />
+                        <span asp-validation-for="DocumentNumber" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="SourceUrl" class="form-label fw-semibold" style="font-size: 0.85rem;">Đường dẫn nguồn tham khảo (nếu có)</label>
+                        <input asp-for="SourceUrl" type="url" class="form-control rounded-3 text-dark" placeholder="Ví dụ: https://vanban.chinhphu.vn" />
+                        <span asp-validation-for="SourceUrl" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Excerpt" class="form-label fw-semibold" style="font-size: 0.85rem;">Tóm tắt ngắn</label>
+                        <input asp-for="Excerpt" class="form-control rounded-3 text-dark" placeholder="Tóm tắt ngắn gọn nội dung bài đăng (hiển thị ở danh sách rút gọn)" required />
+                        <span asp-validation-for="Excerpt" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Content" class="form-label fw-semibold" style="font-size: 0.85rem;">Nội dung chi tiết</label>
+                        <textarea asp-for="Content" class="form-control rounded-3 text-dark" rows="8" placeholder="Nhập toàn văn nội dung thông báo, nghị định hoặc chính sách..." required></textarea>
+                        <span asp-validation-for="Content" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top border-light">
+                    <a asp-controller="Policy" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Hủy Bỏ</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Đăng Tin Bài</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

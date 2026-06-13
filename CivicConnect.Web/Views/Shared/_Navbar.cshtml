@@ -49,10 +49,14 @@
                 <span class="avatar-name d-none d-md-inline text-dark fw-medium pe-2" style="font-size: 0.9rem;">@userName</span>
               </button>
               <div class="avatar-menu shadow-sm" id="avatarMenu" style="display:none; position: absolute; right: 0; top: calc(100% + 8px); background: #fff; min-width: 200px; border-radius: 8px; border: 1px solid var(--gray-200); z-index: 200;">
-                <a href="/Account/Profile" class="d-block px-3 py-2 text-decoration-none text-dark"><i class="bi bi-person me-2"></i> Hồ sơ cá nhân</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="Dashboard" class="d-block px-3 py-2 text-decoration-none text-primary fw-bold"><i class="bi bi-speedometer2 me-2"></i> Trang quản trị</a>
+                }
+                <a asp-area="Identity" asp-page="/Account/Profile" class="d-block px-3 py-2 text-decoration-none text-dark"><i class="bi bi-person me-2"></i> Hồ sơ cá nhân</a>
                 <a href="/Issues/MyIssues" class="d-block px-3 py-2 text-decoration-none text-dark"><i class="bi bi-collection me-2"></i> Phản ánh của tôi</a>
                 <div style="height: 1px; background: var(--gray-200); margin: 4px 0;"></div>
-                <form asp-controller="Account" asp-action="Logout" method="post" id="navbarLogoutForm" class="d-block w-100 m-0">
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post" id="navbarLogoutForm" class="d-block w-100 m-0">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="dropdown-item text-danger border-0 text-start w-100 px-3 py-2" style="background: none; font-size: 0.95rem;">
                         <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
@@ -63,7 +67,7 @@
         }
         else
         {
-            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-2">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-2">
                 <i class="bi bi-person"></i> Đăng nhập
             </a>
         }
@@ -139,7 +143,7 @@
 
     @if (SignInManager.IsSignedIn(User)) {
         <div class="mt-auto pt-4 border-top">
-            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="m-0">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-light w-100 rounded-3 text-danger fw-medium py-2 d-flex align-items-center justify-content-center gap-2" style="background: var(--gray-50); border: 1px solid var(--gray-200);">
                     <i class="bi bi-box-arrow-right"></i> Đăng xuất
@@ -148,7 +152,7 @@
         </div>
     } else {
         <div class="mt-auto pt-4 border-top">
-            <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-3 fw-medium py-2 d-flex align-items-center justify-content-center gap-2">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary w-100 rounded-3 fw-medium py-2 d-flex align-items-center justify-content-center gap-2">
                 <i class="bi bi-person"></i> Đăng nhập
             </a>
         </div>

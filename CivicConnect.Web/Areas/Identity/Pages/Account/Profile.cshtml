@@ -39,7 +39,7 @@
                                 <i class="bi bi-camera-fill" style="font-size: 0.75rem;" id="avatarIcon"></i>
                                 <div class="spinner-border spinner-border-sm text-white d-none" id="avatarSpinner" role="status"></div>
                             </label>
-                            <input type="file" id="avatarFileInput" class="d-none" accept="image/*" />
+                            <input type="file" id="avatarFileInput" class="d-none" accept="image/*, .heic, .HEIC" />
                         </div>
                         <h6 class="fw-bold mb-0 mt-1 position-relative" style="font-size: 0.95rem; z-index: 1;">@Model.Input.FullName</h6>
                         <small class="text-muted position-relative d-block" style="font-size: 0.75rem; z-index: 1;" id="avatarStatus">Công dân</small>
@@ -81,6 +81,9 @@
                                 <select asp-for="Input.ProvinceCode" id="province-select" class="form-select form-select-sm rounded-2" required>
                                     <option value="">Chọn Tỉnh/TP</option>
                                     <option value="79" selected="@(Model.Input.ProvinceCode == "79")">TP. Hồ Chí Minh</option>
+                                    <option value="36" selected="@(Model.Input.ProvinceCode == "36")">Tỉnh Đồng Nai</option>
+                                    <option value="37" selected="@(Model.Input.ProvinceCode == "37")">Tỉnh Bình Dương</option>
+                                    <option value="01" selected="@(Model.Input.ProvinceCode == "01")">TP. Hà Nội</option>
                                 </select>
                             </div>
                             <div class="col-sm-4">
@@ -111,6 +114,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
     <script>
         $(document).ready(function() {
             // === CLOUDINARY CLIENT-SIDE UPLOAD ===
@@ -118,12 +122,47 @@
             const UPLOAD_PRESET = 'civic_db';
 
             $('#avatarFileInput').change(async function() {
-                const file = this.files[0];
+                let file = this.files[0];
                 if (!file) return;
+
+                const fileName = file.name.toLowerCase();
+                const isHeic = fileName.endsWith('.heic') || fileName.endsWith('.heif');
+
+                // Hiển thị trạng thái đang chuẩn bị / chuyển đổi
+                $('#avatarIcon').addClass('d-none');
+                $('#avatarSpinner').removeClass('d-none');
+
+                if (isHeic) {
+                    $('#avatarStatus').text('Đang giải mã HEIC...').css('color', 'var(--primary-500)');
+                    $('#avatar-preview').attr('src', 'https://cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif');
+                    try {
+                        const conversionResult = await heic2any({
+                            blob: file,
+                            toType: 'image/jpeg',
+                            quality: 0.8
+                        });
+                        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                        file = new File([conversionResult], baseName + ".jpg", {
+                            type: "image/jpeg"
+                        });
+                    } catch (err) {
+                        console.error('Lỗi chuyển đổi HEIC:', err);
+                        alert('Không thể giải mã ảnh HEIC này trên trình duyệt.');
+                        $('#avatar-preview').attr('src', '/images/default-avatar.png');
+                        $(this).val('');
+                        $('#avatarIcon').removeClass('d-none');
+                        $('#avatarSpinner').addClass('d-none');
+                        $('#avatarStatus').text('Công dân').css('color', '');
+                        return;
+                    }
+                }
 
                 if (file.size > 5 * 1024 * 1024) {
                     alert('Ảnh không được vượt quá 5MB');
                     $(this).val('');
+                    $('#avatarIcon').removeClass('d-none');
+                    $('#avatarSpinner').addClass('d-none');
+                    $('#avatarStatus').text('Công dân').css('color', '');
                     return;
                 }
 
@@ -134,9 +173,6 @@
                 }
                 reader.readAsDataURL(file);
 
-                // Hiển thị trạng thái đang upload
-                $('#avatarIcon').addClass('d-none');
-                $('#avatarSpinner').removeClass('d-none');
                 $('#avatarStatus').text('Đang tải ảnh lên...').css('color', 'var(--primary-500)');
 
                 try {
@@ -173,6 +209,15 @@
                     { code: "760", name: "Quận 1" },
                     { code: "770", name: "Quận 3" },
                     { code: "774", name: "Quận Bình Thạnh" }
+                ],
+                "36": [
+                    { code: "297", name: "TP. Biên Hòa" }
+                ],
+                "37": [
+                    { code: "300", name: "TP. Thủ Dầu Một" }
+                ],
+                "01": [
+                    { code: "001", name: "Quận Hoàn Kiếm" }
                 ]
             };
 
@@ -189,6 +234,18 @@
                 "774": [
                     { code: "27157", name: "Phường 19" },
                     { code: "27159", name: "Phường 22" }
+                ],
+                "297": [
+                    { code: "10834", name: "Phường Long Hưng" },
+                    { code: "10801", name: "Phường Quyết Thắng" }
+                ],
+                "300": [
+                    { code: "11000", name: "Phường Phú Cường" },
+                    { code: "11005", name: "Phường Chánh Nghĩa" }
+                ],
+                "001": [
+                    { code: "00001", name: "Phường Tràng Tiền" },
+                    { code: "00005", name: "Phường Hàng Bạc" }
                 ]
             };
 

@@ -48,7 +48,13 @@
 
                         <div class="p-4 flex-grow-1 d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                <h6 class="fw-bold text-dark text-truncate mb-0" style="max-width: 80%;"><a asp-action="Details" asp-route-id="@issue.Id" class="text-decoration-none text-dark">@issue.Title</a></h6>
+                                <h6 class="fw-bold text-dark text-truncate mb-0" style="max-width: 80%;">
+                                    <a asp-action="Details" asp-route-id="@issue.Id" class="text-decoration-none text-dark">@issue.Title</a>
+                                    @if (issue.IsVerified)
+                                    {
+                                        <i class="bi bi-patch-check-fill text-primary ms-1" title="Đã xác thực"></i>
+                                    }
+                                </h6>
                                 <span class="badge @GetStatusClass(issue.Status) rounded-pill" style="font-size: 0.7rem; font-weight: 600;">@GetStatusName(issue.Status)</span>
                             </div>
 

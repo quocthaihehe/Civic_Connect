@@ -1,0 +1,39 @@
+@model CivicConnect.Web.Models.Entities.DonationCategory
+@{
+    ViewData["Title"] = "Tạo chiến dịch quyên góp";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold mb-4 text-primary"><i class="bi bi-plus-circle-fill me-2"></i> Tạo Chiến Dịch Quyên Góp Mới</h4>
+
+            <form asp-action="CreateCampaign" method="post" class="needs-validation">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-semibold" style="font-size: 0.85rem;">Tên chiến dịch</label>
+                    <input asp-for="Name" class="form-control rounded-3 text-dark" placeholder="Ví dụ: Quỹ Trồng Cây Xanh Biên Hòa..." required />
+                    <span asp-validation-for="Name" class="text-danger" style="font-size: 0.75rem;"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-semibold" style="font-size: 0.85rem;">Mô tả chiến dịch</label>
+                    <textarea asp-for="Description" class="form-control rounded-3 text-dark" rows="4" placeholder="Mô tả mục đích sử dụng quỹ quyên góp, kế hoạch triển khai..." required></textarea>
+                    <span asp-validation-for="Description" class="text-danger" style="font-size: 0.75rem;"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="TargetAmount" class="form-label fw-semibold" style="font-size: 0.85rem;">Số tiền mục tiêu (VNĐ)</label>
+                    <input asp-for="TargetAmount" type="number" class="form-control rounded-3 text-dark" placeholder="Ví dụ: 50000000" min="1000000" required />
+                    <span asp-validation-for="TargetAmount" class="text-danger" style="font-size: 0.75rem;"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Donations" class="btn btn-outline-secondary rounded-pill px-4">Hủy Bỏ</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Tạo Chiến Dịch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,179 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Issue>
+@using CivicConnect.Web.Models.Enums
+@{
+    ViewData["Title"] = "Quản lý phản ánh";
+    var units = ViewData["GovernmentUnits"] as IEnumerable<CivicConnect.Web.Models.Entities.GovernmentUnit> ?? Enumerable.Empty<CivicConnect.Web.Models.Entities.GovernmentUnit>();
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-12">
+        @if (!string.IsNullOrEmpty(successMsg))
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-3" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @successMsg
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-journal-check text-primary me-2"></i> Danh Sách Phản Ánh
+                </h4>
+                <span class="badge bg-secondary rounded-pill px-3 py-2">Tổng số: @Model.Count()</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr class="text-secondary" style="font-size:0.85rem;">
+                            <th>Mã</th>
+                            <th>Thông tin phản ánh</th>
+                            <th>Địa bàn & Phân cấp</th>
+                            <th>Độ ưu tiên</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var issue in Model)
+                        {
+                            var statusClass = issue.Status switch
+                            {
+                                IssueStatus.Pending => "bg-warning text-dark",
+                                IssueStatus.Assigned => "bg-info text-white",
+                                IssueStatus.Processing => "bg-primary text-white",
+                                IssueStatus.Resolved => "bg-success text-white",
+                                IssueStatus.Rejected => "bg-danger text-white",
+                                _ => "bg-secondary text-white"
+                            };
+
+                            var statusName = issue.Status switch
+                            {
+                                IssueStatus.Pending => "Chờ tiếp nhận",
+                                IssueStatus.Assigned => "Đã phân công",
+                                IssueStatus.Processing => "Đang xử lý",
+                                IssueStatus.Resolved => "Đã giải quyết",
+                                IssueStatus.Rejected => "Từ chối",
+                                IssueStatus.Closed => "Đóng tự động",
+                                _ => "Không xác định"
+                            };
+
+                            var priorityClass = issue.Priority switch
+                            {
+                                IssuePriority.Critical => "text-danger fw-bold",
+                                IssuePriority.High => "text-warning fw-bold",
+                                IssuePriority.Medium => "text-primary",
+                                _ => "text-secondary"
+                            };
+
+                            var priorityName = issue.Priority switch
+                            {
+                                IssuePriority.Critical => "Khẩn cấp",
+                                IssuePriority.High => "Cao",
+                                IssuePriority.Medium => "Trung bình",
+                                IssuePriority.Low => "Thấp",
+                                _ => "Không xác định"
+                            };
+
+                            <tr style="font-size: 0.9rem;">
+                                <td><strong>#@issue.Id</strong></td>
+                                <td>
+                                    <div class="fw-bold text-dark mb-1">
+                                        @issue.Title
+                                        @if (issue.IsVerified)
+                                        {
+                                            <span class="ms-1 text-primary" title="Đã xác thực"><i class="bi bi-patch-check-fill"></i></span>
+                                        }
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        Gửi bởi: @(issue.IsAnonymous ? "Ẩn danh" : issue.Author?.FullName) | @issue.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 0.8rem; font-weight: 500;">@issue.Address</div>
+                                    <div class="text-muted" style="font-size: 0.75rem; margin-top: 2px;">
+                                        Đơn vị: @(issue.AssignedUnit?.Name ?? "Chưa phân phối")
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="@priorityClass">@priorityName</span>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Điểm: @issue.PriorityScore.ToString("F1")</div>
+                                </td>
+                                <td>
+                                    <span class="badge @statusClass">@statusName</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <!-- Chi tiết -->
+                                        <a href="/Issues/Details/@issue.Id" class="btn btn-sm btn-outline-primary" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+
+                                        <!-- Duyệt bài (Verify) -->
+                                        @if (!issue.IsVerified)
+                                        {
+                                            <form asp-action="VerifyIssue" asp-route-id="@issue.Id" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Duyệt / Xác thực thực tế"><i class="bi bi-patch-check"></i> Duyệt</button>
+                                            </form>
+                                        }
+
+                                        <!-- Từ chối -->
+                                        @if (issue.Status != IssueStatus.Resolved && issue.Status != IssueStatus.Rejected && issue.Status != IssueStatus.Closed)
+                                        {
+                                            <form asp-action="RejectIssue" asp-route-id="@issue.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn chắc chắn muốn từ chối phản ánh này?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Từ chối phản ánh"><i class="bi bi-slash-circle"></i> Từ chối</button>
+                                            </form>
+                                        }
+
+                                        <!-- Điều phối cơ quan -->
+                                        <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#assignModal-@issue.Id" title="Điều phối cơ quan"><i class="bi bi-arrow-left-right"></i></button>
+
+                                        <!-- Xóa -->
+                                        <form asp-action="DeleteIssue" asp-route-id="@issue.Id" method="post" class="d-inline" onsubmit="return confirm('CẢNH BÁO: Hành động này sẽ xóa vĩnh viễn phản ánh này khỏi cơ sở dữ liệu. Tiếp tục?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa vĩnh viễn"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Modal Điều phối cho từng phản ánh -->
+                                    <div class="modal fade text-dark" id="assignModal-@issue.Id" tabindex="-1" aria-labelledby="assignModalLabel-@issue.Id" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <form asp-action="AssignIssue" asp-route-id="@issue.Id" method="post">
+                                                <div class="modal-content glass-card">
+                                                    <div class="modal-header border-0 pb-0">
+                                                        <h5 class="modal-title fw-bold" id="assignModalLabel-@issue.Id">Điều phối phản ánh #@issue.Id</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body py-3">
+                                                        <p class="text-muted" style="font-size:0.8rem;">Vui lòng chọn cơ quan tiếp nhận xử lý sự cố này:</p>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold" style="font-size:0.8rem;">Cơ quan tiếp nhận</label>
+                                                            <select name="assignedUnitId" class="form-select text-dark" required>
+                                                                <option value="">Chọn đơn vị</option>
+                                                                @foreach (var unit in units)
+                                                                {
+                                                                    var provName = unit.ProvinceCode == "79" ? "TP. HCM" : unit.ProvinceCode == "36" ? "Đồng Nai" : unit.ProvinceCode == "37" ? "Bình Dương" : "Hà Nội";
+                                                                    <option value="@unit.Id" selected="@(issue.AssignedUnitId == unit.Id)">
+                                                                        @unit.Name (@provName)
+                                                                    </option>
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pt-0">
+                                                        <button type="button" class="btn btn-secondary rounded-pill btn-sm px-3" data-bs-dismiss="modal">Hủy</button>
+                                                        <button type="submit" class="btn btn-primary rounded-pill btn-sm px-4">Xác nhận chuyển</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

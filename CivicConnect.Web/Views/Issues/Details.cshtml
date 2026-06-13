@@ -64,7 +64,13 @@
                     </span>
                 </div>
 
-                <h2 class="fw-bold mb-3 text-dark" style="line-height: 1.4;">@Model.Title</h2>
+                <h2 class="fw-bold mb-3 text-dark" style="line-height: 1.4;">
+                    @Model.Title
+                    @if (Model.IsVerified)
+                    {
+                        <span class="text-primary ms-2" title="Đã xác thực thực tế"><i class="bi bi-patch-check-fill"></i></span>
+                    }
+                </h2>
 
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-4 border-bottom border-secondary border-opacity-25 text-muted" style="font-size: 0.9rem;">
                     <div class="d-flex align-items-center gap-2">
@@ -180,7 +186,7 @@
                     <div class="glass-card p-4 text-center mb-5" style="border-style: dashed;">
                         <i class="bi bi-person-lock fs-1 text-muted mb-2 d-block"></i>
                         <p class="mb-3 text-secondary">Bạn cần đăng nhập để tham gia thảo luận cùng cộng đồng.</p>
-                        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Issues/Details/@Model.Id" class="btn btn-primary rounded-pill px-4">
+                        <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Issues/Details/@Model.Id" class="btn btn-primary rounded-pill px-4">
                             Đăng nhập ngay
                         </a>
                     </div>
@@ -217,6 +223,17 @@
                                             <div class="text-muted" style="font-size: 0.75rem;">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
                                         </div>
                                     </div>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <form asp-area="Admin" asp-controller="Admin" asp-action="DeleteComment" method="post" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bình luận này không?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@comment.Id" />
+                                            <input type="hidden" name="issueId" value="@Model.Id" />
+                                            <button type="submit" class="btn btn-link text-danger p-0 border-0 bg-transparent" title="Xóa bình luận">
+                                                <i class="bi bi-trash fs-5"></i>
+                                            </button>
+                                        </form>
+                                    }
                                 </div>
                                 <div class="text-secondary mt-2 ms-5 ps-2" style="font-size: 0.95rem; line-height: 1.6;">@comment.Content</div>
                             </div>
@@ -300,6 +317,53 @@
                     }
                 </div>
             </div>
+
+            <!-- Satisfaction Rating Card -->
+            @if (Model.Status == IssueStatus.Resolved)
+            {
+                <div class="glass-card p-4 mb-3" id="satisfaction-section">
+                    <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-star-fill text-warning me-2"></i> Đánh Giá Mức Hài Lòng</h5>
+
+                    @if (Model.SatisfactionRating.HasValue)
+                    {
+                        <!-- Already rated -->
+                        <div class="text-center py-2">
+                            <div class="star-display fs-2 mb-2">
+                                @for (int s = 1; s <= 5; s++)
+                                {
+                                    <i class="bi @(s <= Model.SatisfactionRating.Value ? "bi-star-fill text-warning" : "bi-star text-muted")"></i>
+                                }
+                            </div>
+                            <p class="text-success fw-semibold mb-1"><i class="bi bi-check-circle-fill me-1"></i> Bạn đã đánh giá @Model.SatisfactionRating.Value/5 sao</p>
+                            @if (!string.IsNullOrEmpty(Model.SatisfactionComment))
+                            {
+                                <p class="text-muted" style="font-size:0.85rem;">"@Model.SatisfactionComment"</p>
+                            }
+                            <p class="text-muted" style="font-size:0.75rem;">Ngày đánh giá: @Model.RatedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    }
+                    else if (currentUserId == Model.AuthorId)
+                    {
+                        <!-- Rating form for author -->
+                        <p class="text-secondary mb-3" style="font-size:0.85rem;">Phản ánh đã được giải quyết. Hãy cho biết mức độ hài lòng của bạn về quá trình xử lý:</p>
+                        <div class="star-picker d-flex justify-content-center gap-2 fs-2 mb-3" id="star-picker">
+                            @for (int s = 1; s <= 5; s++)
+                            {
+                                <i class="bi bi-star star-pick text-warning" style="cursor:pointer; transition: transform 0.15s;" data-value="@s" id="star-@s"></i>
+                            }
+                        </div>
+                        <div id="selected-rating-label" class="text-center text-muted mb-3" style="font-size:0.85rem; min-height:1.2em;"></div>
+                        <textarea id="rating-comment" class="form-control rounded-3 mb-3 text-dark bg-light border-0 px-3 py-2" rows="2" placeholder="Nhận xét thêm (tùy chọn)..."></textarea>
+                        <button class="btn btn-warning w-100 rounded-pill fw-bold" id="submit-rating-btn" data-id="@Model.Id" disabled>
+                            <i class="bi bi-send-fill me-1"></i> Gửi đánh giá
+                        </button>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center" style="font-size:0.85rem;">Chỉ người gửi phản ánh mới có thể đánh giá.</p>
+                    }
+                </div>
+            }
             
         </div>
     </div>
@@ -382,6 +446,61 @@
                     alert("Gửi bình luận không thành công.");
                 }).always(function() {
                     btn.prop('disabled', false).html('<i class="bi bi-send-fill me-1"></i> Gửi bình luận');
+                });
+            });
+
+            // 3. Star Rating Widget
+            let selectedRating = 0;
+            const ratingLabels = ['', 'Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng ⭐'];
+
+            $('.star-pick').on('mouseenter', function() {
+                const val = parseInt($(this).data('value'));
+                updateStars(val, false);
+            }).on('mouseleave', function() {
+                updateStars(selectedRating, false);
+            }).on('click', function() {
+                selectedRating = parseInt($(this).data('value'));
+                updateStars(selectedRating, true);
+                $('#selected-rating-label').text(ratingLabels[selectedRating]);
+                $('#submit-rating-btn').prop('disabled', false);
+            });
+
+            function updateStars(val, fill) {
+                $('.star-pick').each(function() {
+                    const s = parseInt($(this).data('value'));
+                    if (s <= val) {
+                        $(this).removeClass('bi-star').addClass('bi-star-fill');
+                        if (fill) $(this).css('transform', 'scale(1.2)');
+                    } else {
+                        $(this).removeClass('bi-star-fill').addClass('bi-star');
+                        $(this).css('transform', 'scale(1)');
+                    }
+                });
+            }
+
+            $('#submit-rating-btn').on('click', function() {
+                const issueId = $(this).data('id');
+                const comment = $('#rating-comment').val().trim();
+                const btn = $(this);
+                btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i> Đang gửi...');
+
+                $.post('/Issues/Rate', { id: issueId, rating: selectedRating, comment: comment }, function(res) {
+                    if (res.success) {
+                        const stars = Array.from({length: 5}, (_, i) =>
+                            `<i class="bi ${i < selectedRating ? 'bi-star-fill text-warning' : 'bi-star text-muted'}"></i>`
+                        ).join('');
+                        $('#satisfaction-section').html(`
+                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-star-fill text-warning me-2"></i> Đánh Giá Mức Hài Lòng</h5>
+                            <div class="text-center py-2">
+                                <div class="star-display fs-2 mb-2">${stars}</div>
+                                <p class="text-success fw-semibold mb-1"><i class="bi bi-check-circle-fill me-1"></i> ${res.message}</p>
+                                ${comment ? `<p class="text-muted" style="font-size:0.85rem;">"${comment}"</p>` : ''}
+                            </div>
+                        `);
+                    }
+                }).fail(function(xhr) {
+                    alert(xhr.responseText || 'Đánh giá không thành công.');
+                    btn.prop('disabled', false).html('<i class="bi bi-send-fill me-1"></i> Gửi đánh giá');
                 });
             });
         });

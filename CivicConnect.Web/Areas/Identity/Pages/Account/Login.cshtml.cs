@@ -42,9 +42,20 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         }
 
 
-        public IActionResult OnGet(string? returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string? returnUrl = null)
         {
-            if (User.Identity?.IsAuthenticated == true) return LocalRedirect("~/");
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    await _signInManager.SignOutAsync();
+                }
+                else
+                {
+                    return LocalRedirect("~/");
+                }
+            }
             ReturnUrl = returnUrl;
             ViewData["PageHeader"] = "Đăng Nhập";
             return Page();

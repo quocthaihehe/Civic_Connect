@@ -3,116 +3,111 @@ using System;
 using CivicConnect.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CivicConnect.Web.Data.Migrations
+namespace CivicConnect.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260610033105_AddPoliciesTable")]
-    partial class AddPoliciesTable
+    [Migration("20260613070524_InitialCreateSQLite")]
+    partial class InitialCreateSQLite
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CitizenId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("DistrictCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("GovernmentUnitId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsEmailVerified")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsPhoneVerified")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("LastLoginAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ProvinceCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("WardCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -123,8 +118,7 @@ namespace CivicConnect.Web.Data.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -133,35 +127,33 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AuthorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("EditedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsHidden")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsOfficialResponse")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("IssueId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("ParentCommentId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -174,42 +166,163 @@ namespace CivicConnect.Web.Data.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("CivicConnect.Web.Models.Entities.GovernmentUnit", b =>
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Donation", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("DistrictCode")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DonationCategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DonorName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OrderInfo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PayUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DonationCategoryId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Donations");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.DonationCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("CurrentAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("TargetAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DonationCategories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CurrentAmount = 0m,
+                            Description = "Quyên góp mua cây xanh, hoa trang trí trồng tại các tuyến ngõ hẻm, công viên công cộng trên địa bàn Phường Bến Nghé.",
+                            IsActive = true,
+                            Name = "Quỹ Trồng Xanh Đô Thị",
+                            TargetAmount = 50000000m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CurrentAmount = 0m,
+                            Description = "Hỗ trợ lắp đặt hệ thống đèn đường LED thông minh, tiết kiệm điện tại các ngõ hẻm chưa có đủ ánh sáng.",
+                            IsActive = true,
+                            Name = "Quỹ Thắp Sáng Ngõ Hẻm",
+                            TargetAmount = 30000000m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CurrentAmount = 0m,
+                            Description = "Mua sắm, lắp đặt và sửa chữa các thiết bị vui chơi ngoài trời tại điểm sinh hoạt cộng đồng của phường.",
+                            IsActive = true,
+                            Name = "Quỹ Nâng Cấp Sân Chơi Trẻ Em",
+                            TargetAmount = 100000000m
+                        });
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.GovernmentUnit", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DistrictCode")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ParentUnitId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProvinceCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("WardCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -243,6 +356,84 @@ namespace CivicConnect.Web.Data.Migrations
                             ProvinceCode = "79",
                             Type = 3,
                             WardCode = "26734"
+                        },
+                        new
+                        {
+                            Id = "UBND_BIENHOA",
+                            Address = "Biên Hòa, Đồng Nai",
+                            DistrictCode = "297",
+                            Email = "bienhoa@dongnai.gov.vn",
+                            IsActive = true,
+                            Name = "UBND TP. Biên Hòa",
+                            Phone = "02513822501",
+                            ProvinceCode = "36",
+                            Type = 2
+                        },
+                        new
+                        {
+                            Id = "UBND_LONGHUNG",
+                            Address = "Long Hưng, Biên Hòa, Đồng Nai",
+                            DistrictCode = "297",
+                            Email = "longhung.bienhoa@dongnai.gov.vn",
+                            IsActive = true,
+                            Name = "UBND Phường Long Hưng",
+                            ParentUnitId = "UBND_BIENHOA",
+                            Phone = "02513822502",
+                            ProvinceCode = "36",
+                            Type = 3,
+                            WardCode = "10834"
+                        },
+                        new
+                        {
+                            Id = "UBND_THUDAUMOT",
+                            Address = "Thủ Dầu Một, Bình Dương",
+                            DistrictCode = "300",
+                            Email = "thudaumot@binhduong.gov.vn",
+                            IsActive = true,
+                            Name = "UBND TP. Thủ Dầu Một",
+                            Phone = "02743822001",
+                            ProvinceCode = "37",
+                            Type = 2
+                        },
+                        new
+                        {
+                            Id = "UBND_PHUCUONG",
+                            Address = "Phú Cường, Thủ Dầu Một, Bình Dương",
+                            DistrictCode = "300",
+                            Email = "phucuong.tdm@binhduong.gov.vn",
+                            IsActive = true,
+                            Name = "UBND Phường Phú Cường",
+                            ParentUnitId = "UBND_THUDAUMOT",
+                            Phone = "02743822002",
+                            ProvinceCode = "37",
+                            Type = 3,
+                            WardCode = "11000"
+                        },
+                        new
+                        {
+                            Id = "UBND_HOANKIEM",
+                            Address = "Hoàn Kiếm, Hà Nội",
+                            DistrictCode = "001",
+                            Email = "hoankiem@hanoi.gov.vn",
+                            IsActive = true,
+                            Name = "UBND Quận Hoàn Kiếm",
+                            Phone = "02438252601",
+                            ProvinceCode = "01",
+                            Type = 2
+                        },
+                        new
+                        {
+                            Id = "UBND_TRANGTIEN",
+                            Address = "Tràng Tiền, Hoàn Kiếm, Hà Nội",
+                            DistrictCode = "001",
+                            Email = "trangtien.hk@hanoi.gov.vn",
+                            IsActive = true,
+                            Name = "UBND Phường Tràng Tiền",
+                            ParentUnitId = "UBND_HOANKIEM",
+                            Phone = "02438252602",
+                            ProvinceCode = "01",
+                            Type = 3,
+                            WardCode = "00001"
                         });
                 });
 
@@ -250,103 +441,110 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("AssignedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("AssignedToUserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("AssignedUnitId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("AuthorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Category")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("DistrictCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("DistrictName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DueDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsAnonymous")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsVerified")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<double>("Latitude")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<double>("Longitude")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<int?>("ParentIssueId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Priority")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<float>("PriorityScore")
-                        .HasColumnType("real");
+                        .HasColumnType("REAL");
 
                     b.Property<string>("ProvinceCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProvinceName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("RatedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SatisfactionComment")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("SatisfactionRating")
+                        .HasColumnType("INTEGER");
 
                     b.Property<float>("SeverityScore")
-                        .HasColumnType("real");
+                        .HasColumnType("REAL");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ViewCount")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("WardCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("WardName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -365,37 +563,35 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("FileSizeBytes")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("IssueId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("OriginalFileName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -408,31 +604,29 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AttachmentUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ChangedById")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("FromStatus")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("IssueId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ToStatus")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -447,33 +641,31 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("RelatedIssueId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -484,39 +676,52 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DocumentNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DocumentType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("EffectiveDate")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Excerpt")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("IssuingUnit")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("PublishedDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Signer")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceUrl")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Tag")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("TagClass")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -526,48 +731,80 @@ namespace CivicConnect.Web.Data.Migrations
                         new
                         {
                             Id = 1,
-                            Content = "Nội dung chi tiết nghị định mới...",
-                            Excerpt = "Chính phủ vừa ban hành nghị định mới tăng mức phạt đối với các hành vi xả rác bừa bãi và lấn chiếm lòng lề đường tại đô thị.",
+                            Content = "Nghị định quy định chi tiết các mức xử phạt đối với cá nhân, tổ chức có hành vi vi phạm vệ sinh môi trường đô thị. Mức phạt tiền tối đa đối với cá nhân là 1.000.000đ cho hành vi vứt rác không đúng nơi quy định, 5.000.000đ cho hành vi tự ý đổ rác thải sinh hoạt ra lòng đường, vỉa hè. Các đơn vị kinh doanh lấn chiếm vỉa hè sẽ bị xử phạt từ 10.000.000đ đến 20.000.000đ và buộc khôi phục tình trạng ban đầu.",
+                            DocumentNumber = "45/2026/NĐ-CP",
+                            DocumentType = "Nghị định",
+                            EffectiveDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Excerpt = "Chính phủ ban hành quy định tăng mức phạt đối với các hành vi xả rác bừa bãi, đổ chất thải không đúng nơi quy định và lấn chiếm lòng lề đường.",
                             IsActive = true,
-                            IssuingUnit = "UBND Quận 1",
-                            PublishedDate = new DateTime(2026, 6, 8, 3, 31, 5, 46, DateTimeKind.Utc).AddTicks(5409),
-                            Tag = "Luật mới",
+                            IssuingUnit = "Chính phủ",
+                            PublishedDate = new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Signer = "Thủ tướng Phạm Minh Chính",
+                            SourceUrl = "https://vanban.chinhphu.vn",
+                            Tag = "Nghị định",
                             TagClass = "tag-law",
-                            Title = "Nghị định mới về xử phạt hành chính vi phạm môi trường đô thị"
+                            Title = "Nghị định 45/2026/NĐ-CP về xử phạt vi phạm hành chính trong lĩnh vực bảo vệ môi trường đô thị"
                         },
                         new
                         {
                             Id = 2,
-                            Content = "Nội dung thông báo chi tiết...",
-                            Excerpt = "Thực hiện nếp sống văn minh đô thị, UBND Phường tổ chức đợt ra quân tổng vệ sinh các tuyến đường trọng điểm vào sáng Chủ Nhật tuần này.",
+                            Content = "Bộ Xây dựng ban hành Thông tư hướng dẫn chi tiết quy chuẩn kỹ thuật quốc gia về quy hoạch xây dựng. Trong đó, yêu cầu các khu dân cư mới phải đạt tỷ lệ diện tích cây xanh tối thiểu là 2m2/người, khuyến khích các khu dân cư hiện hữu tận dụng các ngõ hẻm để trồng hoa, cây cảnh công cộng và tạo không gian sinh hoạt cộng đồng tự quản.",
+                            DocumentNumber = "08/2026/TT-BXD",
+                            DocumentType = "Thông tư",
+                            EffectiveDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Excerpt = "Bộ Xây dựng ban hành hướng dẫn thực hiện các chỉ tiêu về diện tích cây xanh, hoa và hạ tầng tiện ích tại khu dân cư đô thị.",
                             IsActive = true,
-                            IssuingUnit = "UBND Phường Bến Nghé",
-                            PublishedDate = new DateTime(2026, 6, 9, 3, 31, 5, 46, DateTimeKind.Utc).AddTicks(5415),
-                            Tag = "Thông báo",
-                            TagClass = "tag-notice",
-                            Title = "Thông báo ra quân dọn dẹp vệ sinh môi trường trên địa bàn Phường Bến Nghé"
+                            IssuingUnit = "Bộ Xây dựng",
+                            PublishedDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Signer = "Bộ trưởng Nguyễn Thanh Nghị",
+                            SourceUrl = "https://moc.gov.vn",
+                            Tag = "Thông tư",
+                            TagClass = "tag-policy",
+                            Title = "Thông tư 08/2026/TT-BXD hướng dẫn về chỉnh trang đô thị và phát triển không gian công cộng xanh"
                         },
                         new
                         {
                             Id = 3,
-                            Content = "Nội dung chính sách chi tiết...",
-                            Excerpt = "Chương trình nâng cấp, chỉnh trang các tuyến vỉa hè trung tâm nhằm nâng cao mỹ quan đô thị và tạo không gian đi bộ an toàn cho người dân.",
+                            Content = "Nhằm xây dựng nếp sống văn minh đô thị và giữ gìn vệ sinh chung, UBND Phường Bến Nghé phát động chiến dịch ra quân quét dọn các tuyến đường chính và chỉnh trang cây xanh tại ngõ hẻm 45 Lê Thánh Tôn. Kính mời toàn thể nhân dân, các ban ngành đoàn thể và tổ dân phố tham gia đầy đủ. Thời gian bắt đầu từ 7:30 sáng ngày Chủ Nhật.",
+                            DocumentNumber = "124/TB-UBND",
+                            DocumentType = "Thông báo",
+                            EffectiveDate = new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Excerpt = "UBND Phường phát động lễ ra quân tổng vệ sinh, dọn dẹp rác thải và trang trí tuyến hẻm xanh vào sáng Chủ Nhật.",
                             IsActive = true,
-                            IssuingUnit = "UBND Quận 1",
-                            PublishedDate = new DateTime(2026, 6, 10, 3, 31, 5, 46, DateTimeKind.Utc).AddTicks(5417),
-                            Tag = "Chính sách",
-                            TagClass = "tag-policy",
-                            Title = "Chính sách hỗ trợ chỉnh trang đô thị, cải tạo vỉa hè Quận 1 năm 2026"
+                            IssuingUnit = "UBND Phường Bến Nghé",
+                            PublishedDate = new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Signer = "Chủ tịch UBND Phường",
+                            SourceUrl = "",
+                            Tag = "Thông báo",
+                            TagClass = "tag-notice",
+                            Title = "Thông báo 124/TB-UBND ra quân tổng vệ sinh môi trường trên địa bàn Phường Bến Nghé"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Content = "Sáng nay, Quận Đoàn 1 phối hợp với Công ty Môi trường Đô thị tổ chức lễ phát động ra quân làm sạch toàn tuyến kênh chảy qua địa bàn quận. Sau 4 giờ làm việc nỗ lực, lực lượng tình nguyện đã thu gom được hơn 3 tấn rác thải các loại, chủ yếu là túi ni lông, chai nhựa và rác sinh hoạt bị vứt xuống lòng kênh. Đây là hoạt động thường niên nhằm tuyên truyền ý thức bảo vệ môi trường nước cho cư dân xung quanh.",
+                            DocumentNumber = "",
+                            DocumentType = "Tin tức",
+                            EffectiveDate = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Excerpt = "Chiến dịch 'Chung tay bảo vệ dòng sông quê hương' thu hút hàng trăm bạn trẻ dọn dẹp rác thải nhựa và vớt lục bình.",
+                            IsActive = true,
+                            IssuingUnit = "Quận Đoàn 1",
+                            PublishedDate = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Signer = "",
+                            SourceUrl = "https://tuoitre.vn",
+                            Tag = "Tin tức",
+                            TagClass = "tag-news",
+                            Title = "Hơn 500 đoàn viên thanh niên Quận 1 tham gia làm sạch kênh Nhiêu Lộc - Thị Nghè"
                         });
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.UnitCategory", b =>
                 {
                     b.Property<string>("GovernmentUnitId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Category")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("GovernmentUnitId", "Category");
 
@@ -618,6 +855,141 @@ namespace CivicConnect.Web.Data.Migrations
                         {
                             GovernmentUnitId = "UBND_Q1",
                             Category = 5
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_LONGHUNG",
+                            Category = 1
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_LONGHUNG",
+                            Category = 2
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_LONGHUNG",
+                            Category = 3
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_LONGHUNG",
+                            Category = 4
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_BIENHOA",
+                            Category = 1
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_BIENHOA",
+                            Category = 2
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_BIENHOA",
+                            Category = 3
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_BIENHOA",
+                            Category = 4
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_BIENHOA",
+                            Category = 5
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_PHUCUONG",
+                            Category = 1
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_PHUCUONG",
+                            Category = 2
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_PHUCUONG",
+                            Category = 3
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_PHUCUONG",
+                            Category = 4
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_THUDAUMOT",
+                            Category = 1
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_THUDAUMOT",
+                            Category = 2
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_THUDAUMOT",
+                            Category = 3
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_THUDAUMOT",
+                            Category = 4
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_THUDAUMOT",
+                            Category = 5
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_TRANGTIEN",
+                            Category = 1
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_TRANGTIEN",
+                            Category = 2
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_TRANGTIEN",
+                            Category = 3
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_TRANGTIEN",
+                            Category = 4
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_HOANKIEM",
+                            Category = 1
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_HOANKIEM",
+                            Category = 2
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_HOANKIEM",
+                            Category = 3
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_HOANKIEM",
+                            Category = 4
+                        },
+                        new
+                        {
+                            GovernmentUnitId = "UBND_HOANKIEM",
+                            Category = 5
                         });
                 });
 
@@ -625,22 +997,20 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("IssueId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -655,26 +1025,25 @@ namespace CivicConnect.Web.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
 
@@ -721,19 +1090,17 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -746,19 +1113,17 @@ namespace CivicConnect.Web.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -770,17 +1135,17 @@ namespace CivicConnect.Web.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -792,10 +1157,10 @@ namespace CivicConnect.Web.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -807,16 +1172,16 @@ namespace CivicConnect.Web.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
@@ -856,6 +1221,24 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Navigation("Issue");
 
                     b.Navigation("ParentComment");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.Donation", b =>
+                {
+                    b.HasOne("CivicConnect.Web.Models.Entities.DonationCategory", "DonationCategory")
+                        .WithMany("Donations")
+                        .HasForeignKey("DonationCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DonationCategory");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.GovernmentUnit", b =>
@@ -1019,6 +1402,11 @@ namespace CivicConnect.Web.Data.Migrations
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Comment", b =>
                 {
                     b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.DonationCategory", b =>
+                {
+                    b.Navigation("Donations");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.GovernmentUnit", b =>

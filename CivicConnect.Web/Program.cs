@@ -1,4 +1,4 @@
-﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Repositories;
 
 using CivicConnect.Web.Services;
@@ -33,10 +33,10 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
 });
 
-// Cáº¥u hÃ¬nh Database Connection
+// Cấu hình Database Connection
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("CivicConnect.Web.Models")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("CivicConnect.Web")));
 
 // Cáº¥u hÃ¬nh ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -92,12 +92,15 @@ builder.Services.AddSignalR(options =>
 
 var app = builder.Build();
 
-// Tá»± Ä‘á»™ng cháº¡y Seed Data cho cÃ¡c tÃ i khoáº£n thá»­ nghiá»‡m khi khá»Ÿi Ä‘á»™ng
+// Tự động chạy Migration và Seed Data cho các tài khoản thử nghiệm khi khởi động
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        var context = services.GetRequiredService<AppDbContext>();
+        await context.Database.MigrateAsync();
+
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         await DbInitializer.SeedUsersAsync(userManager);
     }
@@ -108,14 +111,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Cáº¥u hÃ¬nh HTTP request pipeline.
+// Cấu hình HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    app.UseHttpsRedirection(); // Chỉ redirect HTTPS ở Production
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -124,14 +127,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "admin_area",
+    pattern: "Admin/{action=Dashboard}/{id?}",
+    defaults: new { area = "Admin", controller = "Admin" });
 
 app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}");
-
-app.MapRazorPages();
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "areas",

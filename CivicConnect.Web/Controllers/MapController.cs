@@ -75,5 +75,25 @@ namespace CivicConnect.Web.Controllers
 
             return Json(result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetHeatmapData()
+        {
+            var points = await _context.Issues
+                .Where(i => i.Latitude != 0 && i.Longitude != 0)
+                .Select(i => new
+                {
+                    lat = i.Latitude,
+                    lng = i.Longitude,
+                    // Intensity: ưu tiên cao = màu đậm hơn (Pending & Processing nóng nhất)
+                    intensity = i.Status == IssueStatus.Pending ? 1.0
+                              : i.Status == IssueStatus.Processing ? 0.8
+                              : i.Status == IssueStatus.Assigned ? 0.6
+                              : 0.3
+                })
+                .ToListAsync();
+
+            return Json(points);
+        }
     }
 }

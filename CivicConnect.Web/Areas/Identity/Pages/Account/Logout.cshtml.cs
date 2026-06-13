@@ -15,6 +15,12 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
             _signInManager = signInManager;
         }
 
+        public async Task<IActionResult> OnGetAsync()
+        {
+            await _signInManager.SignOutAsync();
+            return LocalRedirect("~/");
+        }
+
         public async Task<IActionResult> OnPostAsync()
         {
             await _signInManager.SignOutAsync();

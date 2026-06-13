@@ -1,0 +1,108 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.DonationCategory>
+@{
+    ViewData["Title"] = "Quản lý quyên góp";
+    var donations = ViewData["Donations"] as IEnumerable<CivicConnect.Web.Models.Entities.Donation> ?? Enumerable.Empty<CivicConnect.Web.Models.Entities.Donation>();
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-12">
+        @if (!string.IsNullOrEmpty(successMsg))
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-3" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @successMsg
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            <!-- Cột trái: Quản lý Chiến dịch -->
+            <div class="col-xl-7">
+                <div class="glass-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-heart-fill text-danger me-2"></i> Chiến Dịch Quyên Góp Đang Chạy
+                        </h5>
+                        <a asp-action="CreateCampaign" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">
+                            <i class="bi bi-plus-lg me-1"></i> Tạo chiến dịch mới
+                        </a>
+                    </div>
+
+                    <div class="row g-3">
+                        @foreach (var campaign in Model)
+                        {
+                            var progress = campaign.TargetAmount > 0 ? (double)campaign.CurrentAmount / (double)campaign.TargetAmount * 100 : 0;
+                            if (progress > 100) progress = 100;
+                            var activeStatusText = campaign.IsActive ? "Đang chạy" : "Tạm ngưng";
+                            var activeStatusClass = campaign.IsActive ? "bg-success" : "bg-secondary";
+
+                            <div class="col-md-12">
+                                <div class="card bg-light border-0 shadow-sm rounded-3 p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-1">@campaign.Name</h6>
+                                            <p class="text-muted mb-2" style="font-size: 0.8rem;">@campaign.Description</p>
+                                        </div>
+                                        <span class="badge @activeStatusClass">@activeStatusText</span>
+                                    </div>
+                                    <div class="mb-2" style="font-size:0.8rem;">
+                                        <div class="d-flex justify-content-between text-secondary mb-1">
+                                            <span>Tiến độ: @campaign.CurrentAmount.ToString("N0") đ / @campaign.TargetAmount.ToString("N0") đ</span>
+                                            <span>@progress.ToString("F1")%</span>
+                                        </div>
+                                        <div class="progress rounded-pill" style="height: 8px;">
+                                            <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: @progress%" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-light">
+                                        <small class="text-muted">Ngày tạo: @campaign.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                        <form asp-action="ToggleCampaign" asp-route-id="@campaign.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm @(campaign.IsActive ? "btn-outline-warning" : "btn-outline-success") rounded-pill px-3">
+                                                <i class="bi @(campaign.IsActive ? "bi-pause-fill" : "bi-play-fill") me-1"></i> @(campaign.IsActive ? "Tạm ngưng" : "Kích hoạt")
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Lịch sử quyên góp -->
+            <div class="col-xl-5">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-clock-history me-2"></i> Lịch Sử Giao Dịch Quyên Góp</h5>
+
+                    <div style="max-height: 480px; overflow-y: auto;" class="pe-2">
+                        @if (!donations.Any())
+                        {
+                            <p class="text-muted text-center py-4">Chưa có giao dịch quyên góp nào.</p>
+                        }
+                        else
+                        {
+                            @foreach (var d in donations)
+                            {
+                                <div class="p-3 bg-light rounded-3 mb-2 border-start border-3 border-success shadow-xs">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.9rem;">
+                                            @(d.User?.FullName ?? "Công dân ẩn danh")
+                                        </div>
+                                        <span class="text-success fw-bold" style="font-size:0.9rem;">+ @d.Amount.ToString("N0") đ</span>
+                                    </div>
+                                    <div class="text-muted" style="font-size:0.8rem; margin-bottom: 2px;">
+                                        Ủng hộ: @d.DonationCategory?.Name
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
+                                        <span>Mã GD Momo: @d.OrderId</span>
+                                        <span>@d.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

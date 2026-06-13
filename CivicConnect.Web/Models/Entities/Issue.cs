@@ -54,5 +54,10 @@ namespace CivicConnect.Web.Models.Entities
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Vote> Votes { get; set; } = new List<Vote>();
         public ICollection<IssueStatusHistory> StatusHistory { get; set; } = new List<IssueStatusHistory>();
+
+        // Đánh giá hài lòng
+        public int? SatisfactionRating { get; set; }  // Điểm đánh giá (1-5 sao)
+        public string? SatisfactionComment { get; set; } // Ý kiến đóng góp
+        public DateTime? RatedAt { get; set; }         // Thời gian đánh giá
     }
 }

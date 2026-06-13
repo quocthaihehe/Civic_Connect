@@ -30,12 +30,12 @@ namespace CivicConnect.Web.Controllers
             if (string.IsNullOrEmpty(userId)) return Challenge();
 
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return Challenge();
+            if (user == null) return RedirectToPage("/Account/Logout", new { area = "Identity" });
 
             // Redirect non-citizens
             if (User.IsInRole("Admin"))
             {
-                return RedirectToAction("Dashboard", "Admin");
+                return RedirectToAction("Dashboard", "Admin", new { area = "Admin" });
             }
             if (User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff"))
             {
@@ -86,7 +86,8 @@ namespace CivicConnect.Web.Controllers
                     CommentCount = i.Comments.Count,
                     AuthorName = i.IsAnonymous ? "Ẩn danh" : i.Author != null ? i.Author.FullName : "Công dân",
                     AuthorAvatar = i.IsAnonymous ? "/images/default-avatar.png" : i.Author != null && i.Author.AvatarUrl != null ? i.Author.AvatarUrl : "/images/default-avatar.png",
-                    CreatedAt = i.CreatedAt
+                    CreatedAt = i.CreatedAt,
+                    IsVerified = i.IsVerified
                 })
                 .ToListAsync();
 
@@ -104,7 +105,8 @@ namespace CivicConnect.Web.Controllers
                     StatusClass = GetStatusClass(i.Status),
                     Status = i.Status,
                     CreatedAt = i.CreatedAt,
-                    DueDate = i.DueDate
+                    DueDate = i.DueDate,
+                    IsVerified = i.IsVerified
                 })
                 .ToListAsync();
 
