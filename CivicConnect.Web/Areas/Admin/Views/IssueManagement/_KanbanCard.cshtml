@@ -43,7 +43,7 @@
     }
 }
 
-<div class="card mb-2 @borderClass kanban-card cursor-grab" draggable="true" data-id="@Model.Id" style="background: var(--tb-card-bg, #ffffff);">
+<div class="card mb-2 @borderClass kanban-card cursor-grab" draggable="true" data-id="@Model.Id" style="background: var(--tblr-bg-surface) !important; color: var(--tblr-body-color);">
     <div class="card-body p-2.5">
         <div class="d-flex justify-content-between align-items-start mb-1.5">
             <span class="text-xs text-muted font-weight-bold">#@Model.Id</span>
@@ -61,7 +61,7 @@
             </div>
         }
 
-        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-light">
+        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top" style="border-top-color: var(--tblr-border-color) !important;">
             <div class="d-flex align-items-center">
                 <i class="bi bi-clock me-1 text-xs"></i>
                 <span class="text-xxs @textClass">@countdownText</span>

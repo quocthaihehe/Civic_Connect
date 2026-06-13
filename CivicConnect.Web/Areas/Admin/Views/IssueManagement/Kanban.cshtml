@@ -22,7 +22,7 @@
     
     <!-- Column 1: Mới nhận (Pending) -->
     <div class="col" style="min-width: 250px; max-width: 320px;">
-        <div class="card bg-light">
+        <div class="card kanban-column-card">
             <div class="card-header py-2 bg-blue-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">MỚI NHẬN (@Model.Count(i => i.Status == IssueStatus.Pending))</h3>
             </div>
@@ -37,7 +37,7 @@
 
     <!-- Column 2: Đã phân công (Assigned) -->
     <div class="col" style="min-width: 250px; max-width: 320px;">
-        <div class="card bg-light">
+        <div class="card kanban-column-card">
             <div class="card-header py-2 bg-cyan-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">ĐÃ PHÂN CÔNG (@Model.Count(i => i.Status == IssueStatus.Assigned))</h3>
             </div>
@@ -52,7 +52,7 @@
 
     <!-- Column 3: Đang xử lý (Processing) -->
     <div class="col" style="min-width: 250px; max-width: 320px;">
-        <div class="card bg-light">
+        <div class="card kanban-column-card">
             <div class="card-header py-2 bg-yellow-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">ĐANG XỬ LÝ (@Model.Count(i => i.Status == IssueStatus.Processing))</h3>
             </div>
@@ -67,7 +67,7 @@
 
     <!-- Column 4: Từ chối (Rejected) -->
     <div class="col" style="min-width: 250px; max-width: 320px;">
-        <div class="card bg-light">
+        <div class="card kanban-column-card">
             <div class="card-header py-2 bg-red-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">TỪ CHỐI (@Model.Count(i => i.Status == IssueStatus.Rejected))</h3>
             </div>
@@ -82,7 +82,7 @@
 
     <!-- Column 5: Hoàn tất (Resolved / Closed) -->
     <div class="col" style="min-width: 250px; max-width: 320px;">
-        <div class="card bg-light">
+        <div class="card kanban-column-card">
             <div class="card-header py-2 bg-green-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">HOÀN TẤT (@Model.Count(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed))</h3>
             </div>
