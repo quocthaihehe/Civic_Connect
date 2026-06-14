@@ -263,15 +263,18 @@
         display: none;
         position: fixed;
         z-index: 9998;
-        width: min(380px, 92vw);
+        width: min(420px, 92vw);
+        max-height: min(600px, 85vh);
         background: #fff;
         border: 1px solid rgba(99,102,241,0.2);
         border-radius: 16px;
         box-shadow: 0 12px 40px rgba(0,0,0,0.15);
         overflow: hidden;
         animation: slideDownPopover 0.25s ease;
+        display: flex;
+        flex-direction: column;
     }
-    #ai-explain-popover.visible { display: block; }
+    #ai-explain-popover.visible { display: flex; }
 
     @@keyframes slideDownPopover {
         from { opacity: 0; transform: translate(-50%, -60%); }
@@ -284,6 +287,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-shrink: 0;
     }
     .ep-header-title {
         color: #fff;
@@ -306,22 +310,24 @@
     }
     .ep-close:hover { background: rgba(255,255,255,0.35); }
 
-    .ep-body { padding: 1rem; }
+    .ep-body {
+        padding: 1rem;
+        overflow-y: auto;
+        flex: 1;
+    }
 
     .ep-quote {
         background: #f5f3ff;
         border-left: 3px solid #8b5cf6;
         border-radius: 0 8px 8px 0;
-        padding: 0.4rem 0.7rem;
-        font-size: 0.78rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
         color: #5b21b6;
         line-height: 1.5;
         margin-bottom: 0.85rem;
-        max-height: 56px;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        max-height: 120px;
+        overflow-y: auto;
+        font-style: italic;
     }
 
     .ep-label {
@@ -384,6 +390,7 @@
         display: flex;
         align-items: center;
         gap: 0.35rem;
+        flex-shrink: 0;
     }
 
     /* Vùng nội dung cho phép bôi đen */
@@ -737,6 +744,11 @@
 
             // Hiện floating button khi bôi đen trong vùng nội dung
             document.addEventListener('mouseup', function (e) {
+                if (popover.classList.contains('visible')) {
+                    selBtn.classList.remove('visible');
+                    return;
+                }
+
                 clearTimeout(selectionTimeout);
                 selectionTimeout = setTimeout(function () {
                     const sel  = window.getSelection();
@@ -787,6 +799,11 @@
                 selBtn.classList.remove('visible');
                 openPopoverLoading(currentSelected);
 
+                // Xoá vùng bôi đen để tránh hiện lại nút nổi khi mouseup
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                }
+
                 try {
                     const resp = await fetch('/Policy/ExplainSelection', {
                         method: 'POST',
@@ -814,8 +831,8 @@
                 positionPopoverCenter();
                 popover.classList.add('visible');
 
-                const shortQuote = selectedText.length > 100
-                    ? selectedText.slice(0, 100) + '...'
+                const shortQuote = selectedText.length > 250
+                    ? selectedText.slice(0, 250) + '...'
                     : selectedText;
 
                 epBody.innerHTML =
@@ -829,8 +846,8 @@
             }
 
             function renderExplanation(selectedText, data) {
-                const shortQuote = selectedText.length > 120
-                    ? selectedText.slice(0, 120) + '...'
+                const shortQuote = selectedText.length > 250
+                    ? selectedText.slice(0, 250) + '...'
                     : selectedText;
 
                 let keyTermHtml = '';
