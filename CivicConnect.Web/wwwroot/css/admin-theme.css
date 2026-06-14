@@ -46,123 +46,145 @@ h1, h2, h3, h4, h5, h6,
   letter-spacing: -0.01em;
 }
 
-/* === SIDEBAR (NAVBAR VERTICAL) === */
+/* === SIDEBAR (NAVBAR VERTICAL) - THEO PHONG CÁCH USER SIDEBAR === */
 .navbar-vertical {
-  background: #2D6A4F !important; /* Xanh nhạt hơn 2 bậc so với #133B2F */
-  border-right: none !important;
-  box-shadow: none !important;
-  padding-top: 0;
+  background: var(--tblr-bg-surface) !important;
+  border-right: 1px solid var(--tblr-border-color) !important;
+  box-shadow: 2px 0 20px rgba(37,99,235,0.04) !important;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 .navbar-vertical .container-fluid {
   padding: 0 !important;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Brand / Logo */
 .navbar-vertical .navbar-brand,
 .navbar-vertical .navbar-brand-autodark {
-  color: #ffffff !important;
-  font-size: 1.25rem !important;
-  padding: 1.25rem 1rem !important;
+  height: 64px !important;
+  padding: 0 20px !important;
+  border-bottom: 1px solid var(--tblr-border-color) !important;
   margin: 0 !important;
-  font-family: 'EB Garamond', serif !important;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
 }
 .navbar-vertical .navbar-brand a,
 .navbar-vertical .navbar-brand-autodark a {
-  color: #ffffff !important;
   text-decoration: none;
-}
-.navbar-vertical .navbar-brand i {
-  color: #E6C200 !important;
 }
 
 /* Nav container */
 .navbar-vertical .navbar-nav {
-  gap: 0;
-  padding: 0 !important;
+  padding: 16px 12px !important;
+  gap: 2px;
 }
 .navbar-vertical .navbar-nav .nav-item {
   padding: 0;
-  margin: 0;
+  margin-bottom: 2px;
+}
+
+/* Section labels */
+.navbar-vertical .nav-item.header {
+  font-size: 10px !important; 
+  font-weight: 600 !important; 
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important; 
+  color: #9ca3af !important;
+  padding: 8px 8px 4px !important; 
+  margin: 0 !important;
 }
 
 /* === Base Nav Link === */
 .navbar-vertical .nav-link {
-  color: rgba(255, 255, 255, 0.8) !important;
-  border-radius: 0 !important;
-  padding: 0.6rem 1rem !important;
+  color: #6b7280 !important; /* Xám nhạt mặc định */
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
   margin: 0 !important;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   background: transparent !important;
   border: none !important;
-  font-weight: 400;
-  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
   display: flex;
   align-items: center;
 }
 
-/* Icon (simple inline, no box) */
+/* Icon */
 .navbar-vertical .nav-link-icon {
-  width: auto !important;
+  width: 20px !important;
+  min-width: 20px !important;
   height: auto !important;
-  min-width: auto !important;
+  font-size: 17px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: inherit !important;
+  margin-right: 10px !important;
   background: none !important;
   border: none !important;
-  border-radius: 0 !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  margin-right: 0.6rem;
-  font-size: 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Hover */
 .navbar-vertical .nav-link:hover {
-  background: rgba(0, 0, 0, 0.12) !important;
-  color: #ffffff !important;
+  background: rgba(19, 59, 47, 0.05) !important;
+  color: #133B2F !important;
 }
-.navbar-vertical .nav-link:hover .nav-link-icon {
+body.theme-dark .navbar-vertical .nav-link:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
 }
 
-/* === ACTIVE STATE = màu xanh gốc #133B2F === */
+/* === ACTIVE STATE (Kiểu Gradient & Inset Shadow) === */
 .navbar-vertical .nav-link.active,
-.navbar-vertical .nav-item.show > .nav-link {
-  background: #133B2F !important;
-  color: #ffffff !important;
-  font-weight: 600;
+.navbar-vertical .nav-item.show > .nav-link,
+.navbar-vertical .nav-item.active > .nav-link {
+  background: linear-gradient(135deg, rgba(19, 59, 47, 0.06), rgba(19, 59, 47, 0.12)) !important;
+  color: #133B2F !important;
+  box-shadow: inset 3px 0 0 #10B981 !important;
+  font-weight: 600 !important;
 }
-.navbar-vertical .nav-link.active .nav-link-icon,
-.navbar-vertical .nav-item.show > .nav-link .nav-link-icon {
+body.theme-dark .navbar-vertical .nav-link.active,
+body.theme-dark .navbar-vertical .nav-item.show > .nav-link,
+body.theme-dark .navbar-vertical .nav-item.active > .nav-link {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.15)) !important;
   color: #ffffff !important;
 }
 
 /* Dropdown Menu inside Sidebar */
 .navbar-vertical .dropdown-menu {
-  background: rgba(0, 0, 0, 0.1) !important;
+  background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 4px 0 4px 24px !important;
   box-shadow: none !important;
+  position: relative !important;
 }
 .navbar-vertical .dropdown-item {
-  color: rgba(255, 255, 255, 0.7) !important;
-  border-radius: 0 !important;
-  padding: 0.5rem 1rem 0.5rem 2.6rem !important;
-  transition: background 0.2s ease;
-  font-weight: 400;
-  font-size: 0.8125rem;
+  color: #6b7280 !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
 }
 .navbar-vertical .dropdown-item:hover {
-  background: rgba(0, 0, 0, 0.1) !important;
-  color: #ffffff !important;
+  background: rgba(19, 59, 47, 0.05) !important;
+  color: #133B2F !important;
 }
 .navbar-vertical .dropdown-item.active {
-  background: #133B2F !important;
+  background: transparent !important;
+  color: #133B2F !important;
+  font-weight: 600 !important;
+}
+
+body.theme-dark .navbar-vertical .dropdown-item {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+body.theme-dark .navbar-vertical .dropdown-item:hover,
+body.theme-dark .navbar-vertical .dropdown-item.active {
   color: #ffffff !important;
-  font-weight: 500;
 }
 
 /* Dropdown toggle caret */
@@ -182,10 +204,12 @@ h1, h2, h3, h4, h5, h6,
 
 /* === TOP HEADER === */
 .navbar-light {
-  background: transparent !important; /* Trong suốt để nổi bật body-bg */
-  border-bottom: none !important;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  background-color: #F1F5F9 !important; /* Màu xám nhạt thay vì trong suốt */
+  border-bottom: 1px solid var(--tblr-border-color) !important;
+  min-height: 64px !important;
+  height: 64px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 .input-icon .form-control {
   background-color: #ffffff;
@@ -395,4 +419,11 @@ body.theme-dark .kanban-column-card, [data-bs-theme="dark"] .kanban-column-card 
   background-color: #111827 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   color: var(--tblr-body-color);
+}
+
+/* Global Card Styling (Borders & Radius) */
+.card {
+  border: 1px solid #CCCCCC !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
 }

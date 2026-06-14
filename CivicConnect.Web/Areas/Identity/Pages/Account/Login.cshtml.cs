@@ -6,6 +6,10 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authentication;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace CivicConnect.Web.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
@@ -23,6 +27,7 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         public InputModel Input { get; set; } = new();
 
         public string? ReturnUrl { get; set; }
+        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
 
         public class InputModel
@@ -42,10 +47,11 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         }
 
 
-        public IActionResult OnGet(string? returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string? returnUrl = null)
         {
             if (User.Identity?.IsAuthenticated == true) return LocalRedirect("~/");
             ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             ViewData["PageHeader"] = "Đăng Nhập";
             return Page();
         }
@@ -54,6 +60,7 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {

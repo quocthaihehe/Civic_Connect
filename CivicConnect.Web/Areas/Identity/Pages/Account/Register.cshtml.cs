@@ -8,21 +8,33 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authentication;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace CivicConnect.Web.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ISmsService _smsService;
 
-        public RegisterModel(UserManager<ApplicationUser> userManager, ISmsService smsService)
+        public RegisterModel(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ISmsService smsService)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
             _smsService = smsService;
         }
 
         [BindProperty]
         public InputModel Input { get; set; } = new();
+
+        public string? ReturnUrl { get; set; }
+        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
 
         public class InputModel
@@ -63,15 +75,20 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         }
 
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGetAsync(string? returnUrl = null)
         {
             if (User.Identity?.IsAuthenticated == true) return LocalRedirect("~/");
+            ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             ViewData["PageHeader"] = "Đăng Ký Tài Khoản";
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
+            returnUrl ??= Url.Content("~/");
+            ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser

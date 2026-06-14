@@ -11,11 +11,11 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cáº¥u hÃ¬nh MVC
+// Cấu hình MVC
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// Cáº¥u hÃ¬nh giá»›i háº¡n upload file (tá»‘i Ä‘a 5 áº£nh x 5MB = 25MB + overhead)
+// Cấu hình giới hạn upload file (tối đa 5 ảnh x 5MB = 25MB + overhead)
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
@@ -23,7 +23,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
     options.MultipartHeadersLengthLimit = 32 * 1024;     // 32 KB
 });
 
-// Cáº¥u hÃ¬nh Kestrel cho phÃ©p request body lá»›n
+// Cấu hình Kestrel cho phép request body lớn
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
@@ -34,29 +34,29 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("CivicConnect.Web")));
 
-// Cáº¥u hÃ¬nh ASP.NET Core Identity
+// Cấu hình ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Cáº¥u hÃ¬nh máº­t kháº©u
+    // Cấu hình mật khẩu
     options.Password.RequiredLength = 8;
     options.Password.RequireUppercase = true;
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = false;
 
-    // Cáº¥u hÃ¬nh khÃ³a tÃ i khoáº£n
+    // Cấu hình khóa tài khoản
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 
-    // Cáº¥u hÃ¬nh tÃ i khoáº£n
+    // Cấu hình tài khoản
     options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedEmail = false; // Táº¯t yÃªu cáº§u confirm email máº·c Ä‘á»‹nh Ä‘á»ƒ tiá»‡n thá»­ nghiá»‡m
+    options.SignIn.RequireConfirmedEmail = false; // Tắt yêu cầu confirm email mặc định để tiện thử nghiệm
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Cáº¥u hÃ¬nh Cookie Authentication cho MVC Views
+// Cấu hình Cookie Authentication cho MVC Views
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Identity/Account/Login";
@@ -64,6 +64,14 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
+
+// Cấu hình External Authentication (Google)
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "YOUR_GOOGLE_CLIENT_ID";
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "YOUR_GOOGLE_CLIENT_SECRET";
+    });
 
 // Đăng ký các Repository và Service chuyên biệt
 builder.Services.Configure<CivicConnect.Web.Models.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
@@ -82,11 +90,11 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IAiService, GeminiAiService>();
 
-// Ä Äƒng kÃ½ cÃ¡c Hosted Services (Background Jobs cháº¡y ná» n)
+// Đăng ký các Hosted Services (Background Jobs chạy nền)
 builder.Services.AddHostedService<PriorityScoreJob>();
 builder.Services.AddHostedService<DeadlineCheckJob>();
 
-// Ä Äƒng kÃ½ SignalR Ä‘á»ƒ gá»­i thÃ´ng bÃ¡o realtime
+// Đăng ký SignalR để gửi thông báo realtime
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
@@ -95,7 +103,7 @@ builder.Services.AddSignalR(options =>
 
 var app = builder.Build();
 
-// Tá»± Ä‘á»™ng cháº¡y Seed Data cho cÃ¡c tÃ i khoáº£n thá»­ nghiá»‡m khi khá»Ÿi Ä‘á»™ng
+// Tự động chạy Seed Data cho các tài khoản thử nghiệm khi khởi động
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -398,7 +406,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Cáº¥u hÃ¬nh HTTP request pipeline.
+// Cấu hình HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

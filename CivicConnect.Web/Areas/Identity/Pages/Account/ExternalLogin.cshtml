@@ -1,0 +1,46 @@
+@page
+@model ExternalLoginModel
+@{
+    ViewData["Title"] = "Đăng nhập bằng Google";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/login-modern.css" />
+    <style>
+        body {
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        .loading-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-card">
+        <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Đang xử lý...</span>
+        </div>
+        <h5 class="fw-bold mb-2">Đang liên kết Google</h5>
+        <p class="text-muted small mb-0">Hệ thống đang đồng bộ và chuyển hướng tài khoản của bạn, vui lòng đợi trong giây lát...</p>
+    </div>
+</body>
+</html>
