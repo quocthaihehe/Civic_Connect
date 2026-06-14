@@ -2,112 +2,189 @@
     ViewData["Title"] = "Hướng dẫn sử dụng";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center mb-5 text-center">
-        <div class="col-lg-8">
-            <h1 class="display-5 fw-bold text-primary mb-3" style="font-family: var(--font-display, serif);">Hướng dẫn sử dụng</h1>
-            <p class="text-muted fs-5">Khám phá cách sử dụng nền tảng Civic Connect một cách hiệu quả để góp phần xây dựng cộng đồng.</p>
-        </div>
+<style>
+    .guide-wrapper {
+        background-color: #FDFBF7; /* Plain cream background as requested */
+        padding: 3rem 2rem;
+        border-radius: 24px;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .guide-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .guide-header h2 {
+        color: #133B2F;
+        font-family: 'EB Garamond', serif;
+        font-weight: bold;
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+    }
+    .guide-header p {
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    .guide-card {
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        background-size: cover;
+        background-position: top center;
+        background-repeat: no-repeat;
+        height: 520px; /* Tall enough to fit the form image and bottom text */
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        transition: transform 0.2s ease-in-out;
+        border: 1px solid rgba(0,0,0,0.03);
+        overflow: hidden;
+    }
+    .guide-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .step-badge {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 38px;
+        height: 38px;
+        background-color: #133B2F;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 6px rgba(19, 59, 47, 0.3);
+        z-index: 2;
+    }
+    
+    .guide-text-container {
+        padding: 20px 25px 40px 25px;
+        text-align: center;
+        height: 35%; /* Fixed ratio for the bottom text area */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .guide-title {
+        color: #133B2F;
+        font-family: 'EB Garamond', serif;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+    }
+    .guide-desc {
+        color: #4b5563;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+</style>
+
+<div class="guide-wrapper">
+    <div class="guide-header">
+        <h2>Hướng dẫn sử dụng</h2>
+        <p>4 bước đơn giản để cùng Civic Connect xây dựng cộng đồng tốt đẹp hơn</p>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 justify-content-center">
         <!-- Step 1 -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 hover-scale transition-all">
-                <div class="card-body p-4 text-center">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-4 shadow-sm" style="width: 64px; height: 64px; font-size: 1.5rem;">
-                        1
-                    </div>
-                    <h5 class="fw-bold mb-3">Đăng ký / Đăng nhập</h5>
-                    <p class="text-muted small">Tạo một tài khoản định danh để bắt đầu sử dụng các tính năng cá nhân hóa và quản lý lịch sử phản ánh của bạn.</p>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="guide-card" style="background-image: url('@Url.Content("~/images/Bước 1.png")');">
+                <div class="step-badge">1</div>
+                <div class="guide-text-container">
+                    <div class="guide-title">Đăng ký / Đăng nhập</div>
+                    <p class="guide-desc">Tạo một tài khoản định danh để bắt đầu sử dụng các tính năng cá nhân hóa và quản lý lịch sử phản ánh của bạn.</p>
                 </div>
             </div>
         </div>
 
         <!-- Step 2 -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 hover-scale transition-all">
-                <div class="card-body p-4 text-center">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle mb-4 shadow-sm" style="width: 64px; height: 64px; font-size: 1.5rem;">
-                        2
-                    </div>
-                    <h5 class="fw-bold mb-3">Tạo phản ánh</h5>
-                    <p class="text-muted small">Chụp ảnh hiện trường, chọn vị trí trên bản đồ và mô tả chi tiết vấn đề bạn đang gặp phải (Giao thông, Môi trường...).</p>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="guide-card" style="background-image: url('@Url.Content("~/images/Bước 2.png")');">
+                <div class="step-badge">2</div>
+                <div class="guide-text-container">
+                    <div class="guide-title">Tạo phản ánh</div>
+                    <p class="guide-desc">Chụp ảnh hiện trường, chọn vị trí trên bản đồ và mô tả chi tiết vấn đề bạn đang gặp phải (Giao thông, Môi trường...).</p>
                 </div>
             </div>
         </div>
 
         <!-- Step 3 -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 hover-scale transition-all">
-                <div class="card-body p-4 text-center">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-warning text-dark rounded-circle mb-4 shadow-sm" style="width: 64px; height: 64px; font-size: 1.5rem;">
-                        3
-                    </div>
-                    <h5 class="fw-bold mb-3">Theo dõi tiến độ</h5>
-                    <p class="text-muted small">Nhận thông báo cập nhật liên tục khi cơ quan chức năng tiếp nhận, xử lý và hoàn tất giải quyết vấn đề của bạn.</p>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="guide-card" style="background-image: url('@Url.Content("~/images/Bước 3.png")');">
+                <div class="step-badge">3</div>
+                <div class="guide-text-container">
+                    <div class="guide-title">Theo dõi tiến độ</div>
+                    <p class="guide-desc">Nhận thông báo cập nhật liên tục khi cơ quan chức năng tiếp nhận, xử lý và hoàn tất giải quyết vấn đề của bạn.</p>
                 </div>
             </div>
         </div>
 
         <!-- Step 4 -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 hover-scale transition-all">
-                <div class="card-body p-4 text-center">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-info text-white rounded-circle mb-4 shadow-sm" style="width: 64px; height: 64px; font-size: 1.5rem;">
-                        4
-                    </div>
-                    <h5 class="fw-bold mb-3">Tương tác cộng đồng</h5>
-                    <p class="text-muted small">Xem phản ánh của người khác, bình luận, chia sẻ hoặc bình chọn (upvote) để đẩy nhanh tiến độ giải quyết các vấn đề nóng.</p>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="guide-card" style="background-image: url('@Url.Content("~/images/Bước 4.png")');">
+                <div class="step-badge">4</div>
+                <div class="guide-text-container">
+                    <div class="guide-title">Tương tác cộng đồng</div>
+                    <p class="guide-desc">Xem phản ánh của người khác, bình luận, chia sẻ hoặc bình chọn để đẩy nhanh tiến độ giải quyết vấn đề.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row mt-5 pt-5 border-top">
+    <!-- FAQ & Support section -->
+    <div class="row mt-5 pt-5 border-top w-100 mx-0" style="border-color: rgba(19, 59, 47, 0.1) !important;">
         <div class="col-lg-6 mb-4">
-            <h3 class="fw-bold text-dark mb-4">Câu hỏi thường gặp (FAQ)</h3>
+            <h3 class="fw-bold mb-4" style="color: #133B2F; font-family: 'EB Garamond', serif;">Câu hỏi thường gặp (FAQ)</h3>
             <div class="accordion accordion-flush shadow-sm rounded-4 overflow-hidden" id="faqAccordion">
-                <div class="accordion-item border-0 border-bottom">
+                <div class="accordion-item border-0 border-bottom" style="border-color: rgba(19, 59, 47, 0.05) !important;">
                     <h2 class="accordion-header">
-                        <button class="accordion-button fw-medium" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        <button class="accordion-button fw-medium" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" style="background-color: #FDFBF7; color: #133B2F;">
                             Tôi có thể gửi phản ánh ẩn danh không?
                         </button>
                     </h2>
                     <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body text-muted">Có. Hệ thống hỗ trợ tùy chọn "Gửi ẩn danh" khi tạo phản ánh. Tên của bạn sẽ được bảo mật với người dùng khác.</div>
+                        <div class="accordion-body" style="background-color: #FDFBF7; color: #4b5563; font-size: 0.95rem;">Có. Hệ thống hỗ trợ tùy chọn "Gửi ẩn danh" khi tạo phản ánh. Tên của bạn sẽ được bảo mật với người dùng khác.</div>
                     </div>
                 </div>
-                <div class="accordion-item border-0 border-bottom">
+                <div class="accordion-item border-0 border-bottom" style="border-color: rgba(19, 59, 47, 0.05) !important;">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed fw-medium" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        <button class="accordion-button collapsed fw-medium" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" style="background-color: #FDFBF7; color: #133B2F;">
                             Mất bao lâu để phản ánh của tôi được xử lý?
                         </button>
                     </h2>
                     <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body text-muted">Thời gian xử lý phụ thuộc vào mức độ ưu tiên và loại vấn đề. Thông thường, cơ quan chức năng sẽ tiếp nhận trong vòng 24-48 giờ làm việc.</div>
+                        <div class="accordion-body" style="background-color: #FDFBF7; color: #4b5563; font-size: 0.95rem;">Thời gian xử lý phụ thuộc vào mức độ ưu tiên và loại vấn đề. Thông thường, cơ quan chức năng sẽ tiếp nhận trong vòng 24-48 giờ làm việc.</div>
                     </div>
                 </div>
                 <div class="accordion-item border-0">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed fw-medium" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        <button class="accordion-button collapsed fw-medium" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" style="background-color: #FDFBF7; color: #133B2F;">
                             Làm sao để tìm kiếm các quy định, chính sách?
                         </button>
                     </h2>
                     <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body text-muted">Bạn có thể truy cập mục "Chính sách & Pháp luật" trên Menu để tìm đọc các thông báo, quy định mới nhất từ chính quyền địa phương.</div>
+                        <div class="accordion-body" style="background-color: #FDFBF7; color: #4b5563; font-size: 0.95rem;">Bạn có thể truy cập mục "Chính sách & Pháp luật" trên Menu để tìm đọc các thông báo, quy định mới nhất từ chính quyền địa phương.</div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="bg-light p-5 rounded-4 h-100 text-center d-flex flex-column justify-content-center">
-                <i class="bi bi-headset text-primary mb-3" style="font-size: 3rem;"></i>
-                <h4 class="fw-bold mb-3">Cần hỗ trợ thêm?</h4>
-                <p class="text-muted mb-4">Nếu bạn gặp bất kỳ khó khăn nào trong quá trình sử dụng hệ thống, đừng ngần ngại liên hệ với bộ phận hỗ trợ kỹ thuật của chúng tôi.</p>
+            <div class="p-5 rounded-4 h-100 text-center d-flex flex-column justify-content-center shadow-sm" style="background-color: rgba(19, 59, 47, 0.05);">
+                <i class="bi bi-headset mb-3" style="font-size: 3rem; color: #1E5C4A;"></i>
+                <h4 class="fw-bold mb-3" style="color: #133B2F; font-family: 'EB Garamond', serif;">Cần hỗ trợ thêm?</h4>
+                <p class="text-muted mb-4" style="font-size: 0.95rem;">Nếu bạn gặp bất kỳ khó khăn nào trong quá trình sử dụng hệ thống, đừng ngần ngại liên hệ với bộ phận hỗ trợ kỹ thuật của chúng tôi.</p>
                 <div>
-                    <a href="mailto:support@civicconnect.vn" class="btn btn-outline-primary rounded-pill px-4 me-2"><i class="bi bi-envelope me-2"></i>Gửi Email</a>
-                    <a href="tel:19001234" class="btn btn-primary rounded-pill px-4"><i class="bi bi-telephone me-2"></i>Gọi Hotline</a>
+                    <a href="mailto:support@civicconnect.vn" class="btn rounded-pill px-4 me-2 shadow-sm" style="border: 1px solid #1E5C4A; color: #1E5C4A; background-color: transparent; font-weight: 500;"><i class="bi bi-envelope me-2"></i>Gửi Email</a>
+                    <a href="tel:19001234" class="btn rounded-pill px-4 shadow-sm" style="background-color: #1E5C4A; color: white; font-weight: 500;"><i class="bi bi-telephone me-2"></i>Gọi Hotline</a>
                 </div>
             </div>
         </div>
