@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CivicConnect.Web.Data;
 using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Repositories;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -17,13 +18,15 @@ namespace CivicConnect.Web.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IAiService _aiService;
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _scrapedContentCache = 
             new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
 
-        public PolicyController(AppDbContext context, IConfiguration configuration)
+        public PolicyController(AppDbContext context, IConfiguration configuration, IAiService aiService)
         {
             _context = context;
             _configuration = configuration;
+            _aiService = aiService;
         }
 
         public async Task<IActionResult> Index()
@@ -493,6 +496,165 @@ namespace CivicConnect.Web.Controllers
             return newsList;
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Summarize(int id)
+        {
+            try
+            {
+                var policy = await _context.Policies.FindAsync(id);
+                if (policy == null || !policy.IsActive)
+                    return Json(new { success = false, error = "Không tìm thấy chính sách." });
+
+                var existingSummary = await _context.PolicyAiSummaries
+                    .Where(s => s.PolicyId == id && s.IsActive)
+                    .OrderByDescending(s => s.GeneratedAt)
+                    .FirstOrDefaultAsync();
+
+                if (existingSummary != null)
+                {
+                    var cachedBullets = System.Text.Json.JsonSerializer.Deserialize<List<string>>(
+                        existingSummary.BulletPointsJson) ?? new List<string>();
+
+                    return Json(new
+                    {
+                        success = true,
+                        shortSummary = existingSummary.ShortSummary,
+                        bulletPoints = cachedBullets,
+                        realWorldExample = existingSummary.RealWorldExample,
+                        generatedAt = existingSummary.GeneratedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm"),
+                        modelUsed = existingSummary.AiModel,
+                        fromCache = true
+                    });
+                }
+
+                var contentToSummarize = string.IsNullOrWhiteSpace(policy.Content) || policy.Content.Length < 50
+                    ? policy.Excerpt
+                    : policy.Content;
+
+                var result = await _aiService.SummarizePolicyAsync(policy.Title, contentToSummarize);
+
+                if (!result.IsSuccess)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        error = result.ErrorMessage ?? "Không thể tóm tắt lúc này. Vui lòng thử lại sau."
+                    });
+                }
+
+                var summary = new PolicyAiSummary
+                {
+                    PolicyId = id,
+                    ShortSummary = result.ShortSummary,
+                    BulletPointsJson = System.Text.Json.JsonSerializer.Serialize(result.BulletPoints),
+                    RealWorldExample = result.RealWorldExample,
+                    AiModel = result.ModelUsed,
+                    TokensUsed = result.TokensUsed,
+                    GeneratedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                _context.PolicyAiSummaries.Add(summary);
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    shortSummary = result.ShortSummary,
+                    bulletPoints = result.BulletPoints,
+                    realWorldExample = result.RealWorldExample,
+                    generatedAt = summary.GeneratedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm"),
+                    modelUsed = result.ModelUsed,
+                    fromCache = false
+                });
+            }
+            catch (Exception)
+            {
+                return Json(new
+                {
+                    success = false,
+                    error = "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau."
+                });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExplainSelection([FromBody] ExplainSelectionRequest request)
+        {
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.SelectedText) ||
+                request.SelectedText.Trim().Length < 5)
+            {
+                return Json(new { success = false, error = "Vui lòng bôi đen một đoạn văn bản để giải thích." });
+            }
+
+            try
+            {
+                var policy = await _context.Policies.FindAsync(request.PolicyId);
+                var policyTitle = policy?.Title ?? "Chính sách";
+
+                var result = await _aiService.ExplainSelectionAsync(
+                    request.SelectedText.Trim(), policyTitle);
+
+                if (!result.IsSuccess)
+                    return Json(new { success = false, error = result.ErrorMessage ?? "Không thể giải thích lúc này. Vui lòng thử lại." });
+
+                return Json(new
+                {
+                    success = true,
+                    simpleExplanation = result.SimpleExplanation,
+                    keyTerm = result.KeyTerm,
+                    practicalMeaning = result.PracticalMeaning,
+                    modelUsed = result.ModelUsed
+                });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, error = "Đã xảy ra lỗi. Vui lòng thử lại sau." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReadAndExplain(int id)
+        {
+            try
+            {
+                var policy = await _context.Policies.FindAsync(id);
+                if (policy == null || !policy.IsActive)
+                    return Json(new { success = false, error = "Không tìm thấy chính sách." });
+
+                var contentToRead = string.IsNullOrWhiteSpace(policy.Content) || policy.Content.Length < 50
+                    ? policy.Excerpt
+                    : policy.Content;
+
+                var result = await _aiService.ReadAndExplainAsync(policy.Title, contentToRead);
+
+                if (!result.IsSuccess)
+                    return Json(new { success = false, error = result.ErrorMessage ?? "Không thể phân tích lúc này. Vui lòng thử lại sau." });
+
+                return Json(new
+                {
+                    success = true,
+                    overallGist = result.OverallGist,
+                    modelUsed = result.ModelUsed,
+                    sections = result.Sections.Select(s => new
+                    {
+                        title = s.Title,
+                        originalText = s.OriginalText,
+                        simpleExplanation = s.SimpleExplanation,
+                        actionRequired = s.ActionRequired
+                    }).ToList()
+                });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, error = "Đã xảy ra lỗi. Vui lòng thử lại sau." });
+            }
+        }
+
         private static readonly List<LawEntry> LawDataset = new List<LawEntry>
         {
             new LawEntry
@@ -597,5 +759,11 @@ namespace CivicConnect.Web.Controllers
         public string Content { get; set; }
         public string DocumentNumber { get; set; }
         public string PenaltyInfo { get; set; }
+    }
+
+    public class ExplainSelectionRequest
+    {
+        public int PolicyId { get; set; }
+        public string SelectedText { get; set; } = string.Empty;
     }
 }

@@ -22,6 +22,7 @@ namespace CivicConnect.Web.Data
         public DbSet<UnitCategory> UnitCategories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Policy> Policies { get; set; }
+        public DbSet<PolicyAiSummary> PolicyAiSummaries { get; set; }
         public DbSet<DonationCategory> DonationCategories { get; set; }
         public DbSet<Donation> Donations { get; set; }
         public DbSet<SmartRoutingRule> SmartRoutingRules { get; set; }
@@ -218,7 +219,44 @@ namespace CivicConnect.Web.Data
                     Id = 1,
                     Title = "Nghị định 45/2026/NĐ-CP về xử phạt vi phạm hành chính trong lĩnh vực bảo vệ môi trường đô thị",
                     Excerpt = "Chính phủ ban hành quy định tăng mức phạt đối với các hành vi xả rác bừa bãi, đổ chất thải không đúng nơi quy định và lấn chiếm lòng lề đường.",
-                    Content = "Nghị định quy định chi tiết các mức xử phạt đối với cá nhân, tổ chức có hành vi vi phạm vệ sinh môi trường đô thị. Mức phạt tiền tối đa đối với cá nhân là 1.000.000đ cho hành vi vứt rác không đúng nơi quy định, 5.000.000đ cho hành vi tự ý đổ rác thải sinh hoạt ra lòng đường, vỉa hè. Các đơn vị kinh doanh lấn chiếm vỉa hè sẽ bị xử phạt từ 10.000.000đ đến 20.000.000đ và buộc khôi phục tình trạng ban đầu.",
+                    Content = """
+                              <p><strong>NGHỊ ĐỊNH</strong><br/>
+                              <strong>Quy định xử phạt vi phạm hành chính trong lĩnh vực bảo vệ môi trường đô thị</strong></p>
+
+                              <p>Căn cứ Luật Tổ chức Chính phủ ngày 19 tháng 6 năm 2015; Luật sửa đổi, bổ sung một số điều của Luật Tổ chức Chính phủ và Luật Tổ chức chính quyền địa phương ngày 22 tháng 11 năm 2019;<br/>
+                              Căn cứ Luật Bảo vệ môi trường ngày 17 tháng 11 năm 2020;<br/>
+                              Căn cứ Luật Xử lý vi phạm hành chính ngày 20 tháng 6 năm 2012; Luật sửa đổi, bổ sung một số điều của Luật Xử lý vi phạm hành chính ngày 13 tháng 11 năm 2020;<br/>
+                              Theo đề nghị của Bộ trưởng Bộ Tài nguyên và Môi trường;<br/>
+                              Chính phủ ban hành Nghị định quy định xử phạt vi phạm hành chính trong lĩnh vực bảo vệ môi trường đô thị.</p>
+
+                              <p><strong>Chương I: QUY ĐỊNH CHUNG</strong></p>
+
+                              <p><strong>Điều 1. Phạm vi điều chỉnh</strong><br/>
+                              Nghị định này quy định các hành vi vi phạm hành chính, hình thức xử phạt, mức xử phạt, biện pháp khắc phục hậu quả đối với hành vi vi phạm pháp luật về bảo vệ môi trường tại khu vực đô thị, khu dân cư tập trung, nơi công cộng.</p>
+
+                              <p><strong>Điều 2. Đối tượng áp dụng</strong><br/>
+                              1. Cá nhân, tổ chức trong nước và nước ngoài có hành vi vi phạm hành chính trong lĩnh vực bảo vệ môi trường đô thị trên lãnh thổ nước Cộng hòa xã hội chủ nghĩa Việt Nam.<br/>
+                              2. Cơ quan có thẩm quyền xử phạt và cá nhân, tổ chức liên quan.</p>
+
+                              <p><strong>Chương II: HÀNH VI VI PHẠM, HÌNH THỨC VÀ MỨC XỬ PHẠT</strong></p>
+
+                              <p><strong>Điều 10. Vi phạm quy định về bảo vệ môi trường nơi công cộng, khu đô thị, khu dân cư</strong><br/>
+                              1. Phạt tiền từ 1.000.000 đồng đến 2.000.000 đồng đối với hành vi vứt, thải, bỏ đầu, mẩu, tàn thuốc lá không đúng nơi quy định tại khu chung cư, thương mại, dịch vụ hoặc nơi công cộng.<br/>
+                              2. Phạt tiền từ 3.000.000 đồng đến 5.000.000 đồng đối với hành vi vệ sinh cá nhân (tiểu tiện, đại tiện) không đúng nơi quy định tại khu chung cư, thương mại, dịch vụ hoặc nơi công cộng.<br/>
+                              3. Phạt tiền từ 5.000.000 đồng đến 10.000.000 đồng đối với hành vi vứt, thải, bỏ rác thải sinh hoạt, đổ nước thải không đúng nơi quy định tại khu chung cư, thương mại, dịch vụ hoặc nơi công cộng, trừ các hành vi quy định tại khoản 4 Điều này.<br/>
+                              4. Phạt tiền từ 10.000.000 đồng đến 15.000.000 đồng đối với hành vi vứt, thải rác thải sinh hoạt trên vỉa hè, lòng đường hoặc vào hệ thống thoát nước mưa, nước thải đô thị; đổ nước thải không đúng quy định trên vỉa hè, lòng đường phố.</p>
+
+                              <p><strong>Điều 11. Vi phạm về lấn chiếm lòng lề đường, xả rác thải xây dựng</strong><br/>
+                              1. Phạt tiền từ 20.000.000 đồng đến 30.000.000 đồng đối với hành vi đổ, bỏ chất thải rắn xây dựng, đất đá, phế liệu xây dựng trái phép ra môi trường hoặc lấn chiếm lòng lề đường, hè phố đô thị.<br/>
+                              2. Biện pháp khắc phục hậu quả: Buộc khôi phục lại tình trạng ban đầu; buộc vận chuyển chất thải, phế liệu xây dựng đến điểm tập kết đúng quy định.</p>
+
+                              <p><strong>Chương III: THẨM QUYỀN VÀ THỦ TỤC XỬ PHẠT</strong></p>
+
+                              <p><strong>Điều 25. Thẩm quyền của Chủ tịch Ủy ban nhân dân các cấp</strong><br/>
+                              1. Chủ tịch Ủy ban nhân dân cấp xã có quyền phạt cảnh cáo, phạt tiền đến 5.000.000 đồng, tịch thu tang vật vi phạm.<br/>
+                              2. Chủ tịch Ủy ban nhân dân cấp huyện có quyền phạt tiền đến 50.000.000 đồng, đình chỉ hoạt động gây ô nhiễm môi trường.<br/>
+                              3. Chủ tịch Ủy ban nhân dân cấp tỉnh có quyền phạt tiền đến 100.000.000 đồng đối với cá nhân và 200.000.000 đồng đối với tổ chức.</p>
+                              """,
                     Tag = "Nghị định",
                     TagClass = "tag-law",
                     IssuingUnit = "Chính phủ",
@@ -235,7 +273,27 @@ namespace CivicConnect.Web.Data
                     Id = 2,
                     Title = "Thông tư 08/2026/TT-BXD hướng dẫn về chỉnh trang đô thị và phát triển không gian công cộng xanh",
                     Excerpt = "Bộ Xây dựng ban hành hướng dẫn thực hiện các chỉ tiêu về diện tích cây xanh, hoa và hạ tầng tiện ích tại khu dân cư đô thị.",
-                    Content = "Bộ Xây dựng ban hành Thông tư hướng dẫn chi tiết quy chuẩn kỹ thuật quốc gia về quy hoạch xây dựng. Trong đó, yêu cầu các khu dân cư mới phải đạt tỷ lệ diện tích cây xanh tối thiểu là 2m2/người, khuyến khích các khu dân cư hiện hữu tận dụng các ngõ hẻm để trồng hoa, cây cảnh công cộng và tạo không gian sinh hoạt cộng đồng tự quản.",
+                    Content = """
+                              <p><strong>BỘ XÂY DỰNG</strong><br/>
+                              Số: 08/2026/TT-BXD<br/>
+                              <em>Hà Nội, ngày 01 tháng 06 năm 2026</em></p>
+
+                              <p><strong>THÔNG TƯ</strong><br/>
+                              <strong>Hướng dẫn về chỉnh trang đô thị, cải tạo và đồng bộ hóa không gian công cộng xanh</strong></p>
+
+                              <p>Căn cứ Luật Xây dựng ngày 18 tháng 6 năm 2014 và Luật sửa đổi, bổ sung một số điều của Luật Xây dựng ngày 17 tháng 6 năm 2020;<br/>
+                              Căn cứ Luật Quy hoạch đô thị ngày 17 tháng 6 năm 2009;<br/>
+                              Nhằm nâng cao chất lượng hạ tầng xanh và phát triển môi trường sống trong lành tại các đô thị loại I và đặc biệt;<br/>
+                              Bộ trưởng Bộ Xây dựng ban hành Thông tư hướng dẫn về chỉnh trang đô thị, cải tạo và phát triển không gian công cộng xanh.</p>
+
+                              <p><strong>Điều 1. Phạm vi áp dụng và tiêu chuẩn xanh</strong><br/>
+                              1. Tiêu chuẩn diện tích cây xanh: Đề xuất các khu đô thị mới phải đạt tối thiểu 2m² cây xanh/người dân. Các khu dân cư hiện hữu tận dụng tối đa vỉa hè, các tuyến hẻm để trồng hoa, cây xanh công cộng tự quản.<br/>
+                              2. Hạ tầng kỹ thuật vỉa hè: Khuyến khích cải tạo, chỉnh trang đồng bộ bằng đá tự nhiên có độ bền cao, thiết lập các gờ nổi dẫn đường cho người khiếm thị.</p>
+
+                              <p><strong>Điều 2. Quy chuẩn cải tạo và nguồn lực hỗ trợ</strong><br/>
+                              1. Ưu tiên ngân sách hỗ trợ 70% tổng kinh phí đầu tư xây dựng cơ sở hạ tầng xanh. Vận động nguồn lực xã hội đóng góp 30% từ các doanh nghiệp, hộ gia đình mặt tiền đường.<br/>
+                              2. Hỗ trợ 100% kinh phí chỉnh trang kết nối từ nhà ra vỉa hè cho các hộ nghèo, cận nghèo và gia đình chính sách.</p>
+                              """,
                     Tag = "Thông tư",
                     TagClass = "tag-policy",
                     IssuingUnit = "Bộ Xây dựng",
@@ -252,7 +310,24 @@ namespace CivicConnect.Web.Data
                     Id = 3,
                     Title = "Thông báo 124/TB-UBND ra quân tổng vệ sinh môi trường trên địa bàn Phường Bến Nghé",
                     Excerpt = "UBND Phường phát động lễ ra quân tổng vệ sinh, dọn dẹp rác thải và trang trí tuyến hẻm xanh vào sáng Chủ Nhật.",
-                    Content = "Nhằm xây dựng nếp sống văn minh đô thị và giữ gìn vệ sinh chung, UBND Phường Bến Nghé phát động chiến dịch ra quân quét dọn các tuyến đường chính và chỉnh trang cây xanh tại ngõ hẻm 45 Lê Thánh Tôn. Kính mời toàn thể nhân dân, các ban ngành đoàn thể và tổ dân phố tham gia đầy đủ. Thời gian bắt đầu từ 7:30 sáng ngày Chủ Nhật.",
+                    Content = """
+                              <p><strong>ỦY BAN NHÂN DÂN PHƯỜNG BẾN NGHÉ</strong><br/>
+                              Số: 124/TB-UBND<br/>
+                              <em>Bến Nghé, ngày 10 tháng 06 năm 2026</em></p>
+
+                              <p><strong>THÔNG BÁO</strong><br/>
+                              <strong>Về việc tổ chức ra quân tổng vệ sinh môi trường, xóa quảng cáo rao vặt trái phép và chỉnh trang mỹ quan đô thị</strong></p>
+
+                              <p>Nhằm xây dựng nếp sống văn minh đô thị và giữ gìn vệ sinh chung trên địa bàn Phường, Ủy ban nhân dân Phường Bến Nghé phát động chiến dịch ra quân quét dọn các tuyến đường chính và chỉnh trang cây xanh tại ngõ hẻm 45 Lê Thánh Tôn. Kính mời toàn thể nhân dân, các ban ngành đoàn thể và tổ dân phố tham gia đầy đủ.</p>
+
+                              <p><strong>1. Thời gian ra quân:</strong><br/>
+                              Bắt đầu từ 07 giờ 30 phút sáng Chủ Nhật ngày 21 tháng 06 năm 2026.</p>
+
+                              <p><strong>2. Phân công nhiệm vụ cụ thể:</strong><br/>
+                              - Đoàn Thanh niên phường phối hợp dọn dẹp rác thải nhựa dọc các tuyến đường lớn như Nguyễn Huệ và Lê Lợi.<br/>
+                              - Ban điều hành khu phố vận động từng hộ gia đình quét dọn sạch sẽ, phân loại rác thải tại nguồn trước cửa nhà mình.<br/>
+                              - Lực lượng chức năng phối hợp bóc gỡ quảng cáo vẽ bậy trái phép trên tường, tủ điện công cộng.</p>
+                              """,
                     Tag = "Thông báo",
                     TagClass = "tag-notice",
                     IssuingUnit = "UBND Phường Bến Nghé",
@@ -487,6 +562,17 @@ namespace CivicConnect.Web.Data
                     OrderIndex = 0
                 }
             );
+
+            // Cấu hình bảng PolicyAiSummary
+            modelBuilder.Entity<PolicyAiSummary>(entity =>
+            {
+                entity.HasOne(s => s.Policy)
+                    .WithMany()
+                    .HasForeignKey(s => s.PolicyId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(s => new { s.PolicyId, s.IsActive });
+            });
         }
     }
 }
