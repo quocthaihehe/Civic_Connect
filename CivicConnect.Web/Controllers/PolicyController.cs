@@ -179,12 +179,30 @@ namespace CivicConnect.Web.Controllers
         {
             try
             {
-                // 1. Extract Title
+                // 1. Extract Title (avoiding matching the header logo <h1>)
                 string title = "";
-                var titleMatch = System.Text.RegularExpressions.Regex.Match(html, @"<h1[^>]*?>(.*?)</h1>", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
-                if (titleMatch.Success)
+                var titleMatch = System.Text.RegularExpressions.Regex.Match(html, @"<h1[^>]*?class=""[^""]*?(detail-title|article-title)[^""]*""[^>]*?>(.*?)</h1>", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                if (!titleMatch.Success)
                 {
-                    title = titleMatch.Groups[1].Value;
+                    titleMatch = System.Text.RegularExpressions.Regex.Match(html, @"<h1[^>]*?class='[^']*?(detail-title|article-title)[^']*'[^>]*?>(.*?)</h1>", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                }
+                if (!titleMatch.Success)
+                {
+                    // Fallback to first non-logo h1
+                    var matches = System.Text.RegularExpressions.Regex.Matches(html, @"<h1[^>]*?>(.*?)</h1>", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                    foreach (System.Text.RegularExpressions.Match m in matches)
+                    {
+                        var potentialTitle = m.Groups[1].Value;
+                        if (!potentialTitle.Contains("logo") && !potentialTitle.Contains("header__logo"))
+                        {
+                            title = System.Text.RegularExpressions.Regex.Replace(potentialTitle, "<.*?>", "").Trim();
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    title = titleMatch.Groups[2].Value;
                     title = System.Text.RegularExpressions.Regex.Replace(title, "<.*?>", "").Trim();
                 }
 
@@ -211,23 +229,76 @@ namespace CivicConnect.Web.Controllers
                     }
                 }
 
-                // 3. Extract main content body
-                string bodyHtml = "";
-                var bodyRegexes = new string[]
+                // Try hidden input value for hdSapo
+                if (string.IsNullOrEmpty(sapo))
                 {
-                    @"<div[^>]*?(class=""[^""]*?(detail-content|fck_detail|article-content|main-content-body)[^""]*""|id=""(main-detail-body|article-body|content-body)"")[^>]*?>(.*?)</div>\s*<div class=""[a-zA-Z0-9_-]*?(detail-tab-bottom|author-info|relation-news|social-share)",
-                    @"<div[^>]*?(class=""[^""]*?(detail-content|fck_detail|article-content|main-content-body)[^""]*""|id=""(main-detail-body|article-body|content-body)"")[^>]*?>(.*?)</div>",
-                    @"<div[^>]*?class=""[^""]*?fck[^""]*""[^>]*?>(.*?)</div>",
-                    @"<article[^>]*?>(.*?)</article>"
-                };
+                    var sapoInputMatch = System.Text.RegularExpressions.Regex.Match(html, @"<input[^>]*?id=""hdSapo""[^>]*?value=""(.*?)""", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    if (sapoInputMatch.Success)
+                    {
+                        sapo = sapoInputMatch.Groups[1].Value;
+                        sapo = System.Net.WebUtility.HtmlDecode(sapo);
+                    }
+                }
 
-                foreach (var pattern in bodyRegexes)
+                // 3. Extract main content body via robust string splitting
+                string bodyHtml = "";
+                int bodyStartIndex = -1;
+                string[] bodyStartSelectors = new string[] { "detail-content", "fck_detail", "article-content", "main-content-body", "fck" };
+                
+                foreach (var selector in bodyStartSelectors)
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(html, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                    var match = System.Text.RegularExpressions.Regex.Match(html, $@"<div[^>]*?class=""[^""]*?{selector}[^""]*""[^>]*?>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
-                        bodyHtml = match.Groups[match.Groups.Count - 1].Value;
+                        bodyStartIndex = match.Index + match.Length;
                         break;
+                    }
+                }
+
+                if (bodyStartIndex == -1)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(html, @"<div[^>]*?id=""(main-detail-body|article-body|content-body)""[^>]*?>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        bodyStartIndex = match.Index + match.Length;
+                    }
+                }
+
+                if (bodyStartIndex != -1)
+                {
+                    string remainder = html.Substring(bodyStartIndex);
+                    int bodyEndIndex = -1;
+                    string[] endSelectors = new string[] 
+                    { 
+                        "detail-tab-bottom", 
+                        "author-info", 
+                        "social-share", 
+                        "relation-news", 
+                        "detail-author-bot",
+                        "formreactdetail",
+                        "detail-comment"
+                    };
+
+                    foreach (var selector in endSelectors)
+                    {
+                        int idx = remainder.IndexOf(selector, StringComparison.OrdinalIgnoreCase);
+                        if (idx != -1)
+                        {
+                            int tagOpenIdx = remainder.LastIndexOf("<", idx);
+                            if (tagOpenIdx != -1 && (bodyEndIndex == -1 || tagOpenIdx < bodyEndIndex))
+                            {
+                                bodyEndIndex = tagOpenIdx;
+                            }
+                        }
+                    }
+
+                    if (bodyEndIndex != -1)
+                    {
+                        bodyHtml = remainder.Substring(0, bodyEndIndex);
+                    }
+                    else
+                    {
+                        bodyHtml = remainder;
                     }
                 }
 

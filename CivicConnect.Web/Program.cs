@@ -118,33 +118,33 @@ using (var scope = app.Services.CreateScope())
         // Auto-update policy SourceUrls to real working Tuoi Tre article links to bypass geoblocking on Somee
         bool hasChanges = false;
         var policy1 = await dbContext.Policies.FindAsync(1);
-        if (policy1 != null && policy1.SourceUrl == "https://vanban.chinhphu.vn")
+        if (policy1 != null && policy1.SourceUrl != "https://tuoitre.vn/vut-rac-bua-bai-tieu-bay-se-bi-phat-gap-10-lan-1259236.htm")
         {
-            policy1.SourceUrl = "https://tuoitre.vn/tu-hom-nay-3-1-nghi-dinh-45-ve-xu-phat-vi-pham-moi-truong-co-hieu-luc-20221231182414732.htm";
+            policy1.SourceUrl = "https://tuoitre.vn/vut-rac-bua-bai-tieu-bay-se-bi-phat-gap-10-lan-1259236.htm";
             hasChanges = true;
         }
         var policy2 = await dbContext.Policies.FindAsync(2);
-        if (policy2 != null && policy2.SourceUrl == "https://moc.gov.vn")
+        if (policy2 != null && policy2.SourceUrl != "https://tuoitre.vn/de-xuat-xay-cong-vien-khoa-hoc-cho-thieu-nhi-tai-tp-hcm-20240906132157012.htm")
         {
-            policy2.SourceUrl = "https://tuoitre.vn/quy-chuan-moi-ve-quy-hoach-xay-dung-dat-cay-xanh-do-thi-toi-thieu-phai-dat-nhu-the-nao-20210526105822003.htm";
+            policy2.SourceUrl = "https://tuoitre.vn/de-xuat-xay-cong-vien-khoa-hoc-cho-thieu-nhi-tai-tp-hcm-20240906132157012.htm";
             hasChanges = true;
         }
         var policy4 = await dbContext.Policies.FindAsync(4);
-        if (policy4 != null && policy4.SourceUrl == "https://tuoitre.vn")
+        if (policy4 != null && policy4.SourceUrl != "https://tuoitre.vn/ca-ngan-ban-tre-cung-ba-con-o-binh-hung-hoa-chung-tay-don-rac-trong-cay-nhan-chu-nhat-xanh-20260524125312066.htm")
         {
-            policy4.SourceUrl = "https://tuoitre.vn/hon-2000-ban-tre-tp-hcm-tham-gia-ngay-chu-nhat-xanh-don-dep-rac-kenh-rach-20230319114522001.htm";
+            policy4.SourceUrl = "https://tuoitre.vn/ca-ngan-ban-tre-cung-ba-con-o-binh-hung-hoa-chung-tay-don-rac-trong-cay-nhan-chu-nhat-xanh-20260524125312066.htm";
             hasChanges = true;
         }
         var policy5 = await dbContext.Policies.FindAsync(5);
-        if (policy5 != null && policy5.SourceUrl == "https://tphcm.gov.vn")
+        if (policy5 != null && policy5.SourceUrl != "https://tuoitre.vn/tp-hcm-chu-tich-phuong-xa-chiu-trach-nhiem-neu-via-he-bi-lan-chiem-20251128174818155.htm")
         {
-            policy5.SourceUrl = "https://tuoitre.vn/tp-hcm-ban-hanh-quy-dinh-moi-ve-su-dung-tam-thoi-long-duong-he-pho-20230727181051515.htm";
+            policy5.SourceUrl = "https://tuoitre.vn/tp-hcm-chu-tich-phuong-xa-chiu-trach-nhiem-neu-via-he-bi-lan-chiem-20251128174818155.htm";
             hasChanges = true;
         }
         var policy6 = await dbContext.Policies.FindAsync(6);
-        if (policy6 != null && policy6.SourceUrl == "https://quan1.hochiminhcity.gov.vn")
+        if (policy6 != null && policy6.SourceUrl != "https://tuoitre.vn/khanh-hoa-trien-khai-ung-dung-de-dan-phan-anh-hien-truong-tra-cuu-dich-vu-cong-20260415093301147.htm")
         {
-            policy6.SourceUrl = "https://tuoitre.vn/tp-hcm-nguoi-dan-phan-anh-qua-app-sau-2-gio-chinh-quyen-phai-xu-ly-20201026090448107.htm";
+            policy6.SourceUrl = "https://tuoitre.vn/khanh-hoa-trien-khai-ung-dung-de-dan-phan-anh-hien-truong-tra-cuu-dich-vu-cong-20260415093301147.htm";
             hasChanges = true;
         }
 

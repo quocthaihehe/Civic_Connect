@@ -265,7 +265,7 @@ namespace CivicConnect.Web.Data
                     DocumentNumber = "45/2026/NĐ-CP",
                     DocumentType = "Nghị định",
                     Signer = "Thủ tướng Phạm Minh Chính",
-                    SourceUrl = "https://tuoitre.vn/tu-hom-nay-3-1-nghi-dinh-45-ve-xu-phat-vi-pham-moi-truong-co-hieu-luc-20221231182414732.htm",
+                    SourceUrl = "https://tuoitre.vn/vut-rac-bua-bai-tieu-bay-se-bi-phat-gap-10-lan-1259236.htm",
                     EffectiveDate = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Policy
@@ -302,7 +302,7 @@ namespace CivicConnect.Web.Data
                     DocumentNumber = "08/2026/TT-BXD",
                     DocumentType = "Thông tư",
                     Signer = "Bộ trưởng Nguyễn Thanh Nghị",
-                    SourceUrl = "https://tuoitre.vn/quy-chuan-moi-ve-quy-hoach-xay-dung-dat-cay-xanh-do-thi-toi-thieu-phai-dat-nhu-the-nao-20210526105822003.htm",
+                    SourceUrl = "https://tuoitre.vn/de-xuat-xay-cong-vien-khoa-hoc-cho-thieu-nhi-tai-tp-hcm-20240906132157012.htm",
                     EffectiveDate = new DateTime(2026, 8, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Policy
@@ -353,7 +353,7 @@ namespace CivicConnect.Web.Data
                     DocumentNumber = "",
                     DocumentType = "Tin tức",
                     Signer = "",
-                    SourceUrl = "https://tuoitre.vn/hon-2000-ban-tre-tp-hcm-tham-gia-ngay-chu-nhat-xanh-don-dep-rac-kenh-rach-20230319114522001.htm",
+                    SourceUrl = "https://tuoitre.vn/ca-ngan-ban-tre-cung-ba-con-o-binh-hung-hoa-chung-tay-don-rac-trong-cay-nhan-chu-nhat-xanh-20260524125312066.htm",
                     EffectiveDate = new DateTime(2026, 6, 11, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Policy
@@ -395,7 +395,7 @@ namespace CivicConnect.Web.Data
                     DocumentNumber = "18/2026/QĐ-UBND",
                     DocumentType = "Quyết định",
                     Signer = "Chủ tịch Phan Văn Mãi",
-                    SourceUrl = "https://tuoitre.vn/tp-hcm-ban-hanh-quy-dinh-moi-ve-su-dung-tam-thoi-long-duong-he-pho-20230727181051515.htm",
+                    SourceUrl = "https://tuoitre.vn/tp-hcm-chu-tich-phuong-xa-chiu-trach-nhiem-neu-via-he-bi-lan-chiem-20251128174818155.htm",
                     EffectiveDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Policy
@@ -434,7 +434,7 @@ namespace CivicConnect.Web.Data
                     DocumentNumber = "89/KH-UBND",
                     DocumentType = "Kế hoạch",
                     Signer = "Chủ tịch UBND Quận 1",
-                    SourceUrl = "https://tuoitre.vn/tp-hcm-nguoi-dan-phan-anh-qua-app-sau-2-gio-chinh-quyen-phai-xu-ly-20201026090448107.htm",
+                    SourceUrl = "https://tuoitre.vn/khanh-hoa-trien-khai-ung-dung-de-dan-phan-anh-hien-truong-tra-cuu-dich-vu-cong-20260415093301147.htm",
                     EffectiveDate = new DateTime(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
