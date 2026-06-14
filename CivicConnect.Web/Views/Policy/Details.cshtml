@@ -773,6 +773,32 @@
                 }, 160);
             });
 
+            // Lắng nghe sự kiện bôi đen từ iframe báo gốc
+            window.addEventListener('message', function (event) {
+                if (!event.data) return;
+
+                if (event.data.type === 'iframeTextSelected') {
+                    currentSelected = event.data.text;
+                    const iframe = document.querySelector('.iframe-container iframe');
+                    if (iframe) {
+                        const iframeRect = iframe.getBoundingClientRect();
+                        const x = iframeRect.left + event.data.clientX;
+                        const y = iframeRect.top + event.data.clientY;
+                        
+                        // Fake an event object to position the button
+                        const fakeEvent = {
+                            clientX: x,
+                            clientY: y
+                        };
+                        positionSelectionBtn(fakeEvent);
+                    }
+                } else if (event.data.type === 'iframeSelectionCleared') {
+                    if (!popover.classList.contains('visible')) {
+                        hideSelectionUI();
+                    }
+                }
+            });
+
             // Ẩn khi bắt đầu drag mới
             document.addEventListener('mousedown', function (e) {
                 if (!popover.contains(e.target) && !selBtn.contains(e.target)) {

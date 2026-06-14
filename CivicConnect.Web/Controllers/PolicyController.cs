@@ -141,6 +141,50 @@ namespace CivicConnect.Web.Controllers
                     {
                         html = baseTag + html;
                     }
+
+                    var iframeScript = @"
+<script>
+    document.addEventListener('mouseup', function (e) {
+        setTimeout(function () {
+            const sel = window.getSelection();
+            const text = sel ? sel.toString().trim() : '';
+            if (text.length >= 5) {
+                const rect = { clientX: e.clientX, clientY: e.clientY };
+                if (sel.rangeCount > 0) {
+                    const range = sel.getRangeAt(0);
+                    const rects = range.getClientRects();
+                    if (rects.length > 0) {
+                        rect.clientX = rects[rects.length - 1].right;
+                        rect.clientY = rects[rects.length - 1].bottom;
+                    }
+                }
+                window.parent.postMessage({
+                    type: 'iframeTextSelected',
+                    text: text,
+                    clientX: rect.clientX,
+                    clientY: rect.clientY
+                }, '*');
+            }
+        }, 160);
+    });
+
+    document.addEventListener('mousedown', function (e) {
+        window.parent.postMessage({ type: 'iframeSelectionCleared' }, '*');
+    });
+</script>";
+
+                    if (html.Contains("</body>"))
+                    {
+                        html = html.Replace("</body>", $"{iframeScript}\n</body>");
+                    }
+                    else if (html.Contains("</BODY>"))
+                    {
+                        html = html.Replace("</BODY>", $"{iframeScript}\n</BODY>");
+                    }
+                    else
+                    {
+                        html = html + iframeScript;
+                    }
                     
                     return Content(html, "text/html; charset=utf-8");
                 }
@@ -446,6 +490,35 @@ namespace CivicConnect.Web.Controllers
             <a href='{url}' target='_blank' class='btn-view-original'>Xem bài viết gốc <i class='bi bi-box-arrow-up-right'></i></a>
         </div>
     </div>
+    <script>
+        document.addEventListener('mouseup', function (e) {{
+            setTimeout(function () {{
+                const sel = window.getSelection();
+                const text = sel ? sel.toString().trim() : '';
+                if (text.length >= 5) {{
+                    const rect = {{ clientX: e.clientX, clientY: e.clientY }};
+                    if (sel.rangeCount > 0) {{
+                        const range = sel.getRangeAt(0);
+                        const rects = range.getClientRects();
+                        if (rects.length > 0) {{
+                            rect.clientX = rects[rects.length - 1].right;
+                            rect.clientY = rects[rects.length - 1].bottom;
+                        }}
+                    }}
+                    window.parent.postMessage({{
+                        type: 'iframeTextSelected',
+                        text: text,
+                        clientX: rect.clientX,
+                        clientY: rect.clientY
+                    }}, '*');
+                }}
+            }}, 160);
+        }});
+
+        document.addEventListener('mousedown', function (e) {{
+            window.parent.postMessage({{ type: 'iframeSelectionCleared' }}, '*');
+        }});
+    </script>
 </body>
 </html>";
                 return cleanHtml;

@@ -319,7 +319,15 @@ namespace CivicConnect.Web.Services
 
                 if (response == null || !response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("Tất cả Gemini endpoints giải thích thất bại. Sử dụng dự phòng.");
+                    _logger.LogWarning("Tất cả Gemini endpoints giải thích thất bại. Đang kiểm tra mã trạng thái.");
+                    if (response != null && (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden))
+                    {
+                        return new SelectionExplainResult
+                        {
+                            IsSuccess = false,
+                            ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403 Unauthorized). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
+                        };
+                    }
                     return GenerateFallbackExplain(trimmed, policyTitle, modelName);
                 }
 
