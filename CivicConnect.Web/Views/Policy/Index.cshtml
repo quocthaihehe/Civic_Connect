@@ -1,7 +1,7 @@
 @model IEnumerable<CivicConnect.Web.Models.Entities.Policy>
 @{
     ViewData["Title"] = "Chính sách & Tin tức";
-    var laws = Model.Where(p => p.Tag == "Nghị định" || p.Tag == "Thông tư" || p.Tag == "Chính sách");
+    var laws = Model.Where(p => p.Tag == "Nghị định" || p.Tag == "Thông tư" || p.Tag == "Chính sách" || p.Tag == "Quyết định" || p.Tag == "Kế hoạch");
     var newsAndNotices = Model.Where(p => p.Tag == "Thông báo" || p.Tag == "Tin tức" || p.Tag == "tag-news" || p.TagClass == "tag-news");
 }
 
