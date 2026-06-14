@@ -1,4 +1,4 @@
-﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Models.Enums;
 using CivicConnect.Web.Repositories;
 using CivicConnect.Web.Data;
@@ -505,10 +505,14 @@ namespace CivicConnect.Web.Services
 
         private async Task<float> CalculateAreaDensityAsync(double lat, double lng, double radiusKm)
         {
-            // TÃ­nh sá»‘ lÆ°á»£ng issue khÃ¡c trong cÃ¹ng bÃ¡n kÃ­nh 2km lÃ m trá»ng sá»‘ density
-            var count = await _context.Issues
+            // Tải tọa độ các phản ánh chưa giải quyết về bộ nhớ (Client-side evaluation) để tránh lỗi dịch LINQ trên SQLite
+            var activeIssues = await _context.Issues
                 .Where(i => i.Status != IssueStatus.Resolved && i.Status != IssueStatus.Rejected && i.Status != IssueStatus.Closed)
-                .CountAsync(i => CalculateDistance(lat, lng, i.Latitude, i.Longitude) <= radiusKm);
+                .Select(i => new { i.Latitude, i.Longitude })
+                .ToListAsync();
+
+            var count = activeIssues
+                .Count(i => CalculateDistance(lat, lng, i.Latitude, i.Longitude) <= radiusKm);
 
             return (float)count;
         }
