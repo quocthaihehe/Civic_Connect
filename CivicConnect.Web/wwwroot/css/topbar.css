@@ -92,3 +92,23 @@
 #mobileMenu .offcanvas-body {
     padding: 24px;
 }
+
+/* Prevent right action buttons from getting squished or pushed off-screen */
+.topbar-right {
+    flex-shrink: 0;
+}
+
+/* Adjust logo tagline display for spacing */
+@media (max-width: 1449.98px) {
+    .topbar-tagline {
+        display: none !important;
+    }
+}
+
+/* Adjust nav link font size on intermediate screens to save space */
+@media (min-width: 1200px) and (max-width: 1449.98px) {
+    .topbar-nav .nav-link {
+        font-size: 0.85rem;
+    }
+}
+

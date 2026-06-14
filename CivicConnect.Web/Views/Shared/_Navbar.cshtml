@@ -44,14 +44,14 @@
         </div>
         <div class="logo-text d-none d-sm-flex flex-column">
           <span class="fw-bold" style="color: var(--text-main); font-size: 1.1rem; line-height: 1.2;">Civic Connect</span>
-          <span class="text-muted" style="font-size: 0.75rem;">Cổng thông tin phản ánh hiện trường</span>
+          <span class="text-muted topbar-tagline d-none d-xxl-inline" style="font-size: 0.75rem;">Cổng thông tin phản ánh hiện trường</span>
         </div>
       </div>
     </div>
 
     <!-- RIGHT GROUP: Navigation Links & Actions -->
     <div class="topbar-right-group ms-auto d-flex align-items-center">
-      <nav class="topbar-nav d-none d-xl-flex align-items-center gap-4 pe-4" style="font-family: var(--font-display, 'EB Garamond', serif);">
+      <nav class="topbar-nav d-none d-xl-flex align-items-center gap-xl-2 gap-xxl-3 pe-xl-2 pe-xxl-3" style="font-family: var(--font-display, 'EB Garamond', serif);">
         <a href="/" class="nav-link @(currentPath == "/" ? "active fw-bold" : "")">Trang chủ</a>
         @if (SignInManager.IsSignedIn(User)) {
             <a href="/Issues/MyIssues" class="nav-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Phản ánh của tôi</a>
