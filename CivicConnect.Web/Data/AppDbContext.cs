@@ -355,6 +355,87 @@ namespace CivicConnect.Web.Data
                     Signer = "",
                     SourceUrl = "https://tuoitre.vn",
                     EffectiveDate = new DateTime(2026, 6, 11, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 5,
+                    Title = "Quyết định 18/2026/QĐ-UBND về quản lý và sử dụng tạm thời một phần lòng đường, vỉa hè tại TP.HCM",
+                    Excerpt = "UBND Thành phố Hồ Chí Minh ban hành quy định mới về quản lý, cấp phép và thu phí sử dụng tạm thời một phần lòng đường, hè phố không vì mục đích giao thông.",
+                    Content = """
+                              <p><strong>ỦY BAN NHÂN DÂN THÀNH PHỐ HỒ CHÍ MINH</strong><br/>
+                              Số: 18/2026/QĐ-UBND<br/>
+                              <em>TP. Hồ Chí Minh, ngày 15 tháng 05 năm 2026</em></p>
+
+                              <p><strong>QUYẾT ĐỊNH</strong><br/>
+                              <strong>Ban hành Quy định về quản lý và sử dụng tạm thời một phần lòng đường, hè phố trên địa bàn Thành phố Hồ Chí Minh</strong></p>
+
+                              <p>Căn cứ Luật Tổ chức chính quyền địa phương ngày 19 tháng 6 năm 2015;<br/>
+                              Căn cứ Luật Giao thông đường bộ ngày 13 tháng 11 năm 2008;<br/>
+                              Nhằm thiết lập trật tự, kỷ cương đô thị, đồng thời giải quyết nhu cầu sử dụng tạm thời hè phố của người dân và doanh nghiệp một cách công khai, minh bạch;<br/>
+                              Theo đề nghị của Giám đốc Sở Giao thông vận tải Thành phố Hồ Chí Minh.</p>
+
+                              <p><strong>Điều 1. Phạm vi và nguyên tắc sử dụng tạm thời hè phố</strong><br/>
+                              1. Hè phố chỉ được sử dụng tạm thời cho mục đích ngoài giao thông khi phần hè phố còn lại dành cho người đi bộ có bề rộng tối thiểu là 1,5 mét, thông suốt và an toàn.<br/>
+                              2. Việc sử dụng tạm thời phải được cấp phép bởi cơ quan có thẩm quyền và phải đóng phí sử dụng đường bộ theo quy định.</p>
+
+                              <p><strong>Điều 2. Các trường hợp được sử dụng tạm thời đóng phí</strong><br/>
+                              1. Điểm tổ chức kinh doanh dịch vụ mua, bán hàng hóa, ẩm thực tại các tuyến phố đi bộ hoặc khu vực được quy hoạch.<br/>
+                              2. Điểm trông giữ xe đạp, xe máy, xe ô tô có thu tiền dịch vụ.<br/>
+                              3. Tổ chức các hoạt động văn hóa, xã hội, tuyên truyền cổ động lớn của Thành phố hoặc Quận/Huyện.</p>
+
+                              <p><strong>Điều 3. Thẩm quyền cấp phép và mức phí</strong><br/>
+                              1. Ủy ban nhân dân các Quận, Huyện và Thành phố Thủ Đức thực hiện cấp phép sử dụng tạm thời hè phố thuộc phạm vi quản lý hành chính.<br/>
+                              2. Mức phí được áp dụng theo biểu giá phân chia theo 5 khu vực đô thị của Thành phố, dao động từ 20.000 đồng đến 350.000 đồng/m²/tháng đối với kinh doanh hàng hóa và trông giữ xe.</p>
+                              """,
+                    Tag = "Quyết định",
+                    TagClass = "tag-law",
+                    IssuingUnit = "UBND TP.HCM",
+                    PublishedDate = new DateTime(2026, 5, 15, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "18/2026/QĐ-UBND",
+                    DocumentType = "Quyết định",
+                    Signer = "Chủ tịch Phan Văn Mãi",
+                    SourceUrl = "https://tphcm.gov.vn",
+                    EffectiveDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 6,
+                    Title = "Kế hoạch 89/KH-UBND nâng cao hiệu quả tiếp nhận và giải quyết phản ánh, kiến nghị của người dân đô thị",
+                    Excerpt = "UBND Quận 1 ban hành kế hoạch hành động nhằm tối ưu hóa quy trình tiếp nhận phản ánh về trật tự đô thị, vệ sinh môi trường và hạ tầng kỹ thuật.",
+                    Content = """
+                              <p><strong>ỦY BAN NHÂN DÂN QUẬN 1</strong><br/>
+                              Số: 89/KH-UBND<br/>
+                              <em>Quận 1, ngày 25 tháng 05 năm 2026</em></p>
+
+                              <p><strong>KẾ HOẠCH</strong><br/>
+                              <strong>Nâng cao hiệu quả công tác tiếp nhận, xử lý và trả lời phản ánh, kiến nghị của người dân qua Hệ thống tương tác chính quyền số</strong></p>
+
+                              <p>Nhằm tăng cường sự hài lòng của người dân, rút ngắn thời gian xử lý các sự cố về hạ tầng đô thị, an ninh trật tự và vệ sinh môi trường trên địa bàn Quận 1;<br/>
+                              Ủy ban nhân dân Quận 1 ban hành Kế hoạch hành động cụ thể cho giai đoạn 2026 - 2027.</p>
+
+                              <p><strong>1. Chỉ tiêu xử lý phản ánh kiến nghị</strong><br/>
+                              - 100% phản ánh của người dân về các sự cố khẩn cấp (như sụt lún đường, đứt cáp điện, ô nhiễm nghiêm trọng) phải được tiếp nhận và xử lý ban đầu trong vòng 2 giờ.<br/>
+                              - Ít nhất 95% phản ánh thông thường (như rác thải sinh hoạt, lấn chiếm hè phố, tiếng ồn khu dân cư) phải được giải quyết dứt điểm và phản hồi kết quả cho công dân trong vòng 24 giờ kể từ khi tiếp nhận.</p>
+
+                              <p><strong>2. Phân công trách nhiệm</strong><br/>
+                              - Ủy ban nhân dân 10 phường trực thuộc chịu trách nhiệm xử lý trực tiếp tại hiện trường đối với các phản ánh về trật tự đô thị, vệ sinh môi trường trên địa bàn.<br/>
+                              - Phòng Quản lý đô thị phối hợp cùng Phòng Tài nguyên và Môi trường Quận giám sát, đôn đốc tiến độ xử lý và hậu kiểm kết quả tại các đơn vị cơ sở.</p>
+
+                              <p><strong>3. Khen thưởng và kỷ luật</strong><br/>
+                              - Đưa chỉ tiêu tỷ lệ giải quyết đúng hạn các phản ánh của công dân làm tiêu chí xếp loại thi đua hàng năm của các đơn vị phường, phòng ban và cá nhân người đứng đầu.<br/>
+                              - Xử lý nghiêm khắc đối với các trường hợp trễ hẹn không có lý do chính đáng hoặc trả lời phản ánh mang tính đối phó, không dứt điểm.</p>
+                              """,
+                    Tag = "Kế hoạch",
+                    TagClass = "tag-policy",
+                    IssuingUnit = "UBND Quận 1",
+                    PublishedDate = new DateTime(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "89/KH-UBND",
+                    DocumentType = "Kế hoạch",
+                    Signer = "Chủ tịch UBND Quận 1",
+                    SourceUrl = "https://quan1.hochiminhcity.gov.vn",
+                    EffectiveDate = new DateTime(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
 

@@ -1,212 +1,233 @@
 @model CivicConnect.Web.Models.Entities.Policy
 @{
     ViewData["Title"] = Model.Title;
+    bool isOfficialDoc = !string.IsNullOrEmpty(Model.DocumentNumber);
 }
 
 @Html.AntiForgeryToken()
 
 <style>
-    /* ===== AI Summary Panel ===== */
-    .ai-summary-panel {
-        display: none;
-        background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(59,130,246,0.08) 100%);
-        border: 1px solid rgba(99,102,241,0.2);
+    .policy-detail-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    @@media (max-width: 991px) {
+        .policy-detail-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    .policy-main-content {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
         border-radius: 16px;
-        padding: 1.5rem;
-        margin: 1.5rem 0;
-        animation: slideDown 0.35s ease;
-        position: relative;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
-
-    .ai-summary-panel.visible {
-        display: block;
+    .policy-sidebar-meta {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        align-self: start;
     }
-
-    @@keyframes slideDown {
-        from { opacity: 0; transform: translateY(-12px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .ai-panel-header {
+    .official-seal {
+        border: 2px solid #198754;
+        border-radius: 12px;
+        padding: 16px;
+        background-color: #f4faf6;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.2rem;
+        gap: 16px;
+        margin-bottom: 24px;
+        border-left-width: 6px;
     }
-
-    .ai-panel-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #4f46e5;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    .seal-icon {
+        font-size: 2.25rem;
+        color: #198754;
     }
-
-    .ai-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        background: linear-gradient(135deg, #6366f1, #3b82f6);
-        color: #fff;
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 0.2rem 0.6rem;
-        border-radius: 20px;
-        letter-spacing: 0.03em;
+    .seal-text h5 {
+        font-weight: 800;
+        margin-bottom: 2px;
+        color: #0f5132;
+        font-size: 1rem;
     }
-
-    .ai-close-btn {
-        background: none;
-        border: none;
-        color: var(--gray-400, #9ca3af);
-        cursor: pointer;
-        font-size: 1.1rem;
-        line-height: 1;
-        padding: 0.2rem 0.4rem;
-        border-radius: 6px;
-        transition: background 0.15s, color 0.15s;
-    }
-    .ai-close-btn:hover { background: rgba(0,0,0,0.06); color: #374151; }
-
-    /* Sections */
-    .ai-section {
-        margin-bottom: 1.1rem;
-    }
-
-    .ai-section-label {
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: #6366f1;
-        margin-bottom: 0.4rem;
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    .ai-section-text {
-        font-size: 0.95rem;
-        color: var(--gray-800, #1f2937);
-        line-height: 1.7;
-    }
-
-    .ai-bullet-list {
-        list-style: none;
-        padding: 0;
+    .seal-text p {
         margin: 0;
+        font-size: 0.8rem;
+        color: #198754;
+        font-weight: 600;
     }
-
-    .ai-bullet-list li {
-        font-size: 0.93rem;
-        color: var(--gray-800, #1f2937);
-        padding: 0.3rem 0 0.3rem 1.4rem;
-        position: relative;
-        line-height: 1.6;
+    .policy-tag-badge {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        text-transform: uppercase;
     }
-
-    .ai-bullet-list li::before {
-        content: "✦";
-        position: absolute;
-        left: 0;
-        color: #6366f1;
-        font-size: 0.65rem;
-        top: 0.55rem;
+    .policy-tag-badge.tag-law {
+        background-color: #cfe2ff;
+        color: #084298;
+        border: 1px solid #b6d4fe;
     }
-
-    .ai-example-box {
-        background: rgba(59,130,246,0.07);
-        border-left: 3px solid #3b82f6;
-        border-radius: 0 8px 8px 0;
-        padding: 0.7rem 1rem;
-        font-size: 0.92rem;
-        color: var(--gray-800, #1f2937);
-        line-height: 1.7;
+    .policy-tag-badge.tag-policy {
+        background-color: #e2d9f3;
+        color: #563d7c;
+        border: 1px solid #d2c4ec;
     }
-
-    .ai-footer {
-        margin-top: 1rem;
-        padding-top: 0.75rem;
-        border-top: 1px solid rgba(99,102,241,0.15);
-        font-size: 0.75rem;
-        color: var(--gray-400, #9ca3af);
+    .policy-tag-badge.tag-notice {
+        background-color: #fff3cd;
+        color: #664d03;
+        border: 1px solid #ffecb5;
+    }
+    .policy-tag-badge.tag-news {
+        background-color: #cff4fc;
+        color: #087990;
+        border: 1px solid #b6effb;
+    }
+    .document-title {
+        font-family: var(--font-display, inherit);
+        font-size: 1.75rem;
+        font-weight: 850;
+        line-height: 1.4;
+        color: var(--gray-800, #111827);
+        margin-bottom: 20px;
+    }
+    .document-body {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #374151;
+        white-space: pre-line;
+    }
+    .meta-list {
         display: flex;
-        align-items: center;
-        gap: 0.4rem;
+        flex-direction: column;
+        gap: 12px;
     }
-
-    /* ===== Skeleton loader ===== */
-    .ai-skeleton {
-        display: none;
+    .meta-item {
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 8px;
     }
-
-    .ai-skeleton.visible {
+    .meta-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .meta-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 600;
+        margin-bottom: 2px;
+        text-transform: uppercase;
         display: block;
     }
-
-    .skeleton-line {
-        background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.4s infinite;
-        border-radius: 6px;
-        height: 14px;
-        margin-bottom: 10px;
+    .meta-value {
+        font-size: 0.925rem;
+        color: #1f2937;
+        font-weight: 700;
+        display: block;
     }
-
-    .skeleton-line.short  { width: 60%; }
-    .skeleton-line.medium { width: 80%; }
-    .skeleton-line.long   { width: 95%; }
-
-    @@keyframes shimmer {
-        0%   { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    /* ===== Nút AI ===== */
-    #btn-ai-summarize {
-        background: linear-gradient(135deg, #6366f1, #3b82f6);
-        color: #fff;
+    .scroll-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #0d6efd;
+        color: white;
         border: none;
-        border-radius: 10px;
-        padding: 0.55rem 1.2rem;
-        font-size: 0.88rem;
-        font-weight: 600;
+        outline: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
         cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        transition: all 0.2s ease;
+        z-index: 1000;
+    }
+    .scroll-btn:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-4px);
+    }
+    .status-badge {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-        box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        gap: 4px;
     }
-
-    #btn-ai-summarize:hover {
-        opacity: 0.92;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(99,102,241,0.45);
+    /* Tabs styles */
+    .nav-tabs {
+        border-bottom: 2px solid var(--border-color, #e5e7eb) !important;
+        margin-bottom: 20px;
     }
-
-    #btn-ai-summarize:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
+    .nav-tabs .nav-link {
+        border: none !important;
+        color: #6b7280 !important;
+        padding: 12px 20px !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+        background: transparent !important;
     }
-
-    /* ===== Error toast ===== */
-    .ai-error-toast {
-        display: none;
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 10px;
-        padding: 0.75rem 1rem;
-        margin: 0.75rem 0;
-        font-size: 0.88rem;
-        color: #b91c1c;
-        align-items: center;
-        gap: 0.5rem;
+    .nav-tabs .nav-link.active {
+        color: #0d6efd !important;
+        border-bottom: 3px solid #0d6efd !important;
+        border-radius: 0;
     }
-
-    .ai-error-toast.visible { display: flex; }
+    .nav-tabs .nav-link:hover:not(.active) {
+        color: #1f2937 !important;
+        border-bottom: 3px solid #d1d5db !important;
+        border-radius: 0;
+    }
+    .iframe-container {
+        position: relative;
+        width: 100%;
+        height: 750px;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f9fafb;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    /* AI Chatbot Styles */
+    .ai-msg {
+        align-self: flex-start;
+        background: #f1f5f9;
+        padding: 8px 12px;
+        border-radius: 12px 12px 12px 0;
+        max-width: 90%;
+        color: #334155;
+        line-height: 1.4;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .user-msg {
+        align-self: flex-end;
+        background: #0d6efd;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 12px 12px 0 12px;
+        max-width: 90%;
+        line-height: 1.4;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .suggestion-btn {
+        transition: all 0.2s ease;
+    }
+    .suggestion-btn:hover {
+        background-color: #f1f5f9 !important;
+        color: #0d6efd !important;
+        border-color: #0d6efd !important;
+    }
 
     /* ===== Selection floating button ===== */
     #ai-selection-btn {
@@ -248,9 +269,14 @@
         border-radius: 16px;
         box-shadow: 0 12px 40px rgba(0,0,0,0.15);
         overflow: hidden;
-        animation: slideDown 0.25s ease;
+        animation: slideDownPopover 0.25s ease;
     }
     #ai-explain-popover.visible { display: block; }
+
+    @@keyframes slideDownPopover {
+        from { opacity: 0; transform: translate(-50%, -60%); }
+        to   { opacity: 1; transform: translate(-50%, -50%); }
+    }
 
     .ep-header {
         background: linear-gradient(135deg, #6366f1, #3b82f6);
@@ -362,290 +388,196 @@
 
     /* Vùng nội dung cho phép bôi đen */
     .selectable-content { user-select: text; cursor: text; }
-
-    /* ===== AI Đọc & Giải Thích panel ===== */
-    #btn-ai-read {
-        background: linear-gradient(135deg, #059669, #0d9488);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        padding: 0.55rem 1.2rem;
-        font-size: 0.88rem;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-        box-shadow: 0 2px 8px rgba(5,150,105,0.35);
-        margin-left: 0.75rem;
-    }
-    #btn-ai-read:hover   { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(5,150,105,0.45); }
-    #btn-ai-read:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-    .ai-read-panel {
-        display: none;
-        background: linear-gradient(135deg, rgba(5,150,105,0.05) 0%, rgba(13,148,136,0.07) 100%);
-        border: 1px solid rgba(5,150,105,0.2);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin: 1.5rem 0;
-        animation: slideDown 0.35s ease;
-    }
-    .ai-read-panel.visible { display: block; }
-
-    .ai-read-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-    }
-    .ai-read-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #047857;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .ai-read-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        background: linear-gradient(135deg, #059669, #0d9488);
-        color: #fff;
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 0.2rem 0.6rem;
-        border-radius: 20px;
-    }
-
-    .ai-read-gist {
-        background: rgba(5,150,105,0.08);
-        border-left: 3px solid #059669;
-        border-radius: 0 8px 8px 0;
-        padding: 0.55rem 1rem;
-        font-size: 0.9rem;
-        color: #064e3b;
-        font-weight: 500;
-        margin-bottom: 1.2rem;
-        line-height: 1.6;
-    }
-
-    .section-card {
-        background: #fff;
-        border: 1px solid rgba(5,150,105,0.15);
-        border-radius: 12px;
-        margin-bottom: 0.85rem;
-        overflow: hidden;
-        opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 0.35s ease, transform 0.35s ease;
-    }
-    .section-card.show { opacity: 1; transform: translateY(0); }
-
-    .section-card-header {
-        background: linear-gradient(90deg, rgba(5,150,105,0.08), rgba(13,148,136,0.05));
-        padding: 0.65rem 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        user-select: none;
-    }
-    .section-card-title {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #047857;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-    .section-card-toggle {
-        font-size: 0.75rem;
-        color: #6b7280;
-        transition: transform 0.2s;
-    }
-    .section-card-toggle.open { transform: rotate(180deg); }
-
-    .section-card-body { padding: 0.85rem 1rem; }
-
-    .section-original {
-        background: #f9fafb;
-        border-left: 2px solid #d1d5db;
-        border-radius: 0 6px 6px 0;
-        padding: 0.35rem 0.7rem;
-        font-size: 0.78rem;
-        color: #6b7280;
-        font-style: italic;
-        margin-bottom: 0.65rem;
-        line-height: 1.55;
-    }
-    .section-explain {
-        font-size: 0.92rem;
-        color: #1f2937;
-        line-height: 1.7;
-        margin-bottom: 0.5rem;
-    }
-    .section-action {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.4rem;
-        background: #fef3c7;
-        border: 1px solid #fde68a;
-        border-radius: 8px;
-        padding: 0.4rem 0.7rem;
-        font-size: 0.82rem;
-        color: #92400e;
-        margin-top: 0.5rem;
-    }
-
-    .ai-read-footer {
-        margin-top: 0.75rem;
-        padding-top: 0.65rem;
-        border-top: 1px solid rgba(5,150,105,0.15);
-        font-size: 0.75rem;
-        color: #9ca3af;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    /* Skeleton cho read panel */
-    #ai-read-skeleton { display: none; }
-    #ai-read-skeleton.visible { display: block; }
-    .ai-read-skeleton-card {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 0.85rem 1rem;
-        margin-bottom: 0.85rem;
-    }
 </style>
 
 <div class="section-block fade-in-up">
+    <!-- Nút quay lại -->
     <div class="mb-4">
-        <a href="/Policy" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="bi bi-arrow-left me-1"></i> Quay lại danh sách</a>
-    </div>
-    
-    <div class="news-tag @Model.TagClass mb-3">@Model.Tag</div>
-    <h1 class="fw-bold mb-3" style="font-family: var(--font-display); font-size: 2rem; color: var(--gray-800);">@Model.Title</h1>
-    
-    <div class="news-meta mb-3 pb-3 border-bottom" style="font-size: 0.85rem; color: var(--gray-400);">
-        <span class="me-3"><i class="bi bi-building"></i> @Model.IssuingUnit</span>
-        <span><i class="bi bi-calendar3"></i> @Model.PublishedDate.ToString("dd/MM/yyyy HH:mm")</span>
+        <a href="/Policy" class="btn btn-secondary text-decoration-none fw-semibold small">
+            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+        </a>
     </div>
 
-    @* ===== NÚT AI TÓM TẮT ===== *@
-    <div class="mb-4" id="ai-btn-wrapper">
-        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-            <button id="btn-ai-summarize" onclick="requestAiSummary()">
-                🤖 Tóm tắt bằng AI
-            </button>
-            <button id="btn-ai-read" onclick="requestAiRead()">
-                📖 AI Đọc &amp; Giải Thích
-            </button>
+    <div class="policy-detail-container">
+        <!-- Phần nội dung chính -->
+        <div class="policy-main-content">
+            <!-- Dấu chứng thực (Nếu là văn bản chính thức) -->
+            @if (isOfficialDoc)
+            {
+                <div class="official-seal">
+                    <span class="seal-icon"><i class="bi bi-patch-check-fill"></i></span>
+                    <div class="seal-text">
+                        <h5>VĂN BẢN ĐÃ ĐƯỢC CHỨNG THỰC</h5>
+                        <p><i class="bi bi-check-circle-fill"></i> Dữ liệu minh bạch từ Cổng Thông Tin Điện Tử Chính Phủ Việt Nam</p>
+                    </div>
+                </div>
+            }
+
+            <span class="policy-tag-badge @Model.TagClass">@Model.Tag</span>
+            <h1 class="document-title">@Model.Title</h1>
+
+            @if (!string.IsNullOrEmpty(Model.SourceUrl))
+            {
+                <ul class="nav nav-tabs" id="docTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-panel" type="button" role="tab" aria-controls="summary-panel" aria-selected="true">
+                            <i class="bi bi-file-text-fill me-1"></i> Tóm tắt & Nội dung
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-panel" type="button" role="tab" aria-controls="iframe-panel" aria-selected="false">
+                            <i class="bi bi-globe me-1"></i> Xem trang gốc trực tiếp
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="docTabsContent">
+                    <div class="tab-pane fade show active" id="summary-panel" role="tabpanel" aria-labelledby="summary-tab">
+                        <div class="document-body mt-3 selectable-content" id="policy-content">
+                            @if (Model.Id == 0)
+                            {
+                                <p class="lead text-secondary">@Model.Excerpt</p>
+                                <hr />
+                            }
+                            @Html.Raw(Model.Content)
+                        </div>
+                        <div class="mt-4 pt-4 border-top">
+                            <button onclick="$('#iframe-tab').click();" class="btn btn-primary fw-bold me-2">
+                                <i class="bi bi-eye-fill"></i> Xem trực tiếp trang gốc tại đây
+                            </button>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="iframe-panel" role="tabpanel" aria-labelledby="iframe-tab">
+                        <div class="iframe-container mt-3">
+                            <div class="iframe-loading" id="iframe-load-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6b7280; z-index: 1;">
+                                <div class="spinner-border text-primary mb-2" role="status"></div>
+                                <div>Đang kết nối và tải trang gốc...</div>
+                            </div>
+                            <iframe src="/Policy/Proxy?url=@Uri.EscapeDataString(Model.SourceUrl)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 2; background: transparent;" onload="document.getElementById('iframe-load-spinner').style.display='none';"></iframe>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <span class="small text-muted"><i class="bi bi-info-circle"></i> Trang web được tải an toàn qua iframe. Nếu bị chặn, hãy bấm nút bên phải.</span>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trang gốc trong tab mới
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="document-body selectable-content" id="policy-content">
+                    @Html.Raw(Model.Content)
+                </div>
+            }
         </div>
-        <div style="margin-top: 0.5rem; font-size: 0.78rem; color: var(--gray-400);">
-            <span>🤖 Tóm tắt nhanh · 📖 Đọc hiểu từng phần chi tiết · ✨ Bôi đen đoạn bất kỳ để AI giải thích ngay</span>
-        </div>
-    </div>
 
-    @* ===== SKELETON LOADING ===== *@
-    <div class="ai-skeleton" id="ai-skeleton">
-        <div class="skeleton-line short" style="height:12px; margin-bottom:16px;"></div>
-        <div class="skeleton-line long"></div>
-        <div class="skeleton-line medium"></div>
-        <div class="skeleton-line long"></div>
-        <div class="skeleton-line short" style="margin-top:12px;"></div>
-        <div class="skeleton-line medium"></div>
-        <div class="skeleton-line long"></div>
-    </div>
+        <!-- Phần thông tin văn bản bên lề (Công báo) -->
+        <div class="policy-sidebar-meta">
+            <h4 class="fw-bold border-bottom pb-2 mb-3 text-secondary" style="font-size: 1.05rem;">
+                <i class="bi bi-info-circle-fill"></i> Thuộc tính văn bản
+            </h4>
+            
+            <div class="meta-list">
+                <div class="meta-item">
+                    <span class="meta-label">Cơ quan ban hành</span>
+                    <span class="meta-value">@Model.IssuingUnit</span>
+                </div>
+                
+                @if (isOfficialDoc)
+                {
+                    <div class="meta-item">
+                        <span class="meta-label">Số hiệu văn bản</span>
+                        <span class="meta-value text-primary">@Model.DocumentNumber</span>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <span class="meta-label">Loại văn bản</span>
+                        <span class="meta-value">@Model.DocumentType</span>
+                    </div>
 
-    @* ===== ERROR TOAST ===== *@
-    <div class="ai-error-toast" id="ai-error-toast">
-        <i class="bi bi-exclamation-circle-fill"></i>
-        <span id="ai-error-text">Không thể tóm tắt lúc này. Vui lòng thử lại sau.</span>
-    </div>
+                    @if (!string.IsNullOrEmpty(Model.Signer))
+                    {
+                        <div class="meta-item">
+                            <span class="meta-label">Người ký</span>
+                            <span class="meta-value">@Model.Signer</span>
+                        </div>
+                    }
 
-    @* ===== AI SUMMARY PANEL ===== *@
-    <div class="ai-summary-panel" id="ai-summary-panel">
-        <div class="ai-panel-header">
-            <div class="ai-panel-title">
-                <span class="ai-badge">✨ Gemini AI</span>
-                Phân tích thông minh
+                    @if (Model.EffectiveDate.HasValue)
+                    {
+                        <div class="meta-item">
+                            <span class="meta-label">Ngày có hiệu lực</span>
+                            <span class="meta-value">@Model.EffectiveDate.Value.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    }
+
+                    <div class="meta-item">
+                        <span class="meta-label">Trạng thái hiệu lực</span>
+                        <span class="meta-value">
+                            <span class="status-badge"><i class="bi bi-check-circle-fill"></i> Còn hiệu lực</span>
+                        </span>
+                    </div>
+                }
+
+                <div class="meta-item">
+                    <span class="meta-label">Ngày đăng tải công báo</span>
+                    <span class="meta-value">@Model.PublishedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
             </div>
-            <button class="ai-close-btn" onclick="closeAiPanel()" title="Đóng">✕</button>
         </div>
 
-        <div class="ai-section">
-            <div class="ai-section-label">📌 Tóm tắt</div>
-            <div class="ai-section-text" id="ai-short-summary"></div>
-        </div>
-
-        <div class="ai-section">
-            <div class="ai-section-label">📋 Các điểm chính</div>
-            <ul class="ai-bullet-list" id="ai-bullet-list"></ul>
-        </div>
-
-        <div class="ai-section">
-            <div class="ai-section-label">💡 Ví dụ thực tế</div>
-            <div class="ai-example-box" id="ai-example"></div>
-        </div>
-
-        <div class="ai-footer">
-            <i class="bi bi-lightning-charge-fill" style="color:#f59e0b;"></i>
-            <span>Tóm tắt bởi Gemini AI</span>
-            <span>•</span>
-            <span id="ai-generated-at"></span>
-            <span id="ai-cache-badge" style="display:none; background:#e0e7ff; color:#4338ca; font-size:0.68rem; padding:0.1rem 0.45rem; border-radius:20px; font-weight:600; margin-left:0.3rem;">Từ cache</span>
-        </div>
-    </div>
-
-    @* ===== AI ĐỌC & GIẢI THÍCH — SKELETON ===== *@
-    <div id="ai-read-skeleton">
-        <div class="ai-read-skeleton-card">
-            <div class="skeleton-line short" style="height:12px; margin-bottom:12px;"></div>
-            <div class="skeleton-line long"></div>
-            <div class="skeleton-line medium"></div>
-        </div>
-        <div class="ai-read-skeleton-card">
-            <div class="skeleton-line short" style="height:12px; margin-bottom:12px;"></div>
-            <div class="skeleton-line long"></div>
-            <div class="skeleton-line medium"></div>
-            <div class="skeleton-line long"></div>
-        </div>
-        <div class="ai-read-skeleton-card">
-            <div class="skeleton-line short" style="height:12px; margin-bottom:12px;"></div>
-            <div class="skeleton-line medium"></div>
-            <div class="skeleton-line long"></div>
-        </div>
-    </div>
-
-    @* ===== AI ĐỌC & GIẢI THÍCH — PANEL KẾT QUẢ ===== *@
-    <div class="ai-read-panel" id="ai-read-panel">
-        <div class="ai-read-header">
-            <div class="ai-read-title">
-                <span class="ai-read-badge">📖 Gemini AI</span>
-                Đọc Hiểu Từng Phần
+        <!-- Trợ lý pháp luật AI -->
+        <div class="policy-sidebar-meta mt-4" style="background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
+            <h4 class="fw-bold border-bottom pb-2 mb-3 text-primary" style="font-size: 1.05rem;">
+                <i class="bi bi-robot"></i> Trợ lý Pháp luật AI
+            </h4>
+            <p class="text-muted mb-3" style="font-size: 0.825rem; line-height: 1.4;">
+                Bạn chưa rõ về điểm nào của văn bản này? Hãy đặt câu hỏi để AI giải đáp ngay lập tức!
+            </p>
+            
+            <!-- Khung chứa tin nhắn chat -->
+            <div id="aiChatHistory" style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; background: white; font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px;">
+                <div class="ai-msg">
+                    Xin chào! Tôi có thể giải đáp các vấn đề xử phạt, ngày hiệu lực hoặc nội dung cốt lõi của văn bản này. Bạn muốn hỏi gì nào?
+                </div>
             </div>
-            <button class="ai-close-btn" onclick="closeReadPanel()" title="Đóng">✕</button>
-        </div>
-        <div class="ai-read-gist" id="ai-read-gist"></div>
-        <div id="ai-read-sections"></div>
-        <div class="ai-read-footer">
-            <i class="bi bi-book-fill" style="color:#059669;"></i>
-            <span>Phân tích bởi</span>
-            <span id="ai-read-model">Gemini AI</span>
-        </div>
-    </div>
+            
+            <!-- Gợi ý câu hỏi nhanh và Ô nhập câu hỏi (Yêu cầu đăng nhập) -->
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="mb-2 d-flex flex-wrap gap-1">
+                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Tóm tắt nội dung chính')">Tóm tắt chính</button>
+                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Ngày có hiệu lực của văn bản?')">Ngày hiệu lực?</button>
+                    @if (isOfficialDoc || Model.Title.Contains("45/2026/NĐ-CP"))
+                    {
+                        <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Hành vi vứt rác bừa bãi bị phạt bao nhiêu?')">Mức phạt?</button>
+                    }
+                </div>
 
-    <div class="news-content text-secondary selectable-content" id="policy-content" style="font-size: 1.05rem; line-height: 1.8;">
-        <p class="lead text-dark fw-semibold mb-4" style="font-size: 1.15rem; border-left: 4px solid #3b82f6; padding-left: 1rem; font-style: italic;">@Model.Excerpt</p>
-        
-        @Html.Raw(Model.Content)
+                <div class="input-group">
+                    <input type="text" id="aiQuestionInput" class="form-control form-control-sm" placeholder="Nhập câu hỏi của bạn..." style="font-size: 0.85rem; border-radius: 8px 0 0 8px;" onkeypress="if(event.key === 'Enter') sendQuestion();" />
+                    <button class="btn btn-primary btn-sm" type="button" id="sendAiBtn" style="border-radius: 0 8px 8px 0;" onclick="sendQuestion()">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-3 rounded bg-light border border-dashed text-secondary" style="font-size: 0.8rem; background-color: var(--tblr-body-bg) !important; border-color: var(--tblr-border-color) !important;">
+                    <i class="bi bi-lock-fill me-1 text-primary"></i> Vui lòng <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="fw-bold text-decoration-none">Đăng nhập</a> để sử dụng Trợ lý Pháp luật AI.
+                </div>
+            }
+        </div>
     </div>
 </div>
+
+<!-- Nút cuộn lên đầu trang (Scroll-to-top) -->
+<button class="scroll-btn" id="scrollToTopBtn" title="Cuộn lên đầu trang">
+    <i class="bi bi-arrow-up"></i>
+</button>
 
 @* ===== FLOATING SELECTION BUTTON ===== *@
 <button id="ai-selection-btn" title="AI giải thích đoạn này">
@@ -672,408 +604,288 @@
     </div>
 </div>
 
-<script>
-(function () {
-    const POLICY_ID  = @Model.Id;
-    const SESSION_KEY = 'ai_summary_policy_' + POLICY_ID;
-    const TOKEN = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-    // ============================================================
-    // Phần 1 — KHÔI PHỤC TÓM TẮt TÒAN BỘ (logic cũ)
-    // ============================================================
-    const cached = sessionStorage.getItem(SESSION_KEY);
-    if (cached) {
-        try { renderSummary(JSON.parse(cached)); } catch (_) {}
-    }
-
-    window.requestAiSummary = async function () {
-        const btn       = document.getElementById('btn-ai-summarize');
-        const skeleton  = document.getElementById('ai-skeleton');
-        const errorToast = document.getElementById('ai-error-toast');
-
-        btn.disabled = true;
-        btn.textContent = '⏳ Đang tóm tắt...';
-        errorToast.classList.remove('visible');
-        skeleton.classList.add('visible');
-
-        try {
-            const resp = await fetch('/Policy/Summarize/' + POLICY_ID, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': TOKEN || ''
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Lắng nghe sự kiện cuộn trang để hiện nút
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 300) {
+                    $('#scrollToTopBtn').fadeIn().css('display', 'flex');
+                } else {
+                    $('#scrollToTopBtn').fadeOut();
                 }
             });
-            const data = await resp.json();
-            skeleton.classList.remove('visible');
 
-            if (data.success) {
-                sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
-                renderSummary(data);
-            } else {
-                showSummaryError(data.error || 'Không thể tóm tắt lúc này.');
-                btn.disabled = false;
-                btn.innerHTML = '🤖 Thử lại';
-            }
-        } catch (err) {
-            skeleton.classList.remove('visible');
-            showSummaryError('Lỗi kết nối. Vui lòng kiểm tra mạng.');
-            btn.disabled = false;
-            btn.innerHTML = '🤖 Thử lại';
-        }
-    };
+            // Click cuộn lên đầu trang mượt mà
+            $('#scrollToTopBtn').click(function() {
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                return false;
+            });
 
-    function renderSummary(data) {
-        document.getElementById('ai-short-summary').textContent = data.shortSummary || '';
-        const bulletList = document.getElementById('ai-bullet-list');
-        bulletList.innerHTML = '';
-        (data.bulletPoints || []).forEach(function (bp) {
-            const li = document.createElement('li');
-            li.textContent = bp;
-            bulletList.appendChild(li);
+            // Tự động ẩn spinner sau 6 giây nếu tải quá lâu (timeout)
+            setTimeout(function() {
+                var spinner = $('#iframe-load-spinner');
+                if (spinner.length && spinner.is(':visible')) {
+                    spinner.fadeOut();
+                }
+            }, 6000);
         });
-        document.getElementById('ai-example').textContent = data.realWorldExample || '';
-        document.getElementById('ai-generated-at').textContent = data.generatedAt || '';
-        const cacheBadge = document.getElementById('ai-cache-badge');
-        cacheBadge.style.display = data.fromCache ? 'inline' : 'none';
-        document.getElementById('ai-summary-panel').classList.add('visible');
-        document.getElementById('ai-btn-wrapper').style.display = 'none';
-        document.getElementById('ai-error-toast').classList.remove('visible');
-    }
 
-    window.closeAiPanel = function () {
-        document.getElementById('ai-summary-panel').classList.remove('visible');
-        const wrapper = document.getElementById('ai-btn-wrapper');
-        wrapper.style.display = '';
-        const btn = document.getElementById('btn-ai-summarize');
-        btn.disabled = false;
-        btn.innerHTML = '🤖 Tóm tắt bằng AI';
-    };
+        function sendQuestion() {
+            var input = $('#aiQuestionInput');
+            var question = input.val().trim();
+            if (!question) return;
 
-    function showSummaryError(msg) {
-        const toast = document.getElementById('ai-error-toast');
-        document.getElementById('ai-error-text').textContent = msg;
-        toast.classList.add('visible');
-    }
+            // Add user message to chat history
+            $('#aiChatHistory').append(
+                '<div class="user-msg">' + escapeHtml(question) + '</div>'
+            );
+            input.val('');
+            
+            // Auto scroll chat to bottom
+            var chatHistory = $('#aiChatHistory');
+            chatHistory.scrollTop(chatHistory[0].scrollHeight);
 
-    // ============================================================
-    // Phần 2 — GIẢI THÍCH ĐOẠN BÔI ĐEN (logic mới)
-    // ============================================================
-    const selBtn     = document.getElementById('ai-selection-btn');
-    const popover    = document.getElementById('ai-explain-popover');
-    const epBody     = document.getElementById('ep-body');
-    const epModel    = document.getElementById('ep-model');
-    const epCloseBtn = document.getElementById('ep-close-btn');
-    const content    = document.getElementById('policy-content');
+            // Add typing indicator
+            var typingId = 'typing-' + Date.now();
+            chatHistory.append(
+                '<div class="ai-msg" id="' + typingId + '">' +
+                '<span class="spinner-grow spinner-grow-sm text-primary me-1" role="status"></span> Đang suy nghĩ...' +
+                '</div>'
+            );
+            chatHistory.scrollTop(chatHistory[0].scrollHeight);
 
-    let selectionTimeout = null;
-    let currentSelected  = '';
+            // Send AJAX request
+            var requestData = {
+                Question: question,
+                DocTitle: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Title))",
+                DocContent: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Excerpt ?? Model.Content))",
+                IssuingUnit: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.IssuingUnit))",
+                DocNumber: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.DocumentNumber ?? ""))",
+                Signer: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Signer ?? ""))",
+                PublishedDate: "@Model.PublishedDate.ToString("o")",
+                SourceUrl: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.SourceUrl ?? ""))"
+            };
 
-    // Hiện floating button khi bôi đen trong vùng nội dung
-    document.addEventListener('mouseup', function (e) {
-        clearTimeout(selectionTimeout);
-        selectionTimeout = setTimeout(function () {
-            const sel  = window.getSelection();
-            const text = sel ? sel.toString().trim() : '';
-
-            // Kiểm tra selection có liên quan đến #policy-content
-            // Dùng 3 điều kiện OR để cover mọi hướng kéo chuột:
-            // 1. anchorNode nằm trong content (kéo từ trái sang phải)
-            // 2. focusNode nằm trong content  (kéo từ phải sang trái)
-            // 3. range intersectsNode content  (kéo từ ngoài vào trong)
-            let isInContent = false;
-            if (text.length >= 5 && content && sel && sel.rangeCount > 0) {
-                const range = sel.getRangeAt(0);
-                isInContent = content.contains(sel.anchorNode)
-                           || content.contains(sel.focusNode)
-                           || range.intersectsNode(content);
-            }
-
-            if (isInContent) {
-                currentSelected = text;
-                positionSelectionBtn(e);
-            } else {
-                // Nếu click ra ngoài popover thì ẩn cả
-                if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
-                    hideSelectionUI();
-                }
-            }
-        }, 160);
-    });
-
-    // Ẩn khi bắt đầu drag mới
-    document.addEventListener('mousedown', function (e) {
-        // Dùng .contains() thay vì === để cover cả click vào icon/text bên trong nút
-        if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
-            selBtn.classList.remove('visible');
-        }
-    });
-
-    function positionSelectionBtn(e) {
-        const margin = 10;
-        let x = e.clientX - 40;
-        let y = e.clientY - 48;
-        // Giữ trong viewport
-        x = Math.max(margin, Math.min(x, window.innerWidth  - 130 - margin));
-        y = Math.max(margin, Math.min(y, window.innerHeight - 40  - margin));
-        selBtn.style.left = x + 'px';
-        selBtn.style.top  = y + 'px';
-        selBtn.classList.add('visible');
-    }
-
-    // Click nút “Giải thích”
-    selBtn.addEventListener('click', async function () {
-        if (!currentSelected) return;
-        selBtn.classList.remove('visible');
-        openPopoverLoading(currentSelected);
-
-        try {
-            const resp = await fetch('/Policy/ExplainSelection', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': TOKEN || ''
+            $.ajax({
+                url: '/Policy/AskAI',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(requestData),
+                success: function(response) {
+                    $('#' + typingId).remove();
+                    if (response.success) {
+                        chatHistory.append(
+                            '<div class="ai-msg">' + formatResponse(response.answer) + '</div>'
+                        );
+                    } else {
+                        chatHistory.append(
+                            '<div class="ai-msg text-danger"><i class="bi bi-exclamation-circle-fill"></i> Có lỗi xảy ra.</div>'
+                        );
+                    }
+                    chatHistory.scrollTop(chatHistory[0].scrollHeight);
                 },
-                body: JSON.stringify({ policyId: POLICY_ID, selectedText: currentSelected })
-            });
-            const data = await resp.json();
-
-            if (data.success) {
-                renderExplanation(currentSelected, data);
-            } else {
-                renderExplainError(data.error || 'Không thể giải thích lúc này.');
-            }
-        } catch (_) {
-            renderExplainError('Lỗi kết nối. Vui lòng thử lại.');
-        }
-    });
-
-    epCloseBtn.addEventListener('click', hideSelectionUI);
-
-    function openPopoverLoading(selectedText) {
-        // Hiện popover giữa màn hình
-        positionPopoverCenter();
-        popover.classList.add('visible');
-
-        // Skeleton + quote
-        const shortQuote = selectedText.length > 100
-            ? selectedText.slice(0, 100) + '...'
-            : selectedText;
-
-        epBody.innerHTML =
-            '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
-            '<div class="ep-skeleton-line l"></div>' +
-            '<div class="ep-skeleton-line m"></div>' +
-            '<div class="ep-skeleton-line s"></div>' +
-            '<div style="margin-top:10px;"></div>' +
-            '<div class="ep-skeleton-line m"></div>' +
-            '<div class="ep-skeleton-line l"></div>';
-    }
-
-    function renderExplanation(selectedText, data) {
-        const shortQuote = selectedText.length > 120
-            ? selectedText.slice(0, 120) + '...'
-            : selectedText;
-
-        let keyTermHtml = '';
-        if (data.keyTerm) {
-            keyTermHtml =
-                '<div class="ep-key-term">' +
-                '<span>\uD83D\uDCDA</span>' +
-                '<span><b>Thuật ngữ:</b> ' + escHtml(data.keyTerm) + '</span>' +
-                '</div>';
-        }
-
-        epBody.innerHTML =
-            '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
-            '<div class="ep-label">\uD83D\uDCA1 Ý nghĩa</div>' +
-            '<div class="ep-text">' + escHtml(data.simpleExplanation) + '</div>' +
-            keyTermHtml +
-            '<div class="ep-practical">' + escHtml(data.practicalMeaning) + '</div>';
-
-        epModel.textContent = data.modelUsed || 'Gemini AI';
-    }
-
-    function renderExplainError(msg) {
-        epBody.innerHTML =
-            '<div style="color:#b91c1c; font-size:0.88rem; display:flex; gap:0.5rem; align-items:center;">' +
-            '<i class="bi bi-exclamation-circle-fill"></i> ' + escHtml(msg) +
-            '</div>';
-    }
-
-    function positionPopoverCenter() {
-        // Popover xuất hiện gần giữa cửa sổ, hơi lệch trên
-        popover.style.left = '50%';
-        popover.style.top  = '50%';
-        popover.style.transform = 'translate(-50%, -50%)';
-    }
-
-    function hideSelectionUI() {
-        selBtn.classList.remove('visible');
-        popover.classList.remove('visible');
-        currentSelected = '';
-    }
-
-    // Đóng popover khi click ra ngoài
-    document.addEventListener('click', function (e) {
-        if (popover.classList.contains('visible') &&
-            !popover.contains(e.target) &&
-            e.target !== selBtn) {
-            hideSelectionUI();
-        }
-    });
-
-    function escHtml(str) {
-        return (str || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
-})();
-</script>
-
-<script>
-// ============================================================
-// Ph\u1ea7n 3 \u2014 AI \u0110\u1eccC & GI\u1ea2I TH\u00cdCH T\u1eea\u0130NG PH\u1ea6N
-// ============================================================
-(function () {
-    const POLICY_ID   = @Model.Id;
-    const READ_KEY    = 'ai_read_policy_' + POLICY_ID;
-    const TOKEN       = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-    const btnRead     = document.getElementById('btn-ai-read');
-    const skeleton    = document.getElementById('ai-read-skeleton');
-    const panel       = document.getElementById('ai-read-panel');
-    const gistEl      = document.getElementById('ai-read-gist');
-    const sectionsEl  = document.getElementById('ai-read-sections');
-    const modelEl     = document.getElementById('ai-read-model');
-
-    // Kh\u00f4i ph\u1ee5c t\u1eeb session cache khi t\u1ea3i trang
-    const cached = sessionStorage.getItem(READ_KEY);
-    if (cached) {
-        try { renderReadResult(JSON.parse(cached)); } catch (_) {}
-    }
-
-    window.requestAiRead = async function () {
-        if (btnRead.disabled) return;
-
-        btnRead.disabled = true;
-        btnRead.innerHTML = '\u23f3 \u0110ang ph\u00e2n t\u00edch...';
-        skeleton.classList.add('visible');
-        panel.classList.remove('visible');
-
-        try {
-            const resp = await fetch('/Policy/ReadAndExplain/' + POLICY_ID, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': TOKEN || ''
+                error: function() {
+                    $('#' + typingId).remove();
+                    chatHistory.append(
+                        '<div class="ai-msg text-danger"><i class="bi bi-exclamation-circle-fill"></i> Lỗi kết nối máy chủ.</div>'
+                    );
+                    chatHistory.scrollTop(chatHistory[0].scrollHeight);
                 }
             });
-            const data = await resp.json();
-            skeleton.classList.remove('visible');
-
-            if (data.success) {
-                sessionStorage.setItem(READ_KEY, JSON.stringify(data));
-                renderReadResult(data);
-            } else {
-                showReadError(data.error || 'Kh\u00f4ng th\u1ec3 ph\u00e2n t\u00edch l\u00fac n\u00e0y.');
-                btnRead.disabled = false;
-                btnRead.innerHTML = '\ud83d\udcd6 AI \u0110\u1ecdc & Gi\u1ea3i Th\u00edch';
-            }
-        } catch (_) {
-            skeleton.classList.remove('visible');
-            showReadError('L\u1ed7i k\u1ebft n\u1ed1i. Vui l\u00f2ng ki\u1ec3m tra m\u1ea1ng.');
-            btnRead.disabled = false;
-            btnRead.innerHTML = '\ud83d\udcd6 AI \u0110\u1ecdc & Gi\u1ea3i Th\u00edch';
         }
-    };
 
-    function renderReadResult(data) {
-        // Overall gist
-        gistEl.textContent = data.overallGist || '';
-        modelEl.textContent = data.modelUsed || 'Gemini AI';
+        function askSuggestion(question) {
+            $('#aiQuestionInput').val(question);
+            sendQuestion();
+        }
 
-        // X\u00e2y d\u1ef1ng section cards
-        sectionsEl.innerHTML = '';
-        var icons = ['\ud83d\udccc', '\ud83d\udcc4', '\u2696\ufe0f', '\ud83d\udcc5', '\ud83d\udce2'];
-        (data.sections || []).forEach(function (sec, idx) {
-            var card = document.createElement('div');
-            card.className = 'section-card';
-            card.id = 'sec-card-' + idx;
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
 
-            var actionHtml = '';
-            if (sec.actionRequired) {
-                actionHtml =
-                    '<div class="section-action">' +
-                    '<span>\ud83d\udc64</span>' +
-                    '<span>' + escHtml(sec.actionRequired) + '</span>' +
+        function formatResponse(text) {
+            // Convert markdown style **bold** to html
+            // Replace newlines with <br/> for readable layout
+            var formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return formatted.replace(/\n/g, '<br/>');
+        }
+    </script>
+
+    <script>
+        // ============================================================
+        // GIẢI THÍCH ĐOẠN BÔI ĐEN (Text Selection AI Explain)
+        // ============================================================
+        (function () {
+            const POLICY_ID  = @Model.Id;
+            const TOKEN = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            const selBtn     = document.getElementById('ai-selection-btn');
+            const popover    = document.getElementById('ai-explain-popover');
+            const epBody     = document.getElementById('ep-body');
+            const epModel    = document.getElementById('ep-model');
+            const epCloseBtn = document.getElementById('ep-close-btn');
+            const content    = document.getElementById('policy-content');
+
+            let selectionTimeout = null;
+            let currentSelected  = '';
+
+            // Hiện floating button khi bôi đen trong vùng nội dung
+            document.addEventListener('mouseup', function (e) {
+                clearTimeout(selectionTimeout);
+                selectionTimeout = setTimeout(function () {
+                    const sel  = window.getSelection();
+                    const text = sel ? sel.toString().trim() : '';
+
+                    let isInContent = false;
+                    if (text.length >= 5 && content && sel && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        isInContent = content.contains(sel.anchorNode)
+                                   || content.contains(sel.focusNode)
+                                   || range.intersectsNode(content);
+                    }
+
+                    if (isInContent) {
+                        currentSelected = text;
+                        positionSelectionBtn(e);
+                    } else {
+                        // Nếu click ra ngoài popover thì ẩn cả
+                        if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
+                            hideSelectionUI();
+                        }
+                    }
+                }, 160);
+            });
+
+            // Ẩn khi bắt đầu drag mới
+            document.addEventListener('mousedown', function (e) {
+                if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
+                    selBtn.classList.remove('visible');
+                }
+            });
+
+            function positionSelectionBtn(e) {
+                const margin = 10;
+                let x = e.clientX - 40;
+                let y = e.clientY - 48;
+                // Giữ trong viewport
+                x = Math.max(margin, Math.min(x, window.innerWidth  - 130 - margin));
+                y = Math.max(margin, Math.min(y, window.innerHeight - 40  - margin));
+                selBtn.style.left = x + 'px';
+                selBtn.style.top  = y + 'px';
+                selBtn.classList.add('visible');
+            }
+
+            // Click nút “Giải thích”
+            selBtn.addEventListener('click', async function () {
+                if (!currentSelected) return;
+                selBtn.classList.remove('visible');
+                openPopoverLoading(currentSelected);
+
+                try {
+                    const resp = await fetch('/Policy/ExplainSelection', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': TOKEN || ''
+                        },
+                        body: JSON.stringify({ policyId: POLICY_ID, selectedText: currentSelected })
+                    });
+                    const data = await resp.json();
+
+                    if (data.success) {
+                        renderExplanation(currentSelected, data);
+                    } else {
+                        renderExplainError(data.error || 'Không thể giải thích lúc này.');
+                    }
+                } catch (_) {
+                    renderExplainError('Lỗi kết nối. Vui lòng thử lại.');
+                }
+            });
+
+            epCloseBtn.addEventListener('click', hideSelectionUI);
+
+            function openPopoverLoading(selectedText) {
+                positionPopoverCenter();
+                popover.classList.add('visible');
+
+                const shortQuote = selectedText.length > 100
+                    ? selectedText.slice(0, 100) + '...'
+                    : selectedText;
+
+                epBody.innerHTML =
+                    '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
+                    '<div class="ep-skeleton-line l"></div>' +
+                    '<div class="ep-skeleton-line m"></div>' +
+                    '<div class="ep-skeleton-line s"></div>' +
+                    '<div style="margin-top:10px;"></div>' +
+                    '<div class="ep-skeleton-line m"></div>' +
+                    '<div class="ep-skeleton-line l"></div>';
+            }
+
+            function renderExplanation(selectedText, data) {
+                const shortQuote = selectedText.length > 120
+                    ? selectedText.slice(0, 120) + '...'
+                    : selectedText;
+
+                let keyTermHtml = '';
+                if (data.keyTerm) {
+                    keyTermHtml =
+                        '<div class="ep-key-term">' +
+                        '<span>📚</span>' +
+                        '<span><b>Thuật ngữ:</b> ' + escHtml(data.keyTerm) + '</span>' +
+                        '</div>';
+                }
+
+                epBody.innerHTML =
+                    '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
+                    '<div class="ep-label">💡 Ý nghĩa</div>' +
+                    '<div class="ep-text">' + escHtml(data.simpleExplanation) + '</div>' +
+                    keyTermHtml +
+                    '<div class="ep-practical">' + escHtml(data.practicalMeaning) + '</div>';
+
+                epModel.textContent = data.modelUsed || 'Gemini AI';
+            }
+
+            function renderExplainError(msg) {
+                epBody.innerHTML =
+                    '<div style="color:#b91c1c; font-size:0.88rem; display:flex; gap:0.5rem; align-items:center;">' +
+                    '<i class="bi bi-exclamation-circle-fill"></i> ' + escHtml(msg) +
                     '</div>';
             }
 
-            card.innerHTML =
-                '<div class="section-card-header" onclick="toggleSection(' + idx + ')">' +
-                '<div class="section-card-title">' +
-                '<span>' + (icons[idx % icons.length]) + '</span>' +
-                '<span>' + escHtml(sec.title) + '</span>' +
-                '</div>' +
-                '<span class="section-card-toggle open" id="sec-toggle-' + idx + '">\u25bc</span>' +
-                '</div>' +
-                '<div class="section-card-body" id="sec-body-' + idx + '">' +
-                '<div class="section-original">\u201C' + escHtml(sec.originalText) + '\u201D</div>' +
-                '<div class="section-explain">' + escHtml(sec.simpleExplanation) + '</div>' +
-                actionHtml +
-                '</div>';
+            function positionPopoverCenter() {
+                popover.style.left = '50%';
+                popover.style.top  = '50%';
+                popover.style.transform = 'translate(-50%, -50%)';
+            }
 
-            sectionsEl.appendChild(card);
+            function hideSelectionUI() {
+                selBtn.classList.remove('visible');
+                popover.classList.remove('visible');
+                currentSelected = '';
+            }
 
-            // Stagger animation: m\u1ed7i card hi\u1ec7n l\u1ea7n l\u01b0\u1ee3t
-            setTimeout(function () {
-                card.classList.add('show');
-            }, 80 + idx * 120);
-        });
+            document.addEventListener('click', function (e) {
+                if (popover.classList.contains('visible') &&
+                    !popover.contains(e.target) &&
+                    e.target !== selBtn) {
+                    hideSelectionUI();
+                }
+            });
 
-        panel.classList.add('visible');
-        // \u1ea8n wrapper n\u00fat ch\u1ec9 khi \u0111\u00f3ng panel m\u1edbi hi\u1ec7n l\u1ea1i \u2014 gi\u1eef n\u00fat lu\u00f4n visible
-        btnRead.disabled = false;
-        btnRead.innerHTML = '\ud83d\udcd6 AI \u0110\u1ecdc & Gi\u1ea3i Th\u00edch';
-    }
-
-    // Toggle collapse t\u1eebng section
-    window.toggleSection = function (idx) {
-        var body   = document.getElementById('sec-body-' + idx);
-        var toggle = document.getElementById('sec-toggle-' + idx);
-        if (!body) return;
-        if (body.style.display === 'none') {
-            body.style.display = '';
-            toggle.classList.add('open');
-        } else {
-            body.style.display = 'none';
-            toggle.classList.remove('open');
-        }
-    };
-
-    window.closeReadPanel = function () {
-        panel.classList.remove('visible');
-        btnRead.disabled = false;
-        btnRead.innerHTML = '\ud83d\udcd6 AI \u0110\u1ecdc & Gi\u1ea3i Th\u00edch';
-    };
-
-    function showReadError(msg) {
-        skeleton.classList.remove('visible');
-        // Hi\u1ec7n l\u1ed7i t\u1ea1m th\u1eddi trong gist box
-        gistEl.textContent = '\u26a0\ufe0f ' + msg;
-        panel.classList.add('visible');
-        sectionsEl.innerHTML = '';
-    }
-
-    function escHtml(str) {
-        return (str || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
-})();
-</script>
+            function escHtml(str) {
+                return (str || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+        })();
+    </script>
+}
