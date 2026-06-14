@@ -16,11 +16,11 @@
 <div class="row row-cards mb-4">
     <!-- CPU Usage -->
     <div class="col-md-6 col-lg-3">
-        <div class="card">
-            <div class="card-body text-center py-4">
-                <div class="text-muted small uppercase font-weight-bold">Sử dụng CPU (Kestrel)</div>
-                <div class="display-5 font-weight-bold text-primary my-2">@ViewBag.CpuUsage%</div>
-                <div class="progress progress-sm">
+        <div class="card h-100">
+            <div class="card-body text-center py-4 d-flex flex-column justify-content-between">
+                <div class="h4 text-muted mb-0">CPU (Kestrel)</div>
+                <div class="display-5 text-primary" style="font-weight: 900;">@ViewBag.CpuUsage%</div>
+                <div class="progress progress-sm mt-1 mx-4">
                     <div class="progress-bar bg-primary" style="width: @(ViewBag.CpuUsage)%"></div>
                 </div>
             </div>
@@ -29,11 +29,11 @@
 
     <!-- RAM Usage -->
     <div class="col-md-6 col-lg-3">
-        <div class="card">
-            <div class="card-body text-center py-4">
-                <div class="text-muted small uppercase font-weight-bold">Bộ nhớ RAM</div>
-                <div class="display-5 font-weight-bold text-primary my-2">@ViewBag.RamUsage%</div>
-                <div class="progress progress-sm">
+        <div class="card h-100">
+            <div class="card-body text-center py-4 d-flex flex-column justify-content-between">
+                <div class="h4 text-muted mb-0">Bộ nhớ RAM</div>
+                <div class="display-5 text-primary" style="font-weight: 900;">@ViewBag.RamUsage%</div>
+                <div class="progress progress-sm mt-1 mx-4">
                     <div class="progress-bar bg-primary" style="width: @(ViewBag.RamUsage)%"></div>
                 </div>
             </div>
@@ -42,22 +42,22 @@
 
     <!-- Database Status -->
     <div class="col-md-6 col-lg-3">
-        <div class="card">
-            <div class="card-body text-center py-4">
-                <div class="text-muted small uppercase font-weight-bold">Kết nối CSDL (SQL Server)</div>
-                <div class="display-6 font-weight-bold text-green my-2">@ViewBag.DbConnection</div>
-                <div class="text-xs text-muted">Mạng Somee SQL Server đang chạy</div>
+        <div class="card h-100">
+            <div class="card-body text-center py-4 d-flex flex-column justify-content-between">
+                <div class="h4 text-muted mb-0">CSDL (SQL Server)</div>
+                <div class="display-5 text-green" style="font-weight: 900;">Ổn định</div>
+                <div class="h5 text-muted mb-0 mt-1" style="font-weight: 500;">Máy chủ Somee SQL Server</div>
             </div>
         </div>
     </div>
 
     <!-- Queue Status -->
     <div class="col-md-6 col-lg-3">
-        <div class="card">
-            <div class="card-body text-center py-4">
-                <div class="text-muted small uppercase font-weight-bold">Hàng đợi nền (Background Jobs)</div>
-                <div class="display-5 font-weight-bold text-primary my-2">@ViewBag.QueueLength</div>
-                <div class="text-xs text-muted">Ca trực SLA Checker đang chạy</div>
+        <div class="card h-100">
+            <div class="card-body text-center py-4 d-flex flex-column justify-content-between">
+                <div class="h4 text-muted mb-0">Hàng đợi nền (Jobs)</div>
+                <div class="display-5 text-primary" style="font-weight: 900;">@ViewBag.QueueLength</div>
+                <div class="h5 text-muted mb-0 mt-1" style="font-weight: 500;">Ca trực SLA Checker</div>
             </div>
         </div>
     </div>
@@ -73,16 +73,16 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <div class="text-muted small uppercase">Runtime Environment</div>
-                        <div class="font-weight-bold text-lg">.NET 8.0 (ASP.NET Core Web SDK)</div>
+                        <div class="h5 text-muted mb-1">Môi trường Runtime</div>
+                        <div class="text-lg font-weight-bold" style="color: #133B2F;">.NET 8.0 (ASP.NET Core)</div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-muted small uppercase">Database System</div>
-                        <div class="font-weight-bold text-lg">Microsoft SQL Server Express Edition</div>
+                        <div class="h5 text-muted mb-1">Hệ quản trị CSDL</div>
+                        <div class="text-lg font-weight-bold" style="color: #133B2F;">Microsoft SQL Server</div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-muted small uppercase">Web Server Gateway</div>
-                        <div class="font-weight-bold text-lg">Kestrel + IIS Reverse Proxy (Localhost)</div>
+                        <div class="h5 text-muted mb-1">Web Server Gateway</div>
+                        <div class="text-lg font-weight-bold" style="color: #133B2F;">Kestrel + IIS Reverse Proxy</div>
                     </div>
                 </div>
             </div>
