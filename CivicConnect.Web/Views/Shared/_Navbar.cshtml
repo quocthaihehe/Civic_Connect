@@ -10,6 +10,29 @@
     var currentPath = Context.Request.Path.Value ?? "/";
 }
 
+<style>
+    /* Smooth Dropdown Animation for Avatar and Notifications */
+    .dropdown-menu.show {
+        animation: dropdownFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transform-origin: top;
+    }
+    @@keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Smooth Offcanvas Animation for Mobile Menu */
+    .offcanvas {
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+</style>
+
 <header class="topbar horizontal-topbar">
   <div class="container-fluid topbar-container d-flex align-items-center justify-content-between">
     
@@ -46,7 +69,7 @@
         {
             <!-- Notifications Dropdown -->
             <div class="dropdown me-2">
-              <button class="btn btn-light position-relative p-2 rounded-circle bg-white border" type="button" id="notif-dropdown-trigger" data-bs-toggle="dropdown" aria-expanded="false" style="width: 38px; height: 38px;">
+              <button class="btn btn-light position-relative rounded-circle bg-white border d-flex align-items-center justify-content-center" type="button" id="notif-dropdown-trigger" data-bs-toggle="dropdown" aria-expanded="false" style="width: 38px; height: 38px; padding: 0;">
                 <i class="bi bi-bell fs-5 text-muted"></i>
                 <span id="notif-counter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem;">
                   0
@@ -66,7 +89,7 @@
             <!-- Avatar dropdown -->
             <div class="dropdown">
               <button class="avatar-btn d-flex align-items-center gap-2 p-1 border rounded-pill bg-white" type="button" id="avatarDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-                <i class="bi bi-person-circle fs-5 ms-1 text-muted"></i>
+                <img src="@userAvatar" alt="Avatar" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;" onerror="this.src='/images/default-avatar.png'" />
                 <span class="avatar-name d-none d-md-inline text-dark fw-medium pe-2" style="font-size: 0.9rem;">@userName</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm border" aria-labelledby="avatarDropdown" style="border-radius: 8px;">
