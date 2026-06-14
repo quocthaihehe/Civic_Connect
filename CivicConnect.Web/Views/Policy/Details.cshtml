@@ -271,7 +271,6 @@
         box-shadow: 0 12px 40px rgba(0,0,0,0.15);
         overflow: hidden;
         animation: slideDownPopover 0.25s ease;
-        display: flex;
         flex-direction: column;
     }
     #ai-explain-popover.visible { display: flex; }
@@ -427,18 +426,33 @@
             {
                 <ul class="nav nav-tabs" id="docTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-panel" type="button" role="tab" aria-controls="summary-panel" aria-selected="true">
-                            <i class="bi bi-file-text-fill me-1"></i> Tóm tắt & Nội dung
+                        <button class="nav-link active" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-panel" type="button" role="tab" aria-controls="iframe-panel" aria-selected="true">
+                            <i class="bi bi-globe me-1"></i> Nội dung bài báo gốc
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-panel" type="button" role="tab" aria-controls="iframe-panel" aria-selected="false">
-                            <i class="bi bi-globe me-1"></i> Xem trang gốc trực tiếp
+                        <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-panel" type="button" role="tab" aria-controls="summary-panel" aria-selected="false">
+                            <i class="bi bi-file-text-fill me-1"></i> Tóm tắt & Giải thích
                         </button>
                     </li>
                 </ul>
                 <div class="tab-content" id="docTabsContent">
-                    <div class="tab-pane fade show active" id="summary-panel" role="tabpanel" aria-labelledby="summary-tab">
+                    <div class="tab-pane fade show active" id="iframe-panel" role="tabpanel" aria-labelledby="iframe-tab">
+                        <div class="iframe-container mt-3">
+                            <div class="iframe-loading" id="iframe-load-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6b7280; z-index: 1;">
+                                <div class="spinner-border text-primary mb-2" role="status"></div>
+                                <div>Đang kết nối và tải trang gốc...</div>
+                            </div>
+                            <iframe src="/Policy/Proxy?url=@Uri.EscapeDataString(Model.SourceUrl)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 2; background: transparent;" onload="document.getElementById('iframe-load-spinner').style.display='none';"></iframe>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <span class="small text-muted"><i class="bi bi-info-circle"></i> Trang web được tải an toàn qua iframe. Nếu bị chặn, hãy bấm nút bên phải.</span>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trang gốc trong tab mới
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="summary-panel" role="tabpanel" aria-labelledby="summary-tab">
                         <div class="document-body mt-3 selectable-content" id="policy-content">
                             @if (Model.Id == 0)
                             {
@@ -453,21 +467,6 @@
                             </button>
                             <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-secondary">
                                 <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
-                            </a>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="iframe-panel" role="tabpanel" aria-labelledby="iframe-tab">
-                        <div class="iframe-container mt-3">
-                            <div class="iframe-loading" id="iframe-load-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6b7280; z-index: 1;">
-                                <div class="spinner-border text-primary mb-2" role="status"></div>
-                                <div>Đang kết nối và tải trang gốc...</div>
-                            </div>
-                            <iframe src="/Policy/Proxy?url=@Uri.EscapeDataString(Model.SourceUrl)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 2; background: transparent;" onload="document.getElementById('iframe-load-spinner').style.display='none';"></iframe>
-                        </div>
-                        <div class="mt-2 d-flex justify-content-between align-items-center">
-                            <span class="small text-muted"><i class="bi bi-info-circle"></i> Trang web được tải an toàn qua iframe. Nếu bị chặn, hãy bấm nút bên phải.</span>
-                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-box-arrow-up-right"></i> Mở trang gốc trong tab mới
                             </a>
                         </div>
                     </div>
@@ -825,7 +824,13 @@
                 }
             });
 
-            epCloseBtn.addEventListener('click', hideSelectionUI);
+            if (epCloseBtn) {
+                epCloseBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    hideSelectionUI();
+                });
+            }
 
             function openPopoverLoading(selectedText) {
                 positionPopoverCenter();
