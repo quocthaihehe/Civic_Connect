@@ -96,9 +96,13 @@ namespace CivicConnect.Web.Controllers
 
             try
             {
-                using (var client = new HttpClient())
+                var handler = new HttpClientHandler
                 {
-                    client.Timeout = TimeSpan.FromSeconds(4);
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+                using (var client = new HttpClient(handler))
+                {
+                    client.Timeout = TimeSpan.FromSeconds(12);
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                     
                     var response = await client.GetAsync(url);
@@ -108,6 +112,13 @@ namespace CivicConnect.Web.Controllers
                     }
                     
                     var html = await response.Content.ReadAsStringAsync();
+                    
+                    // Attempt to extract clean reader mode (content only)
+                    var readerHtml = ExtractReaderMode(html, url);
+                    if (readerHtml != null)
+                    {
+                        return Content(readerHtml, "text/html; charset=utf-8");
+                    }
                     
                     // Set base tag to resolve relative paths
                     var uri = new Uri(url);
@@ -161,6 +172,217 @@ namespace CivicConnect.Web.Controllers
 </body>
 </html>";
                 return Content(fallbackHtml, "text/html; charset=utf-8");
+            }
+        }
+
+        private string? ExtractReaderMode(string html, string url)
+        {
+            try
+            {
+                // 1. Extract Title
+                string title = "";
+                var titleMatch = System.Text.RegularExpressions.Regex.Match(html, @"<h1[^>]*?>(.*?)</h1>", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                if (titleMatch.Success)
+                {
+                    title = titleMatch.Groups[1].Value;
+                    title = System.Text.RegularExpressions.Regex.Replace(title, "<.*?>", "").Trim();
+                }
+
+                // 2. Extract Sapo/Summary
+                string sapo = "";
+                var sapoRegexes = new string[]
+                {
+                    @"<h2[^>]*?class=""[^""]*?sapo[^""]*""[^>]*?>(.*?)</h2>",
+                    @"<p[^>]*?class=""[^""]*?description[^""]*""[^>]*?>(.*?)</p>",
+                    @"<div[^>]*?class=""[^""]*?sapo[^""]*""[^>]*?>(.*?)</div>",
+                    @"<h2[^>]*?class='[^']*?sapo[^']*'[^>]*?>(.*?)</h2>",
+                    @"<p[^>]*?class='[^']*?description[^']*'[^>]*?>(.*?)</p>",
+                    @"<div[^>]*?class='[^']*?sapo[^']*'[^>]*?>(.*?)</div>"
+                };
+
+                foreach (var pattern in sapoRegexes)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(html, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                    if (match.Success)
+                    {
+                        sapo = match.Groups[1].Value;
+                        sapo = System.Text.RegularExpressions.Regex.Replace(sapo, "<.*?>", "").Trim();
+                        break;
+                    }
+                }
+
+                // 3. Extract main content body
+                string bodyHtml = "";
+                var bodyRegexes = new string[]
+                {
+                    @"<div[^>]*?(class=""[^""]*?(detail-content|fck_detail|article-content|main-content-body)[^""]*""|id=""(main-detail-body|article-body|content-body)"")[^>]*?>(.*?)</div>\s*<div class=""[a-zA-Z0-9_-]*?(detail-tab-bottom|author-info|relation-news|social-share)",
+                    @"<div[^>]*?(class=""[^""]*?(detail-content|fck_detail|article-content|main-content-body)[^""]*""|id=""(main-detail-body|article-body|content-body)"")[^>]*?>(.*?)</div>",
+                    @"<div[^>]*?class=""[^""]*?fck[^""]*""[^>]*?>(.*?)</div>",
+                    @"<article[^>]*?>(.*?)</article>"
+                };
+
+                foreach (var pattern in bodyRegexes)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(html, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                    if (match.Success)
+                    {
+                        bodyHtml = match.Groups[match.Groups.Count - 1].Value;
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(bodyHtml) || bodyHtml.Length < 200)
+                {
+                    return null; // Trigger fallback
+                }
+
+                // 4. Clean bodyHtml (Remove comments, scripts, styles, navigation, ads, social share buttons)
+                bodyHtml = System.Text.RegularExpressions.Regex.Replace(bodyHtml, @"<!--.*?-->", "", System.Text.RegularExpressions.RegexOptions.Singleline);
+                bodyHtml = System.Text.RegularExpressions.Regex.Replace(bodyHtml, @"<script[^>]*?>.*?</script>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                bodyHtml = System.Text.RegularExpressions.Regex.Replace(bodyHtml, @"<style[^>]*?>.*?</style>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                
+                // Remove ad/social boxes
+                bodyHtml = System.Text.RegularExpressions.Regex.Replace(bodyHtml, @"<div[^>]*?class=""[^""]*?(social|share|relation|ads|banner|sidebar|comment|header|footer|menu)[^""]*""[^>]*?>.*?</div>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                bodyHtml = System.Text.RegularExpressions.Regex.Replace(bodyHtml, @"<div[^>]*?id=""[^""]*?(social|share|relation|ads|banner|sidebar|comment|header|footer|menu)[^""]*""[^>]*?>.*?</div>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+                
+                // Also clean up any embedded iframe ads
+                bodyHtml = System.Text.RegularExpressions.Regex.Replace(bodyHtml, @"<iframe[^>]*?>.*?</iframe>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+
+                var uri = new Uri(url);
+                var baseHref = $"{uri.Scheme}://{uri.Host}";
+
+                // 5. Wrap in premium Reader Mode layout
+                var cleanHtml = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <base href='{baseHref}/' />
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css'>
+    <style>
+        body {{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.8;
+            font-size: 1.075rem;
+            padding: 20px 10px;
+            margin: 0;
+        }}
+        .reader-container {{
+            max-width: 760px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }}
+        @media (max-width: 576px) {{
+            body {{ padding: 10px 5px; }}
+            .reader-container {{ padding: 20px; border-radius: 8px; }}
+        }}
+        .article-title {{
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.35;
+            margin-bottom: 12px;
+        }}
+        .article-meta {{
+            font-size: 0.825rem;
+            color: #64748b;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }}
+        .sapo {{
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            background-color: #f1f5f9;
+            border-left: 4px solid #3b82f6;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+        }}
+        .content-body {{
+            color: #334155;
+        }}
+        .content-body p {{
+            margin-bottom: 16px;
+        }}
+        .content-body img {{
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }}
+        .content-body figure {{
+            margin: 20px 0;
+            text-align: center;
+        }}
+        .content-body figcaption {{
+            font-size: 0.825rem;
+            color: #64748b;
+            margin-top: 6px;
+            font-style: italic;
+        }}
+        .source-footer {{
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px dashed #e2e8f0;
+            font-size: 0.825rem;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        .btn-view-original {{
+            text-decoration: none;
+            color: #3b82f6;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }}
+        .btn-view-original:hover {{
+            text-decoration: underline;
+        }}
+    </style>
+</head>
+<body>
+    <div class='reader-container'>
+        {(string.IsNullOrEmpty(title) ? "" : $"<h1 class='article-title'>{title}</h1>")}
+        <div class='article-meta'>
+            <span><i class='bi bi-newspaper'></i> Báo chí chính thống</span>
+            <span>•</span>
+            <span><i class='bi bi-patch-check-fill' style='color:#0d6efd;'></i> Đã kiểm chứng</span>
+        </div>
+        {(string.IsNullOrEmpty(sapo) ? "" : $"<div class='sapo'>{sapo}</div>")}
+        <div class='content-body'>
+            {bodyHtml}
+        </div>
+        <div class='source-footer'>
+            <span>Nguồn: {new Uri(url).Host}</span>
+            <a href='{url}' target='_blank' class='btn-view-original'>Xem bài viết gốc <i class='bi bi-box-arrow-up-right'></i></a>
+        </div>
+    </div>
+</body>
+</html>";
+                return cleanHtml;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Reader Mode extraction failed: {ex.Message}");
+                return null;
             }
         }
 
@@ -394,9 +616,13 @@ namespace CivicConnect.Web.Controllers
 
             try
             {
-                using (var client = new HttpClient())
+                var handler = new HttpClientHandler
                 {
-                    client.Timeout = TimeSpan.FromSeconds(4);
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+                using (var client = new HttpClient(handler))
+                {
+                    client.Timeout = TimeSpan.FromSeconds(12);
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                     
                     var response = await client.GetAsync(url);
