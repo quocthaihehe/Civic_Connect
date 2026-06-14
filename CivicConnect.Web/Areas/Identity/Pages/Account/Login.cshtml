@@ -89,6 +89,22 @@
                 <button type="submit" class="btn-submit-modern">Đăng Nhập</button>
             </form>
 
+            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <div class="text-center my-3 text-muted position-relative d-flex align-items-center justify-content-center">
+                    <hr class="w-100" style="border-color: #e2e8f0;" />
+                    <span class="position-absolute px-3" style="font-size: 0.8rem; color: #94a3b8; background-color: #ffffff;">Hoặc đăng nhập bằng</span>
+                </div>
+                <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="w-100 mt-2">
+                    @foreach (var provider in Model.ExternalLogins!)
+                    {
+                        <button type="submit" class="btn btn-outline-danger w-100 fw-bold py-2.5 d-flex align-items-center justify-content-center gap-2" name="provider" value="@provider.Name" title="Đăng nhập bằng tài khoản @provider.DisplayName" style="border-radius: 12px; font-size: 0.95rem; border-color: #fca5a5; color: #dc2626; background: #fff5f5; transition: all 0.2s;">
+                            <i class="bi bi-google"></i> Đăng nhập bằng Google
+                        </button>
+                    }
+                </form>
+            }
+
             <div class="text-center mt-4" style="font-size: 0.85rem;">
                 <span class="text-muted">Chưa có tài khoản? </span>
                 <a asp-page="./Register" class="text-link-bright">Đăng ký ngay</a>
