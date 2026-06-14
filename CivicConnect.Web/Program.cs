@@ -65,7 +65,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
 
-// ÄÄƒng kÃ½ cÃ¡c Repository vÃ  Service chuyÃªn biá»‡t
+// Đăng ký các Repository và Service chuyên biệt
 builder.Services.Configure<CivicConnect.Web.Models.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 builder.Services.AddScoped<IIssueService, IssueService>();
@@ -75,11 +75,18 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IMomoService, MomoService>();
 
-// ÄÄƒng kÃ½ cÃ¡c Hosted Services (Background Jobs cháº¡y ná»n)
+// AI Service — Gemini
+builder.Services.Configure<CivicConnect.Web.Models.GeminiSettings>(
+    builder.Configuration.GetSection("GeminiSettings"));
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IAiService, GeminiAiService>();
+
+// Ä Äƒng kÃ½ cÃ¡c Hosted Services (Background Jobs cháº¡y ná» n)
 builder.Services.AddHostedService<PriorityScoreJob>();
 builder.Services.AddHostedService<DeadlineCheckJob>();
 
-// ÄÄƒng kÃ½ SignalR Ä‘á»ƒ gá»­i thÃ´ng bÃ¡o realtime
+// Ä Äƒng kÃ½ SignalR Ä‘á»ƒ gá»­i thÃ´ng bÃ¡o realtime
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
