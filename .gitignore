@@ -12,3 +12,6 @@ obj/
 # Bỏ qua thư mục node_modules
 node_modules/
 **/node_modules/
+
+# Bỏ qua thư mục cấu hình AI agent
+.agents/
