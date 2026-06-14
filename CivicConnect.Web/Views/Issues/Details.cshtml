@@ -6,6 +6,35 @@
 @{
     ViewData["Title"] = Model.Title;
     var currentUserId = UserManager.GetUserId(User);
+
+    // Dynamic absolute URL based on active domain
+    var absoluteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
+    var encodedUrl = System.Net.WebUtility.UrlEncode(absoluteUrl);
+}
+
+@section Meta {
+    <!-- Open Graph / Facebook / Zalo Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@Model.Title" />
+    <meta property="og:url" content="@absoluteUrl" />
+    @{
+        var rawDesc = Model.Description ?? "";
+        // Remove HTML tags to prevent broken preview markup
+        var cleanDesc = System.Text.RegularExpressions.Regex.Replace(rawDesc, "<.*?>", string.Empty);
+        var truncatedDesc = cleanDesc.Length > 180 ? cleanDesc.Substring(0, 180) + "..." : cleanDesc;
+    }
+    <meta property="og:description" content="@truncatedDesc" />
+    
+    @if (Model.Images != null && Model.Images.Any())
+    {
+        // First image as preview thumbnail
+        <meta property="og:image" content="@Model.Images.OrderBy(img => img.OrderIndex).First().Url" />
+    }
+    else
+    {
+        // Fallback site logo
+        <meta property="og:image" content="@($"{Context.Request.Scheme}://{Context.Request.Host}/images/favicon.png")" />
+    }
 }
 
 <style>
@@ -173,10 +202,10 @@
                     </div>
                     <div class="d-flex align-items-center gap-4 mt-3 mt-md-0">
                         <div class="d-flex gap-2">
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=https://civicconnect.vn/Issues/Details/@Model.Id" target="_blank" class="btn btn-sm btn-light text-primary rounded-circle shadow-sm border" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Facebook">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=@encodedUrl" target="_blank" class="btn btn-sm btn-light text-primary rounded-circle shadow-sm border" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Facebook">
                                 <i class="bi bi-facebook fs-6"></i>
                             </a>
-                            <a href="https://sp.zalo.me/plugins/share?link=https://civicconnect.vn/Issues/Details/@Model.Id" target="_blank" class="btn btn-sm btn-light text-info rounded-circle shadow-sm border" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Zalo">
+                            <a href="https://sp.zalo.me/plugins/share?link=@encodedUrl" target="_blank" class="btn btn-sm btn-light text-info rounded-circle shadow-sm border" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Zalo">
                                 <i class="bi bi-chat-fill fs-6"></i>
                             </a>
                         </div>

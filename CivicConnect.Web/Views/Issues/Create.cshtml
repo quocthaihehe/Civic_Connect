@@ -5,10 +5,11 @@
 }
 
 @section Styles {
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
-        #map-selector { width: 100%; height: 100%; min-height: 350px; background-color: var(--bg-main); border-radius: 12px; }
+        /* Compact layout adjustments specifically for Create Issue page */
+        .glass-card { transition: none !important; }
+        .glass-card:hover { transform: none !important; box-shadow: var(--shadow-sm) !important; }
         .leaflet-container { font-family: inherit; }
         .selector-pin {
             display: flex; align-items: center; justify-content: center; border-radius: 50%;
@@ -18,35 +19,89 @@
         }
         .selector-pin i { font-size: 1.25rem; }
 
-        /* Wizard Styles */
-        .wizard-stepper { display: flex; justify-content: space-between; margin-bottom: 2.5rem; position: relative; }
-        .wizard-stepper::before { content: ''; position: absolute; top: 15px; left: 10%; right: 10%; height: 2px; background: var(--gray-200); z-index: 1; }
-        .progress-bar-stepper { position: absolute; top: 15px; left: 10%; height: 2px; background: var(--primary-color); z-index: 2; transition: width 0.4s ease; width: 0%; }
-        .step { position: relative; z-index: 3; text-align: center; width: 25%; }
-        .step-icon { width: 32px; height: 32px; background: white; border: 2px solid var(--gray-300); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem auto; font-weight: 600; color: var(--gray-500); transition: all 0.3s; }
-        .step.active .step-icon { border-color: var(--primary-color); background: var(--primary-color); color: white; box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), 0.15); }
-        .step.completed .step-icon { border-color: var(--success-color, #10b981); background: var(--success-color, #10b981); color: white; }
-        .step-label { font-size: 0.85rem; color: var(--gray-500); font-weight: 500; }
-        .step.active .step-label { color: var(--text-main); font-weight: 700; }
-        
         .step-content { display: none; }
         .step-content.active { display: block; animation: fadeInRight 0.4s ease; }
         @@keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* Category Cards */
-        .category-card { border: 2px solid var(--border-glass); border-radius: 12px; padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-glass); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        /* --- PHẦN 1: CẤU HÌNH GIAO DIỆN MẶC ĐỊNH (Màn hình nhỏ hoặc Zoom lớn) --- */
+        .main-content { padding: 12px 20px !important; }
+        .glass-card { padding: 1.25rem !important; }
+        
+        .wizard-stepper { display: flex; justify-content: space-between; margin-bottom: 0.75rem; position: relative; }
+        .wizard-stepper::before { content: ''; position: absolute; top: 13px; left: 10%; right: 10%; height: 2px; background: var(--gray-200); z-index: 1; }
+        .progress-bar-stepper { position: absolute; top: 13px; left: 10%; height: 2px; background: var(--primary-500); z-index: 2; transition: width 0.4s ease; width: 0%; }
+        .step { position: relative; z-index: 3; text-align: center; width: 25%; }
+        .step-icon { width: 28px; height: 28px; background: white; border: 2px solid var(--gray-300); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.25rem auto; font-weight: 600; color: var(--gray-500); transition: all 0.3s; font-size: 0.85rem; }
+        .step.active .step-icon { border-color: var(--primary-500); background: var(--primary-500); color: white; box-shadow: 0 0 0 4px rgba(27, 77, 62, 0.15); }
+        .step.completed .step-icon { border-color: var(--success-color, #10b981); background: var(--success-color, #10b981); color: white; }
+        .step-label { font-size: 0.75rem; color: var(--gray-500); font-weight: 500; }
+        .step.active .step-label { color: var(--text-main); font-weight: 700; }
+
+        #map-selector { width: 100%; height: 100%; min-height: 200px; background-color: var(--bg-main); border-radius: 12px; }
+        #map-container, .upload-dropzone { height: 200px !important; }
+
+        .category-card { border: 2px solid var(--border-glass); border-radius: 12px; padding: 0.75rem 0.5rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-glass); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .category-card:hover { border-color: var(--primary-300); background: var(--bg-glass-hover); transform: translateY(-3px); }
         .category-card.selected { border-color: var(--primary-color); background: rgba(var(--bs-primary-rgb), 0.05); box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.1); }
-        .category-card i { font-size: 2.2rem; margin-bottom: 0.5rem; display: block; color: var(--text-muted); transition: color 0.2s; }
+        .category-card i { font-size: 1.75rem; margin-bottom: 0.25rem; display: block; color: var(--text-muted); transition: color 0.2s; }
         .category-card.selected i { color: var(--primary-color); }
-        .category-card span { font-weight: 600; font-size: 0.9rem; color: var(--text-main); }
+        .category-card span { font-weight: 600; font-size: 0.8rem; color: var(--text-main); }
+        
+        #descInput { height: 80px; }
+        .form-label { margin-bottom: 0.25rem; font-size: 0.85rem; }
+        .form-control, .form-select, .input-group-text, .btn { font-size: 0.85rem; }
+        .preview-item-thumb { width: 75px; height: 75px; }
+
+        /* --- PHẦN 2: THAY ĐỔI THEO CHIỀU CAO MÀN HÌNH ĐỂ LẤP ĐẦY TRỐNG TRẢI --- */
+        
+        /* Màn hình trung bình (Chiều cao viewport >= 720px) */
+        @@media (min-height: 720px) {
+            .main-content { padding: 20px 24px !important; }
+            .glass-card { padding: 1.75rem !important; }
+            .wizard-stepper { margin-bottom: 1.25rem; }
+            
+            #map-selector { min-height: 250px !important; }
+            #map-container, .upload-dropzone { height: 250px !important; }
+            
+            .category-card { padding: 1.25rem 0.75rem; }
+            .category-card i { font-size: 2rem; margin-bottom: 0.5rem; }
+            .category-card span { font-size: 0.85rem; }
+
+            #descInput { height: 110px; }
+            .form-label { font-size: 0.9rem; margin-bottom: 0.35rem; }
+            .form-control, .form-select, .input-group-text, .btn { font-size: 0.9rem; }
+            .preview-item-thumb { width: 95px; height: 95px; }
+        }
+
+        /* Màn hình lớn (Chiều cao viewport >= 840px - VD: laptop 1080p mở lớn nhất) */
+        @@media (min-height: 840px) {
+            .main-content { padding: 28px 32px !important; }
+            .glass-card { padding: 2rem 2.25rem !important; }
+            
+            .wizard-stepper { margin-bottom: 1.75rem; }
+            .wizard-stepper::before, .progress-bar-stepper { top: 17px; }
+            .step-icon { width: 36px; height: 36px; font-size: 0.95rem; line-height: 32px; }
+            .step-label { font-size: 0.85rem; }
+
+            #map-selector { min-height: 285px !important; }
+            #map-container, .upload-dropzone { height: 285px !important; }
+            
+            .category-card { padding: 1.5rem 1rem; }
+            .category-card i { font-size: 2.2rem; margin-bottom: 0.5rem; }
+            .category-card span { font-size: 0.9rem; }
+
+            #descInput { height: 135px; }
+            .form-label { font-size: 0.95rem; margin-bottom: 0.5rem; }
+            .form-control, .form-select, .input-group-text, .btn { font-size: 0.95rem; }
+            .preview-item-thumb { width: 110px; height: 110px; }
+        }
     </style>
 }
 
-<div class="row justify-content-center py-4">
+<div class="row justify-content-center py-1 py-md-2">
     <div class="col-12 col-xl-10 col-xxl-8">
-        <div class="glass-card p-4 p-md-5 shadow-sm">
-            <h3 class="fw-bold mb-4 text-center" style="color: var(--primary-900); font-family: var(--font-display);">Gửi phản ánh đời sống</h3>
+        <div class="glass-card p-3 p-md-4 shadow-sm">
+            <h4 class="fw-bold mb-2 text-center" style="color: var(--primary-900); font-family: var(--font-display); font-size: 1.5rem;">Gửi phản ánh đời sống</h4>
             
             <!-- Stepper UI -->
             <div class="wizard-stepper">
@@ -70,7 +125,7 @@
             </div>
 
             <form asp-action="Create" method="post" enctype="multipart/form-data" id="issueWizardForm">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
                 <!-- STEP 1: CHỌN DANH MỤC -->
                 <div class="step-content active" id="step1">
@@ -121,58 +176,63 @@
 
                 <!-- STEP 2: BẢN ĐỒ & ẢNH -->
                 <div class="step-content" id="step2">
-                    <h5 class="fw-bold mb-3">Vị trí & Minh chứng</h5>
-                    <div class="row g-4">
+                    <h5 class="fw-bold mb-2" style="font-size: 1.1rem;">Vị trí & Minh chứng</h5>
+                    <div class="row g-3">
                         <div class="col-lg-6">
                             <label class="form-label fw-semibold">Vị trí trên bản đồ <span class="text-danger">*</span></label>
-                            <div class="input-group mb-2">
+                            <div class="input-group mb-1">
                                 <input asp-for="Address" id="address-input" class="form-control rounded-start-3" placeholder="Địa chỉ hiện trường..." required />
-                                <button type="button" class="btn btn-outline-secondary" id="btnLocateMe" title="Lấy vị trí hiện tại">
+                                <button type="button" class="btn btn-outline-secondary py-1" id="btnLocateMe" title="Lấy vị trí hiện tại">
                                     <i class="bi bi-geo-alt"></i>
                                 </button>
                             </div>
-                            <div class="border rounded-3 position-relative" style="height: 300px; overflow: hidden;" id="map-container">
+                            <div class="border rounded-3 position-relative" style="height: 200px; overflow: hidden;" id="map-container">
                                 <div id="map-selector"></div>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label fw-semibold">Hình ảnh minh chứng <span class="text-danger">*</span></label>
-                            <div class="upload-dropzone border border-dashed rounded-3 p-4 text-center bg-light" style="cursor: pointer;" onclick="document.getElementById('image-upload-input').click()">
-                                <i class="bi bi-cloud-arrow-up text-primary fs-1 mb-2"></i>
-                                <h6 class="fw-bold mb-1">Click để tải ảnh lên</h6>
-                                <p class="text-muted small mb-0">Hỗ trợ JPG, PNG (Tối đa 5 ảnh)</p>
+                            <div class="upload-dropzone border border-dashed rounded-3 p-2 text-center bg-light d-flex flex-column align-items-center justify-content-center position-relative" style="cursor: pointer; height: 200px;">
+                                <!-- Empty State -->
+                                <div id="upload-empty-state" class="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                    <i class="bi bi-cloud-arrow-up text-primary fs-3 mb-1"></i>
+                                    <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">Click để tải ảnh lên</h6>
+                                    <p class="text-muted small mb-0" style="font-size: 0.7rem;">Hỗ trợ JPG, PNG (Tối đa 5 ảnh)</p>
+                                </div>
+                                <!-- Previews State -->
+                                <div id="image-previews-container" class="d-none flex-wrap justify-content-center align-items-center gap-2 w-100 h-100 p-1">
+                                </div>
                             </div>
                             <input type="file" asp-for="ImageFiles" class="d-none" multiple accept="image/*" id="image-upload-input" />
-                            <div class="d-flex flex-wrap gap-2 mt-3" id="image-previews-container"></div>
-                            <div class="text-danger mt-1 d-none" id="imgError" style="font-size: 0.85rem;">Vui lòng tải lên ít nhất 1 ảnh minh chứng.</div>
+                            <div class="text-danger mt-1 d-none" id="imgError" style="font-size: 0.8rem;">Vui lòng tải lên ít nhất 1 ảnh minh chứng.</div>
                         </div>
                     </div>
 
                     <!-- Hidden fields -->
                     <input type="hidden" asp-for="Latitude" id="lat-input" value="10.7769" />
                     <input type="hidden" asp-for="Longitude" id="lng-input" value="106.7009" />
-                    <input type="hidden" asp-for="ProvinceCode" id="prov-code" />
-                    <input type="hidden" asp-for="ProvinceName" id="prov-name" />
-                    <input type="hidden" asp-for="DistrictCode" id="dist-code" />
-                    <input type="hidden" asp-for="DistrictName" id="dist-name" />
-                    <input type="hidden" asp-for="WardCode" id="ward-code" />
-                    <input type="hidden" asp-for="WardName" id="ward-name" />
+                    <input type="hidden" asp-for="ProvinceCode" id="prov-code" value="79" />
+                    <input type="hidden" asp-for="ProvinceName" id="prov-name" value="TP. Hồ Chí Minh" />
+                    <input type="hidden" asp-for="DistrictCode" id="dist-code" value="760" />
+                    <input type="hidden" asp-for="DistrictName" id="dist-name" value="Quận 1" />
+                    <input type="hidden" asp-for="WardCode" id="ward-code" value="26734" />
+                    <input type="hidden" asp-for="WardName" id="ward-name" value="Phường Bến Nghé" />
                 </div>
 
                 <!-- STEP 3: CHI TIẾT -->
                 <div class="step-content" id="step3">
-                    <h5 class="fw-bold mb-3">Thông tin chi tiết</h5>
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label fw-semibold">Tiêu đề phản ánh <span class="text-danger">*</span></label>
-                        <input asp-for="Title" id="titleInput" class="form-control rounded-3" placeholder="Nhập tiêu đề ngắn gọn..." required />
+                    <h5 class="fw-bold mb-2" style="font-size: 1.1rem;">Thông tin chi tiết</h5>
+                    <div class="mb-2">
+                        <label asp-for="Title" class="form-label fw-semibold">Tiêu đề phản ánh (Tối thiểu 5 ký tự) <span class="text-danger">*</span></label>
+                        <input asp-for="Title" id="titleInput" class="form-control rounded-3 py-1" placeholder="Nhập tiêu đề ngắn gọn..." required />
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Description" class="form-label fw-semibold">Mô tả nội dung <span class="text-danger">*</span></label>
-                        <textarea asp-for="Description" id="descInput" class="form-control rounded-3" rows="5" placeholder="Mô tả chi tiết sự việc, tác động đến đời sống..." required></textarea>
+                    <div class="mb-2">
+                        <label asp-for="Description" class="form-label fw-semibold">Mô tả nội dung (Tối thiểu 20 ký tự) <span class="text-danger">*</span></label>
+                        <textarea asp-for="Description" id="descInput" class="form-control rounded-3 py-1" rows="3" placeholder="Mô tả chi tiết sự việc, tác động đến đời sống..." required></textarea>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label asp-for="Priority" class="form-label fw-semibold">Mức độ ưu tiên <span class="text-danger">*</span></label>
-                        <select asp-for="Priority" id="priorityInput" class="form-select rounded-3" required>
+                        <select asp-for="Priority" id="priorityInput" class="form-select rounded-3 py-1" required>
                             <option value="">Chọn mức độ ưu tiên</option>
                             <option value="1">Thấp</option>
                             <option value="2">Trung bình</option>
@@ -190,32 +250,32 @@
                 </div>
 
                 <!-- STEP 4: XÁC NHẬN -->
-                <div class="step-content text-center py-4" id="step4">
-                    <div class="mb-4">
-                        <i class="bi bi-clipboard2-check text-success" style="font-size: 4rem;"></i>
+                <div class="step-content text-center py-2" id="step4">
+                    <div class="mb-2">
+                        <i class="bi bi-clipboard2-check text-success" style="font-size: 2rem;"></i>
                     </div>
-                    <h4 class="fw-bold text-dark">Kiểm tra lại thông tin</h4>
-                    <p class="text-muted mx-auto" style="max-width: 500px;">
+                    <h5 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;">Kiểm tra lại thông tin</h5>
+                    <p class="text-muted mx-auto mb-2" style="max-width: 500px; font-size: 0.8rem;">
                         Bạn chuẩn bị gửi 1 phản ánh thuộc lĩnh vực <strong id="lblCat" class="text-primary"></strong>.<br/>
-                        Vui lòng đảm bảo thông tin hình ảnh và mô tả đã phản ánh đúng sự thật. Phản ánh sai sự thật có thể bị khóa tài khoản.
+                        Vui lòng đảm bảo thông tin hình ảnh và mô tả đã phản ánh đúng sự thật.
                     </p>
-                    <div class="bg-light p-3 rounded-3 text-start mx-auto mt-4" style="max-width: 500px; font-size: 0.9rem;">
-                        <div class="mb-2"><strong>Tiêu đề:</strong> <span id="lblTitle"></span></div>
-                        <div class="mb-2"><strong>Địa chỉ:</strong> <span id="lblAddress"></span></div>
+                    <div class="bg-light p-2 rounded-3 text-start mx-auto mt-2" style="max-width: 500px; font-size: 0.8rem;">
+                        <div class="mb-1"><strong>Tiêu đề:</strong> <span id="lblTitle"></span></div>
+                        <div class="mb-1"><strong>Địa chỉ:</strong> <span id="lblAddress"></span></div>
                         <div><strong>Ưu tiên:</strong> <span id="lblPriority"></span></div>
                     </div>
                 </div>
 
                 <!-- Navigation Buttons -->
-                <div class="d-flex justify-content-between mt-5 pt-3 border-top">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 d-none" id="btnPrev">
+                <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1 d-none" id="btnPrev">
                         <i class="bi bi-arrow-left me-1"></i> Quay lại
                     </button>
                     <div class="ms-auto">
-                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnNext">
+                        <button type="button" class="btn btn-primary rounded-pill px-3 py-1" id="btnNext">
                             Tiếp tục <i class="bi bi-arrow-right ms-1"></i>
                         </button>
-                        <button type="submit" class="btn btn-success rounded-pill px-4 d-none" id="btnSubmit">
+                        <button type="submit" class="btn btn-success rounded-pill px-3 py-1 d-none" id="btnSubmit">
                             <i class="bi bi-send-fill me-1"></i> Gửi Phản Ánh
                         </button>
                     </div>
@@ -237,11 +297,30 @@
             let currentStep = 1;
             const totalSteps = 4;
 
+            // Restore selected category on load
+            const initialCat = $('#categoryInput').val();
+            if (initialCat) {
+                $(`.category-card[data-val="${initialCat}"]`).addClass('selected');
+            }
+
+            // Restore step on validation error reload
+            @if (!ViewData.ModelState.IsValid)
+            {
+                var step = 3;
+                if (ViewData.ModelState.ContainsKey("ImageFiles") || ViewData.ModelState.ContainsKey("Address")) {
+                    step = 2;
+                }
+                <text>
+                currentStep = @step;
+                updateWizard();
+                </text>
+            }
+
             // Category Selection
             $('.category-card').click(function() {
                 $('.category-card').removeClass('selected');
                 $(this).addClass('selected');
-                $('#categoryInput').val($(this).data('val'));
+                $('#categoryInput').val($(this).data('val')).trigger('change');
                 $('#catError').addClass('d-none');
             });
 
@@ -311,9 +390,30 @@
                 }
                 if (currentStep === 3) {
                     let isValid = true;
-                    if (!$('#titleInput').val()) { $('#titleInput').addClass('is-invalid'); isValid = false; } else $('#titleInput').removeClass('is-invalid');
-                    if (!$('#descInput').val()) { $('#descInput').addClass('is-invalid'); isValid = false; } else $('#descInput').removeClass('is-invalid');
-                    if (!$('#priorityInput').val()) { $('#priorityInput').addClass('is-invalid'); isValid = false; } else $('#priorityInput').removeClass('is-invalid');
+                    
+                    const titleVal = $('#titleInput').val() || "";
+                    if (titleVal.trim().length < 5 || titleVal.trim().length > 200) {
+                        $('#titleInput').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#titleInput').removeClass('is-invalid');
+                    }
+                    
+                    const descVal = $('#descInput').val() || "";
+                    if (descVal.trim().length < 20 || descVal.trim().length > 5000) {
+                        $('#descInput').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#descInput').removeClass('is-invalid');
+                    }
+                    
+                    if (!$('#priorityInput').val()) {
+                        $('#priorityInput').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#priorityInput').removeClass('is-invalid');
+                    }
+                    
                     return isValid;
                 }
                 return true;

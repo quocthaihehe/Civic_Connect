@@ -1,104 +1,152 @@
 @page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+    ViewData["Title"] = "Đăng ký tài khoản - CivicConnect";
 }
 
-<div class="row justify-content-center align-items-center py-5">
-    <div class="col-md-7 col-lg-5">
-        <div class="glass-card p-4 p-md-5">
-            <div class="text-center mb-4">
-                <i class="bi bi-shield-check text-primary fs-1"></i>
-                <h3 class="fw-bold mt-2">Tạo tài khoản mới</h3>
-                <p class="text-muted" style="font-size: 0.85rem;">Kết nối trực tiếp với chính quyền địa bàn cư trú</p>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" type="image/png" href="~/images/favicon.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/variables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login-modern.css" asp-append-version="true" />
+</head>
+<body class="login-body-custom">
+
+    <div class="login-wrapper">
+        <!-- Background Ambient Floating Blobs -->
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        <div class="bg-blob blob-3"></div>
+        <div class="bg-blob blob-4"></div>
+
+        <!-- Centered Soft UI Register Card (Grid Layout for Zero-Scroll on Desktop) -->
+        <div class="soft-login-card" style="padding: 32px 40px;">
+            <div class="text-center mb-3">
+                <!-- Circular Buildings Logo matching the system branding -->
+                <div class="d-inline-flex align-items-center justify-content-center mb-2 rounded-circle" style="width: 70px; height: 70px; background: var(--primary-500); box-shadow: 0 4px 12px rgba(27, 77, 62, 0.15);">
+                    <i class="bi bi-buildings-fill text-white" style="font-size: 1.8rem;"></i>
+                </div>
+                <h3 class="fw-bold mb-1" style="font-size: 26px;">Đăng ký</h3>
+                <p class="card-subtitle-custom" style="font-size: 13.5px; margin-bottom: 0;">Tham gia cổng thông tin phản ánh và chính quyền đô thị</p>
             </div>
 
             <form asp-page="./Register" method="post" class="needs-validation">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-1 mb-2" style="font-size: 0.8rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); color: #b91c1c;" role="alert"></div>
 
-                <div class="mb-3">
-                    <label asp-for="Input.FullName" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                        <input asp-for="Input.FullName" class="form-control border-start-0 ps-0" placeholder="Nguyễn Văn A" required />
+                <!-- Row 1: Họ và tên & Số điện thoại -->
+                <div class="row g-2">
+                    <div class="col-md-6 form-group-modern">
+                        <label asp-for="Input.FullName" class="form-label-modern" style="font-size: 12px; margin-bottom: 4px;"></label>
+                        <div class="input-group-modern">
+                            <span class="input-icon-left"><i class="bi bi-person"></i></span>
+                            <input asp-for="Input.FullName" class="form-control-modern" placeholder="Nguyễn Văn A" required style="padding: 10px 14px 10px 42px; font-size: 14px;" />
+                        </div>
+                        <span asp-validation-for="Input.FullName" class="text-danger" style="font-size: 0.7rem;"></span>
                     </div>
-                    <span asp-validation-for="Input.FullName" class="text-danger" style="font-size: 0.75rem;"></span>
+
+                    <div class="col-md-6 form-group-modern">
+                        <label asp-for="Input.PhoneNumber" class="form-label-modern" style="font-size: 12px; margin-bottom: 4px;"></label>
+                        <div class="input-group-modern">
+                            <span class="input-icon-left"><i class="bi bi-telephone"></i></span>
+                            <input asp-for="Input.PhoneNumber" class="form-control-modern" placeholder="0901234567" required style="padding: 10px 14px 10px 42px; font-size: 14px;" />
+                        </div>
+                        <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size: 0.7rem;"></span>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="Input.Email" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
-                        <input asp-for="Input.Email" class="form-control border-start-0 ps-0" placeholder="nguyenvana@gmail.com" type="email" required />
+                <!-- Row 2: Email -->
+                <div class="form-group-modern">
+                    <label asp-for="Input.Email" class="form-label-modern" style="font-size: 12px; margin-bottom: 4px;"></label>
+                    <div class="input-group-modern">
+                        <span class="input-icon-left"><i class="bi bi-envelope"></i></span>
+                        <input asp-for="Input.Email" class="form-control-modern" placeholder="nguyenvana@gmail.com" type="email" required style="padding: 10px 14px 10px 42px; font-size: 14px;" />
                     </div>
-                    <span asp-validation-for="Input.Email" class="text-danger" style="font-size: 0.75rem;"></span>
+                    <span asp-validation-for="Input.Email" class="text-danger" style="font-size: 0.7rem;"></span>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="Input.PhoneNumber" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
-                        <input asp-for="Input.PhoneNumber" class="form-control border-start-0 ps-0" placeholder="0901234567" required />
-                    </div>
-                    <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size: 0.75rem;"></span>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Khu vực cư trú</label>
+                <!-- Row 3: Khu vực cư trú -->
+                <div class="form-group-modern">
+                    <label class="form-label-modern" style="font-size: 12px; margin-bottom: 4px;">Khu vực cư trú</label>
                     <div class="row g-2">
                         <div class="col-4">
-                            <select asp-for="Input.ProvinceCode" id="province-select" class="form-select select-sm" style="font-size: 0.85rem;" required>
+                            <select asp-for="Input.ProvinceCode" id="province-select" class="form-select-modern" required style="padding: 10px 12px; font-size: 13.5px;">
                                 <option value="">Tỉnh/TP</option>
                                 <option value="79">TP. Hồ Chí Minh</option>
                             </select>
                         </div>
                         <div class="col-4">
-                            <select asp-for="Input.DistrictCode" id="district-select" class="form-select select-sm" style="font-size: 0.85rem;" required>
+                            <select asp-for="Input.DistrictCode" id="district-select" class="form-select-modern" required style="padding: 10px 12px; font-size: 13.5px;">
                                 <option value="">Quận/Huyện</option>
                             </select>
                         </div>
                         <div class="col-4">
-                            <select asp-for="Input.WardCode" id="ward-select" class="form-select select-sm" style="font-size: 0.85rem;" required>
+                            <select asp-for="Input.WardCode" id="ward-select" class="form-select-modern" required style="padding: 10px 12px; font-size: 13.5px;">
                                 <option value="">Phường/Xã</option>
                             </select>
                         </div>
                     </div>
-                    <span asp-validation-for="Input.WardCode" class="text-danger" style="font-size: 0.75rem;"></span>
+                    <span asp-validation-for="Input.WardCode" class="text-danger" style="font-size: 0.7rem;"></span>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="Input.Password" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-                        <input asp-for="Input.Password" class="form-control border-start-0 ps-0" type="password" placeholder="••••••••" required />
+                <!-- Row 4: Mật khẩu & Xác nhận mật khẩu -->
+                <div class="row g-2">
+                    <div class="col-md-6 form-group-modern">
+                        <label asp-for="Input.Password" class="form-label-modern" style="font-size: 12px; margin-bottom: 4px;"></label>
+                        <div class="input-group-modern">
+                            <span class="input-icon-left"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Input.Password" id="password-input" class="form-control-modern" type="password" placeholder="••••••••" required style="padding: 10px 14px 10px 42px; font-size: 14px;" />
+                            <button type="button" class="btn-toggle-password" id="togglePasswordBtn" onclick="togglePasswordVisibility('password-input', 'passwordToggleIcon')" style="font-size: 16px; right: 14px;">
+                                <i class="bi bi-eye" id="passwordToggleIcon"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger" style="font-size: 0.7rem;"></span>
                     </div>
-                    <span asp-validation-for="Input.Password" class="text-danger" style="font-size: 0.75rem;"></span>
-                </div>
 
-                <div class="mb-4">
-                    <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-lock-fill"></i></span>
-                        <input asp-for="Input.ConfirmPassword" class="form-control border-start-0 ps-0" type="password" placeholder="••••••••" required />
+                    <div class="col-md-6 form-group-modern">
+                        <label asp-for="Input.ConfirmPassword" class="form-label-modern" style="font-size: 12px; margin-bottom: 4px;"></label>
+                        <div class="input-group-modern">
+                            <span class="input-icon-left"><i class="bi bi-lock-fill"></i></span>
+                            <input asp-for="Input.ConfirmPassword" id="confirm-password-input" class="form-control-modern" type="password" placeholder="••••••••" required style="padding: 10px 14px 10px 42px; font-size: 14px;" />
+                            <button type="button" class="btn-toggle-password" id="toggleConfirmPasswordBtn" onclick="togglePasswordVisibility('confirm-password-input', 'confirmPasswordToggleIcon')" style="font-size: 16px; right: 14px;">
+                                <i class="bi bi-eye" id="confirmPasswordToggleIcon"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger" style="font-size: 0.7rem;"></span>
                     </div>
-                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger" style="font-size: 0.75rem;"></span>
                 </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary rounded-pill py-2">Đăng Ký</button>
-                </div>
+                <button type="submit" class="btn-submit-modern mt-2" style="padding: 11px 20px; font-size: 15px;">Đăng Ký</button>
             </form>
 
-            <div class="text-center mt-4" style="font-size: 0.85rem;">
+            <div class="text-center mt-3" style="font-size: 0.8rem;">
                 <span class="text-muted">Đã có tài khoản? </span>
-                <a asp-page="./Login" class="text-primary fw-semibold text-decoration-none">Đăng nhập ngay</a>
+                <a asp-page="./Login" class="text-link-bright">Đăng nhập ngay</a>
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
+    <!-- JQuery and Bootstrap Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
+
     <script>
         $(document).ready(function() {
             // Danh sách dữ liệu mẫu cho Phường/Quận hành chính Việt Nam
@@ -156,5 +204,20 @@
                 }
             });
         });
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
     </script>
-}
+</body>
+</html>
