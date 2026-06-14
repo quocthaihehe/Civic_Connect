@@ -74,6 +74,7 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     user.LastLoginAt = DateTime.UtcNow;
+                    user.IsOnline = true;
                     await _userManager.UpdateAsync(user);
                     return LocalRedirect(returnUrl);
                 }

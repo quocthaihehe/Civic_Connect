@@ -4,6 +4,8 @@
     bool isOfficialDoc = !string.IsNullOrEmpty(Model.DocumentNumber);
 }
 
+@Html.AntiForgeryToken()
+
 <style>
     .policy-detail-container {
         display: grid;
@@ -226,6 +228,172 @@
         color: #0d6efd !important;
         border-color: #0d6efd !important;
     }
+
+    /* ===== Selection floating button ===== */
+    #ai-selection-btn {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        background: linear-gradient(135deg, #6366f1, #3b82f6);
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        padding: 0.38rem 0.85rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        align-items: center;
+        gap: 0.35rem;
+        box-shadow: 0 4px 16px rgba(99,102,241,0.45);
+        white-space: nowrap;
+        animation: popIn 0.18s ease;
+        transform-origin: bottom center;
+        pointer-events: auto;
+    }
+    #ai-selection-btn.visible { display: inline-flex; }
+    #ai-selection-btn:hover { opacity: 0.9; transform: scale(1.04); }
+
+    @@keyframes popIn {
+        from { opacity: 0; transform: scale(0.82); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ===== Selection explain popover ===== */
+    #ai-explain-popover {
+        display: none;
+        position: fixed;
+        z-index: 9998;
+        width: min(420px, 92vw);
+        max-height: min(600px, 85vh);
+        background: #fff;
+        border: 1px solid rgba(99,102,241,0.2);
+        border-radius: 16px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+        animation: slideDownPopover 0.25s ease;
+        flex-direction: column;
+    }
+    #ai-explain-popover.visible { display: flex; }
+
+    @@keyframes slideDownPopover {
+        from { opacity: 0; transform: translate(-50%, -60%); }
+        to   { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    .ep-header {
+        background: linear-gradient(135deg, #6366f1, #3b82f6);
+        padding: 0.7rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+    .ep-header-title {
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .ep-close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: #fff;
+        border-radius: 50%;
+        width: 22px; height: 22px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s;
+    }
+    .ep-close:hover { background: rgba(255,255,255,0.35); }
+
+    .ep-body {
+        padding: 1rem;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .ep-quote {
+        background: #f5f3ff;
+        border-left: 3px solid #8b5cf6;
+        border-radius: 0 8px 8px 0;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        color: #5b21b6;
+        line-height: 1.5;
+        margin-bottom: 0.85rem;
+        max-height: 120px;
+        overflow-y: auto;
+        font-style: italic;
+    }
+
+    .ep-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #6366f1;
+        margin-bottom: 0.3rem;
+    }
+
+    .ep-text {
+        font-size: 0.9rem;
+        color: #1f2937;
+        line-height: 1.65;
+        margin-bottom: 0.75rem;
+    }
+
+    .ep-key-term {
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: 0.4rem 0.7rem;
+        font-size: 0.82rem;
+        color: #92400e;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .ep-practical {
+        background: rgba(59,130,246,0.07);
+        border-left: 3px solid #3b82f6;
+        border-radius: 0 8px 8px 0;
+        padding: 0.4rem 0.7rem;
+        font-size: 0.85rem;
+        color: #1e3a5f;
+        line-height: 1.6;
+    }
+
+    .ep-skeleton-line {
+        background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+        border-radius: 6px;
+        height: 13px;
+        margin-bottom: 8px;
+    }
+    .ep-skeleton-line.s { width: 50%; }
+    .ep-skeleton-line.m { width: 75%; }
+    .ep-skeleton-line.l { width: 95%; }
+
+    .ep-footer {
+        padding: 0.45rem 1rem;
+        background: #f9fafb;
+        border-top: 1px solid #f0f0f0;
+        font-size: 0.7rem;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        flex-shrink: 0;
+    }
+
+    /* Vùng nội dung cho phép bôi đen */
+    .selectable-content { user-select: text; cursor: text; }
 </style>
 
 <div class="section-block fade-in-up">
@@ -258,36 +426,18 @@
             {
                 <ul class="nav nav-tabs" id="docTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-panel" type="button" role="tab" aria-controls="summary-panel" aria-selected="true">
-                            <i class="bi bi-file-text-fill me-1"></i> Tóm tắt & Nội dung
+                        <button class="nav-link active" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-panel" type="button" role="tab" aria-controls="iframe-panel" aria-selected="true">
+                            <i class="bi bi-globe me-1"></i> Nội dung bài báo gốc
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-panel" type="button" role="tab" aria-controls="iframe-panel" aria-selected="false">
-                            <i class="bi bi-globe me-1"></i> Xem trang gốc trực tiếp
+                        <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-panel" type="button" role="tab" aria-controls="summary-panel" aria-selected="false">
+                            <i class="bi bi-file-text-fill me-1"></i> Tóm tắt & Giải thích
                         </button>
                     </li>
                 </ul>
                 <div class="tab-content" id="docTabsContent">
-                    <div class="tab-pane fade show active" id="summary-panel" role="tabpanel" aria-labelledby="summary-tab">
-                        <div class="document-body mt-3">
-                            @if (Model.Id == 0)
-                            {
-                                <p class="lead text-secondary">@Model.Excerpt</p>
-                                <hr />
-                            }
-                            @Model.Content
-                        </div>
-                        <div class="mt-4 pt-4 border-top">
-                            <button onclick="$('#iframe-tab').click();" class="btn btn-primary fw-bold me-2">
-                                <i class="bi bi-eye-fill"></i> Xem trực tiếp trang gốc tại đây
-                            </button>
-                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-secondary">
-                                <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
-                            </a>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="iframe-panel" role="tabpanel" aria-labelledby="iframe-tab">
+                    <div class="tab-pane fade show active" id="iframe-panel" role="tabpanel" aria-labelledby="iframe-tab">
                         <div class="iframe-container mt-3">
                             <div class="iframe-loading" id="iframe-load-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6b7280; z-index: 1;">
                                 <div class="spinner-border text-primary mb-2" role="status"></div>
@@ -302,12 +452,30 @@
                             </a>
                         </div>
                     </div>
+                    <div class="tab-pane fade" id="summary-panel" role="tabpanel" aria-labelledby="summary-tab">
+                        <div class="document-body mt-3 selectable-content" id="policy-content">
+                            @if (Model.Id == 0)
+                            {
+                                <p class="lead text-secondary">@Model.Excerpt</p>
+                                <hr />
+                            }
+                            @Html.Raw(Model.Content)
+                        </div>
+                        <div class="mt-4 pt-4 border-top">
+                            <button onclick="$('#iframe-tab').click();" class="btn btn-primary fw-bold me-2">
+                                <i class="bi bi-eye-fill"></i> Xem trực tiếp trang gốc tại đây
+                            </button>
+                            <a href="@Model.SourceUrl" target="_blank" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
+                            </a>
+                        </div>
+                    </div>
                 </div>
             }
             else
             {
-                <div class="document-body">
-                    @Model.Content
+                <div class="document-body selectable-content" id="policy-content">
+                    @Html.Raw(Model.Content)
                 </div>
             }
         </div>
@@ -383,23 +551,31 @@
                 </div>
             </div>
             
-            <!-- Gợi ý câu hỏi nhanh -->
-            <div class="mb-2 d-flex flex-wrap gap-1">
-                <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Tóm tắt nội dung chính')">Tóm tắt chính</button>
-                <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Ngày có hiệu lực của văn bản?')">Ngày hiệu lực?</button>
-                @if (isOfficialDoc || Model.Title.Contains("45/2026/NĐ-CP"))
-                {
-                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Hành vi vứt rác bừa bãi bị phạt bao nhiêu?')">Mức phạt?</button>
-                }
-            </div>
+            <!-- Gợi ý câu hỏi nhanh và Ô nhập câu hỏi (Yêu cầu đăng nhập) -->
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="mb-2 d-flex flex-wrap gap-1">
+                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Tóm tắt nội dung chính')">Tóm tắt chính</button>
+                    <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Ngày có hiệu lực của văn bản?')">Ngày hiệu lực?</button>
+                    @if (isOfficialDoc || Model.Title.Contains("45/2026/NĐ-CP"))
+                    {
+                        <button class="btn btn-outline-secondary suggestion-btn" style="font-size: 0.725rem; padding: 3px 8px; border-radius: 6px;" onclick="askSuggestion('Hành vi vứt rác bừa bãi bị phạt bao nhiêu?')">Mức phạt?</button>
+                    }
+                </div>
 
-            <!-- Ô nhập câu hỏi -->
-            <div class="input-group">
-                <input type="text" id="aiQuestionInput" class="form-control form-control-sm" placeholder="Nhập câu hỏi của bạn..." style="font-size: 0.85rem; border-radius: 8px 0 0 8px;" onkeypress="if(event.key === 'Enter') sendQuestion();" />
-                <button class="btn btn-primary btn-sm" type="button" id="sendAiBtn" style="border-radius: 0 8px 8px 0;" onclick="sendQuestion()">
-                    <i class="bi bi-send-fill"></i>
-                </button>
-            </div>
+                <div class="input-group">
+                    <input type="text" id="aiQuestionInput" class="form-control form-control-sm" placeholder="Nhập câu hỏi của bạn..." style="font-size: 0.85rem; border-radius: 8px 0 0 8px;" onkeypress="if(event.key === 'Enter') sendQuestion();" />
+                    <button class="btn btn-primary btn-sm" type="button" id="sendAiBtn" style="border-radius: 0 8px 8px 0;" onclick="sendQuestion()">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-3 rounded bg-light border border-dashed text-secondary" style="font-size: 0.8rem; background-color: var(--tblr-body-bg) !important; border-color: var(--tblr-border-color) !important;">
+                    <i class="bi bi-lock-fill me-1 text-primary"></i> Vui lòng <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="fw-bold text-decoration-none">Đăng nhập</a> để sử dụng Trợ lý Pháp luật AI.
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -408,6 +584,31 @@
 <button class="scroll-btn" id="scrollToTopBtn" title="Cuộn lên đầu trang">
     <i class="bi bi-arrow-up"></i>
 </button>
+
+@* ===== FLOATING SELECTION BUTTON ===== *@
+<button id="ai-selection-btn" title="AI giải thích đoạn này">
+    ✨ Giải thích
+</button>
+
+@* ===== EXPLAIN POPOVER ===== *@
+<div id="ai-explain-popover">
+    <div class="ep-header">
+        <div class="ep-header-title">
+            <span>🤖</span>
+            <span>AI Giải Thích</span>
+            <span style="background:rgba(255,255,255,0.25); font-size:0.65rem; padding:0.1rem 0.4rem; border-radius:10px;">Gemini</span>
+        </div>
+        <button class="ep-close" id="ep-close-btn" title="Đóng">×</button>
+    </div>
+    <div class="ep-body" id="ep-body">
+        <!-- Content injected by JS -->
+    </div>
+    <div class="ep-footer">
+        <i class="bi bi-lightning-charge-fill" style="color:#f59e0b;"></i>
+        <span id="ep-model">Gemini AI</span>
+        <span>• AI có thể mắc lỗi</span>
+    </div>
+</div>
 
 @section Scripts {
     <script>
@@ -520,5 +721,219 @@
             var formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             return formatted.replace(/\n/g, '<br/>');
         }
+    </script>
+
+    <script>
+        // ============================================================
+        // GIẢI THÍCH ĐOẠN BÔI ĐEN (Text Selection AI Explain)
+        // ============================================================
+        (function () {
+            const POLICY_ID  = @Model.Id;
+            const TOKEN = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            const selBtn     = document.getElementById('ai-selection-btn');
+            const popover    = document.getElementById('ai-explain-popover');
+            const epBody     = document.getElementById('ep-body');
+            const epModel    = document.getElementById('ep-model');
+            const epCloseBtn = document.getElementById('ep-close-btn');
+            const content    = document.getElementById('policy-content');
+
+            let selectionTimeout = null;
+            let currentSelected  = '';
+
+            // Hiện floating button khi bôi đen trong vùng nội dung
+            document.addEventListener('mouseup', function (e) {
+                if (popover.classList.contains('visible')) {
+                    selBtn.classList.remove('visible');
+                    return;
+                }
+
+                clearTimeout(selectionTimeout);
+                selectionTimeout = setTimeout(function () {
+                    const sel  = window.getSelection();
+                    const text = sel ? sel.toString().trim() : '';
+
+                    let isInContent = false;
+                    if (text.length >= 5 && content && sel && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        isInContent = content.contains(sel.anchorNode)
+                                   || content.contains(sel.focusNode)
+                                   || range.intersectsNode(content);
+                    }
+
+                    if (isInContent) {
+                        currentSelected = text;
+                        positionSelectionBtn(e);
+                    } else {
+                        // Nếu click ra ngoài popover thì ẩn cả
+                        if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
+                            hideSelectionUI();
+                        }
+                    }
+                }, 160);
+            });
+
+            // Lắng nghe sự kiện bôi đen từ iframe báo gốc
+            window.addEventListener('message', function (event) {
+                if (!event.data) return;
+
+                if (event.data.type === 'iframeTextSelected') {
+                    currentSelected = event.data.text;
+                    const iframe = document.querySelector('.iframe-container iframe');
+                    if (iframe) {
+                        const iframeRect = iframe.getBoundingClientRect();
+                        const x = iframeRect.left + event.data.clientX;
+                        const y = iframeRect.top + event.data.clientY;
+                        
+                        // Fake an event object to position the button
+                        const fakeEvent = {
+                            clientX: x,
+                            clientY: y
+                        };
+                        positionSelectionBtn(fakeEvent);
+                    }
+                } else if (event.data.type === 'iframeSelectionCleared') {
+                    if (!popover.classList.contains('visible')) {
+                        hideSelectionUI();
+                    }
+                }
+            });
+
+            // Ẩn khi bắt đầu drag mới
+            document.addEventListener('mousedown', function (e) {
+                if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
+                    selBtn.classList.remove('visible');
+                }
+            });
+
+            function positionSelectionBtn(e) {
+                const margin = 10;
+                let x = e.clientX - 40;
+                let y = e.clientY - 48;
+                // Giữ trong viewport
+                x = Math.max(margin, Math.min(x, window.innerWidth  - 130 - margin));
+                y = Math.max(margin, Math.min(y, window.innerHeight - 40  - margin));
+                selBtn.style.left = x + 'px';
+                selBtn.style.top  = y + 'px';
+                selBtn.classList.add('visible');
+            }
+
+            // Click nút “Giải thích”
+            selBtn.addEventListener('click', async function () {
+                if (!currentSelected) return;
+                selBtn.classList.remove('visible');
+                openPopoverLoading(currentSelected);
+
+                // Xoá vùng bôi đen để tránh hiện lại nút nổi khi mouseup
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                }
+
+                try {
+                    const resp = await fetch('/Policy/ExplainSelection', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': TOKEN || ''
+                        },
+                        body: JSON.stringify({ policyId: POLICY_ID, selectedText: currentSelected })
+                    });
+                    const data = await resp.json();
+
+                    if (data.success) {
+                        renderExplanation(currentSelected, data);
+                    } else {
+                        renderExplainError(data.error || 'Không thể giải thích lúc này.');
+                    }
+                } catch (_) {
+                    renderExplainError('Lỗi kết nối. Vui lòng thử lại.');
+                }
+            });
+
+            if (epCloseBtn) {
+                epCloseBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    hideSelectionUI();
+                });
+            }
+
+            function openPopoverLoading(selectedText) {
+                positionPopoverCenter();
+                popover.classList.add('visible');
+
+                const shortQuote = selectedText.length > 250
+                    ? selectedText.slice(0, 250) + '...'
+                    : selectedText;
+
+                epBody.innerHTML =
+                    '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
+                    '<div class="ep-skeleton-line l"></div>' +
+                    '<div class="ep-skeleton-line m"></div>' +
+                    '<div class="ep-skeleton-line s"></div>' +
+                    '<div style="margin-top:10px;"></div>' +
+                    '<div class="ep-skeleton-line m"></div>' +
+                    '<div class="ep-skeleton-line l"></div>';
+            }
+
+            function renderExplanation(selectedText, data) {
+                const shortQuote = selectedText.length > 250
+                    ? selectedText.slice(0, 250) + '...'
+                    : selectedText;
+
+                let keyTermHtml = '';
+                if (data.keyTerm) {
+                    keyTermHtml =
+                        '<div class="ep-key-term">' +
+                        '<span>📚</span>' +
+                        '<span><b>Thuật ngữ:</b> ' + escHtml(data.keyTerm) + '</span>' +
+                        '</div>';
+                }
+
+                epBody.innerHTML =
+                    '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
+                    '<div class="ep-label">💡 Ý nghĩa</div>' +
+                    '<div class="ep-text">' + escHtml(data.simpleExplanation) + '</div>' +
+                    keyTermHtml +
+                    '<div class="ep-practical">' + escHtml(data.practicalMeaning) + '</div>';
+
+                epModel.textContent = data.modelUsed || 'Gemini AI';
+            }
+
+            function renderExplainError(msg) {
+                epBody.innerHTML =
+                    '<div style="color:#b91c1c; font-size:0.88rem; display:flex; gap:0.5rem; align-items:center;">' +
+                    '<i class="bi bi-exclamation-circle-fill"></i> ' + escHtml(msg) +
+                    '</div>';
+            }
+
+            function positionPopoverCenter() {
+                popover.style.left = '50%';
+                popover.style.top  = '50%';
+                popover.style.transform = 'translate(-50%, -50%)';
+            }
+
+            function hideSelectionUI() {
+                selBtn.classList.remove('visible');
+                popover.classList.remove('visible');
+                currentSelected = '';
+            }
+
+            document.addEventListener('click', function (e) {
+                if (popover.classList.contains('visible') &&
+                    !popover.contains(e.target) &&
+                    e.target !== selBtn) {
+                    hideSelectionUI();
+                }
+            });
+
+            function escHtml(str) {
+                return (str || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+        })();
     </script>
 }

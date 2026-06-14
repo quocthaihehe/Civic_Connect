@@ -1,0 +1,206 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.ApplicationUser>
+@using CivicConnect.Web.Models.Enums
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Quản lý công dân";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Danh sách Công dân</h2>
+            <div class="text-muted small mt-1">Hồ sơ định danh, mức độ tin cậy và trạng thái hoạt động của công dân đô thị</div>
+        </div>
+        <div class="col-auto ms-auto d-print-none flex gap-2">
+            <button class="btn btn-white" data-bs-toggle="modal" data-bs-target="#importExcelModal"><i class="bi bi-file-earmark-excel me-2"></i>Nhập từ Excel</button>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- Citizens Table -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-people text-primary me-2"></i>Hồ sơ danh sách cư dân</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>Email & Số điện thoại</th>
+                            <th>Điểm công dân</th>
+                            <th>Huy hiệu KYC</th>
+                            <th>Tình trạng vi phạm</th>
+                            <th class="w-1">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Chưa có hồ sơ công dân nào khớp điều kiện tìm kiếm</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-sm bg-blue-lt text-blue rounded-circle me-2">@user.FullName.Substring(0, 1)</span>
+                                            <div>
+                                                <div class="font-weight-bold text-body">@user.FullName</div>
+                                                <div class="text-xs text-muted">Mã: @user.Id.Substring(0, 8)...</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>@user.Email</div>
+                                        <div class="text-xs text-muted">@user.PhoneNumber</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-weight-bold @(user.CitizenPoints >= 80 ? "text-green" : (user.CitizenPoints >= 50 ? "text-warning" : "text-danger"))">
+                                            @user.CitizenPoints / 100 pt
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetKycBadgeClass(user.KYCLevel)">
+                                            @GetKycLevelName(user.KYCLevel)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (user.IsRestricted)
+                                        {
+                                            <span class="badge bg-red" title="Hạn chế gửi phản ánh do vi phạm: @user.RestrictionReason">Hạn chế gửi tin</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-green-lt">Bình thường</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-list flex-nowrap">
+                                            @if (user.KYCLevel != KYCLevel.IdentityVerified)
+                                            {
+                                                <!-- Verify KYC Action -->
+                                                <form action="/Admin/Users/VerifyKYC/@user.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="level" value="@KYCLevel.IdentityVerified" />
+                                                    <button type="submit" class="btn btn-white btn-sm text-green">Duyệt KYC</button>
+                                                </form>
+                                            }
+                                            
+                                            @if (user.IsRestricted)
+                                            {
+                                                <form action="/Admin/Users/Unrestrict/@user.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-white btn-sm text-blue">Gỡ phạt</button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <!-- Restrict Modal Trigger -->
+                                                <button class="btn btn-white btn-sm text-danger" data-bs-toggle="modal" data-bs-target="#restrictModal-@user.Id">Phạt</button>
+                                            }
+                                        </div>
+
+                                        <!-- Restrict Modal (Inline for each user to keep logic simple) -->
+                                        <div class="modal modal-blur fade" id="restrictModal-@user.Id" tabindex="-1" role="dialog" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <form action="/Admin/Users/Restrict/@user.Id" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title font-weight-bold">Hạn chế quyền gửi phản ánh</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label font-weight-bold">Thời gian hạn chế (Ngày)</label>
+                                                                <input type="number" name="days" class="form-control" value="7" min="1" required>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label font-weight-bold">Lý do áp dụng hình phạt</label>
+                                                                <textarea name="reason" rows="3" class="form-control" placeholder="VD: Gửi tin rác, phản ánh sai sự thật nhiều lần..." required></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-danger">Áp dụng hình phạt</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Excel Modal -->
+<div class="modal modal-blur fade" id="importExcelModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form action="/Admin/Users/ImportExcel" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold">Nhập cư dân từ tệp Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Chọn tệp dữ liệu (.xlsx, .xls)</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx, .xls" required>
+                        <span class="text-muted small mt-1 d-block">Tải về <a href="#" class="text-primary text-decoration-none">Tệp biểu mẫu Excel chuẩn</a></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Bắt đầu nhập dữ liệu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetKycLevelName(KYCLevel level) => level switch
+    {
+        KYCLevel.Unverified => "Chưa xác minh",
+        KYCLevel.EmailVerified => "Xác minh Email",
+        KYCLevel.PhoneVerified => "Xác minh SĐT",
+        KYCLevel.IdentityVerified => "Xác minh danh tính CCCD",
+        _ => "Chưa xác minh"
+    };
+
+    public string GetKycBadgeClass(KYCLevel level) => level switch
+    {
+        KYCLevel.Unverified => "bg-secondary-lt",
+        KYCLevel.EmailVerified => "bg-blue-lt",
+        KYCLevel.PhoneVerified => "bg-cyan-lt",
+        KYCLevel.IdentityVerified => "bg-green-lt",
+        _ => "bg-secondary-lt"
+    };
+}

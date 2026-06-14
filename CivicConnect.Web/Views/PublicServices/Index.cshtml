@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "Tiện ích hành chính";
+}
+
+<div class="position-relative mb-5 p-4 p-md-5 shadow-sm" style="border-radius: 24px; background-color: #FDFBF7; overflow: hidden; min-height: 400px; display: flex; align-items: center;">
+    <div class="position-absolute top-0 end-0 h-100" style="width: 70%; background: url('@Url.Content("~/images/dịch vụ công.png")') no-repeat right bottom; background-size: cover; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 50%); mask-image: linear-gradient(to right, transparent 0%, black 50%); pointer-events: none; opacity: 0.9;"></div>
+    
+    <div class="row position-relative z-index-1 w-100 m-0">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-2" style="color: #133B2F; font-family: 'EB Garamond', serif;">
+                Dịch vụ công
+            </h1>
+            <h4 class="mb-4" style="color: #1E5C4A; font-family: 'EB Garamond', serif; font-style: italic;">
+                Minh bạch - Nhanh chóng - Tiện lợi
+            </h4>
+            <p class="mb-4" style="color: #4b5563; font-weight: 500; line-height: 1.6; font-size: 1.05rem; max-width: 90%;">
+                Tra cứu thủ tục, tìm kiếm danh bạ cơ quan và đặt lịch tiếp dân dễ dàng ngay trên CivicConnect.
+            </p>
+            <a asp-action="Procedures" class="btn rounded-pill px-4 py-2 fw-semibold shadow-sm" style="background-color: #133B2F; color: white;">
+                <i class="bi bi-search me-2"></i> Tra cứu thủ tục
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card p-4 rounded-4 shadow-sm h-100 transition-hover border-0 d-flex flex-column" style="background-color: #FDFBF7;">
+            <div class="d-flex gap-3 mb-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; background-color: rgba(19, 59, 47, 0.1);">
+                    <i class="bi bi-file-earmark-text fs-4" style="color: #133B2F;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-2" style="color: #133B2F; font-family: 'EB Garamond', serif; font-size: 1.15rem;">Thủ tục hành chính</h5>
+                    <p class="small mb-0" style="color: #555; line-height: 1.6;">Cơ sở dữ liệu các thủ tục, quy trình nộp hồ sơ, mức phí, và tải biểu mẫu trực tuyến.</p>
+                </div>
+            </div>
+            <div class="mt-auto text-center pt-3">
+                <a asp-action="Procedures" class="btn rounded-pill px-4 py-2 w-75" style="border: 1px solid #133B2F; color: #133B2F; background: transparent; font-weight: 500; font-size: 0.95rem;">Tra cứu ngay <i class="bi bi-chevron-right ms-1" style="font-size: 0.8rem;"></i></a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card p-4 rounded-4 shadow-sm h-100 transition-hover border-0 d-flex flex-column" style="background-color: #FDFBF7;">
+            <div class="d-flex gap-3 mb-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; background-color: rgba(19, 59, 47, 0.1);">
+                    <i class="bi bi-telephone-inbound fs-4" style="color: #133B2F;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-2" style="color: #133B2F; font-family: 'EB Garamond', serif; font-size: 1.15rem;">Danh bạ cơ quan</h5>
+                    <p class="small mb-0" style="color: #555; line-height: 1.6;">Tìm kiếm thông tin liên hệ, địa chỉ, giờ làm việc của các cơ quan, đơn vị trên địa bàn.</p>
+                </div>
+            </div>
+            <div class="mt-auto text-center pt-3">
+                <a asp-action="Directory" class="btn rounded-pill px-4 py-2 w-75" style="border: 1px solid #133B2F; color: #133B2F; background: transparent; font-weight: 500; font-size: 0.95rem;">Xem danh bạ <i class="bi bi-chevron-right ms-1" style="font-size: 0.8rem;"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4 rounded-4 shadow-sm h-100 transition-hover border-0 d-flex flex-column" style="background-color: #FDFBF7;">
+            <div class="d-flex gap-3 mb-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; background-color: rgba(19, 59, 47, 0.1);">
+                    <i class="bi bi-calendar-check fs-4" style="color: #133B2F;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-2" style="color: #133B2F; font-family: 'EB Garamond', serif; font-size: 1.15rem;">Lịch tiếp dân</h5>
+                    <p class="small mb-0" style="color: #555; line-height: 1.6;">Tra cứu lịch làm việc của lãnh đạo phường/quận và đăng ký lịch hẹn trực tuyến.</p>
+                </div>
+            </div>
+            <div class="mt-auto text-center pt-3">
+                <a asp-action="Directory" class="btn rounded-pill px-4 py-2 w-75" style="border: 1px solid #133B2F; color: #133B2F; background: transparent; font-weight: 500; font-size: 0.95rem;">Xem lịch hẹn <i class="bi bi-chevron-right ms-1" style="font-size: 0.8rem;"></i></a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Petition>
+@{
+    ViewData["Title"] = "Kiến nghị điện tử";
+    var userSignatures = ViewBag.UserSignatures as List<int> ?? new List<int>();
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-lg-8">
+        <h2 class="fw-bold mb-1 text-dark">Kiến nghị điện tử</h2>
+        <p class="text-muted mb-0">Thu thập chữ ký trực tuyến để đề xuất các thay đổi chính sách từ cộng đồng.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var petition in Model)
+        {
+            var isSigned = userSignatures.Contains(petition.Id);
+            var percentage = petition.TargetSignatures > 0 ? (int)Math.Min(100, Math.Round((double)petition.CurrentSignatures / petition.TargetSignatures * 100)) : 0;
+            
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge bg-danger text-white rounded-pill px-3 py-2">Gửi: @petition.TargetAudience</span>
+                            <span class="text-muted small fw-semibold"><i class="bi bi-clock me-1"></i>Hạn: @petition.EndDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <h4 class="fw-bold mt-3 mb-2">@petition.Title</h4>
+                        <p class="text-secondary mb-4" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">@petition.Description</p>
+                        
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between small fw-bold mb-2">
+                                <span class="text-danger"><i class="bi bi-pen-fill me-1"></i>@petition.CurrentSignatures chữ ký</span>
+                                <span class="text-muted">Mục tiêu: @petition.TargetSignatures</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: @percentage%;" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        @if (isSigned)
+                        {
+                            <button class="btn btn-outline-success w-100 rounded-pill fw-bold" disabled>
+                                <i class="bi bi-check2-circle me-2"></i>Đã ký tên ủng hộ
+                            </button>
+                        }
+                        else if (petition.CurrentSignatures >= petition.TargetSignatures)
+                        {
+                            <button class="btn btn-secondary w-100 rounded-pill fw-bold" disabled>
+                                <i class="bi bi-flag-fill me-2"></i>Đã đạt mục tiêu chữ ký
+                            </button>
+                        }
+                        else
+                        {
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-action="SignPetition" method="post">
+                                    <input type="hidden" name="petitionId" value="@petition.Id" />
+                                    <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold shadow-sm">
+                                        <i class="bi bi-pen me-2"></i>Ký tên ủng hộ ngay
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-danger w-100 rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-lock-fill me-2"></i>Đăng nhập để ký tên
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-file-earmark-text display-1 text-muted opacity-25 mb-3 d-block"></i>
+            <h5 class="text-muted">Chưa có kiến nghị nào</h5>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-lift { transition: transform 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-5px); }
+</style>

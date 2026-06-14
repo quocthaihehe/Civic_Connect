@@ -1,0 +1,311 @@
+/* wwwroot/css/login-modern.css */
+
+/* Custom Reset & Page Variables */
+:root {
+  --soft-shadow-layered: 0 25px 60px rgba(19, 27, 24, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --soft-shadow-input: inset 0 2px 4px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+body.login-body-custom {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #d2e3d8;
+}
+
+/* Fullscreen Wrapper with Softer, Light Pastel Green Flowing Gradient Background */
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
+  position: relative;
+  padding: 40px 20px; /* Safe padding for short screens / mobile viewports */
+  overflow-y: auto; /* Graceful scroll fallback if screen height is too small */
+  /* Light pastel sage, mint, and soft cream theme */
+  background: linear-gradient(135deg, #d2e3d8, #edf6f0, #f5eedc, #e3eed5, #d2e3d8);
+  background-size: 400% 400%;
+  animation: gradient-bg-flow 16s ease infinite;
+}
+
+@keyframes gradient-bg-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Faint overlay ambient blobs to add color shifting depth */
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: 1;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.blob-1 {
+  width: 650px;
+  height: 650px;
+  background: rgba(52, 211, 153, 0.12); /* Soft pastel teal */
+  top: -100px;
+  left: -100px;
+  animation: float-slow 20s ease-in-out infinite alternate;
+}
+
+.blob-2 {
+  width: 550px;
+  height: 550px;
+  background: rgba(230, 210, 150, 0.08); /* Soft cream gold */
+  bottom: -100px;
+  right: 10%;
+  animation: float-slow 24s ease-in-out infinite alternate-reverse;
+}
+
+.blob-3 {
+  width: 520px;
+  height: 520px;
+  background: rgba(59, 130, 246, 0.08); /* Soft pastel blue */
+  top: 15%;
+  right: -80px;
+  animation: float-slow 22s ease-in-out infinite alternate;
+}
+
+.blob-4 {
+  width: 480px;
+  height: 480px;
+  background: rgba(27, 77, 62, 0.08); /* Soft sage green */
+  bottom: 15%;
+  left: 5%;
+  animation: float-slow 28s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes float-slow {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(40px, -30px) scale(1.08) rotate(8deg); }
+  100% { transform: translate(-30px, 40px) scale(0.92) rotate(-8deg); }
+}
+
+/* ENLARGED SOFT GLASS LOGIN/REGISTER CARD WITH CUSTOM BACKGROUND IMAGE */
+.soft-login-card {
+  width: 590px; /* Scaled down: Ideal fit for 100% zoom */
+  max-width: 100%;
+  background-color: #FDFBF7; /* Fallback cream color */
+  background-image: url('/images/nền user.png'); /* Opaque watercolor background */
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px; /* Softer, rounder corners */
+  padding: 44px 40px; /* Optimized padding for balanced vertical space */
+  border: 1px solid rgba(27, 77, 62, 0.1);
+  box-shadow: var(--soft-shadow-layered);
+  position: relative;
+  z-index: 5;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Soft Border-Beam Outline Animation using CSS Mask */
+.soft-login-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 20px; /* Matches rounded card */
+  padding: 1.5px;
+  /* Soft gradient border beam */
+  background: linear-gradient(135deg, rgba(27, 77, 62, 0.45), rgba(52, 211, 153, 0.35), rgba(230, 194, 0, 0.35), rgba(27, 77, 62, 0.45));
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+  animation: border-beam-flow 7s linear infinite;
+}
+
+@keyframes border-beam-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.soft-login-card h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--primary-600);
+}
+
+.card-subtitle-custom {
+  color: var(--gray-600);
+  font-size: 14px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Inputs & Form Controls (Spacious, Light Theme) */
+.form-group-modern {
+  margin-bottom: 18px; /* Tighter margins for multi-field forms */
+}
+
+.form-label-modern {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-group-modern {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon-left {
+  position: absolute;
+  left: 16px;
+  color: var(--gray-400);
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 10;
+  transition: color 0.25s ease;
+}
+
+.form-control-modern {
+  width: 100%;
+  padding: 12px 16px 12px 46px;
+  font-size: 14.5px;
+  font-family: var(--font-main);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid var(--gray-300);
+  border-radius: 8px;
+  color: var(--gray-800);
+  box-shadow: var(--soft-shadow-input);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-control-modern::placeholder {
+  color: var(--gray-400);
+}
+
+.form-control-modern:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--primary-500);
+  color: var(--gray-800);
+  box-shadow: 0 0 0 4px rgba(27, 77, 62, 0.1), var(--soft-shadow-input);
+}
+
+.form-control-modern:focus + .input-icon-left,
+.input-group-modern:focus-within .input-icon-left {
+  color: var(--primary-500);
+}
+
+/* Custom Select Dropdowns styling for Register Residence fields */
+.form-select-modern {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: var(--font-main);
+  background-color: rgba(255, 255, 255, 0.85);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: 8px;
+  color: var(--gray-800);
+  box-shadow: var(--soft-shadow-input);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  appearance: none; /* Hide default browser arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.form-select-modern:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--primary-500);
+  color: var(--gray-800);
+  box-shadow: 0 0 0 4px rgba(27, 77, 62, 0.1), var(--soft-shadow-input);
+}
+
+/* Password Toggle Eye Button */
+.btn-toggle-password {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  z-index: 10;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.btn-toggle-password:hover {
+  color: var(--primary-500);
+}
+
+/* Forest Green brand gradient submit button */
+.btn-submit-modern {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  border: none;
+  color: white;
+  padding: 13px 20px;
+  font-weight: 700;
+  font-size: 16.5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(27, 77, 62, 0.15);
+  width: 100%;
+}
+
+.btn-submit-modern:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(27, 77, 62, 0.25), 0 3px 10px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+}
+
+.btn-submit-modern:active {
+  transform: translateY(0);
+}
+
+.text-link-bright {
+  color: var(--primary-500);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.text-link-bright:hover {
+  color: var(--primary-700);
+  text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .soft-login-card {
+    padding: 36px 24px;
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  .soft-login-card h3 {
+    font-size: 25px;
+  }
+}
+
+/* Hide ASP.NET Core Validation Summary alert boxes when empty/valid */
+.validation-summary-valid, .validation-summary-valid.alert {
+  display: none !important;
+}

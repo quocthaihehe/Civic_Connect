@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Cấu hình hệ thống";
+    var usersCount = ViewData["UsersCount"] ?? 0;
+    var unitsCount = ViewData["UnitsCount"] ?? 0;
+    var issuesCount = ViewData["IssuesCount"] ?? 0;
+    var commentsCount = ViewData["CommentsCount"] ?? 0;
+}
+
+<div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- System Settings Form (2/3 width) -->
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md border border-gray-100 p-6">
+                <h3 class="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3 uppercase"><i class="fas fa-sliders-h text-primary mr-1.5"></i>Cài đặt chung</h3>
+                
+                <form class="space-y-4 pt-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Tên hệ thống</label>
+                            <input type="text" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" value="CivicConnect">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Email liên hệ hỗ trợ</label>
+                            <input type="email" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" value="support@civicconnect.gov.vn">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">SLA giải quyết khẩn cấp (Ngày)</label>
+                            <input type="number" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" value="3">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">SLA giải quyết bình thường (Ngày)</label>
+                            <input type="number" class="block w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-primary focus:border-primary" value="15">
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-150 pt-4 flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-700">Chế độ bảo trì (Maintenance Mode)</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">Khoá tạm thời các hoạt động gửi phản ánh mới của công dân để nâng cấp hệ thống</p>
+                        </div>
+                        <button type="button" class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none bg-gray-200" role="switch" aria-checked="false">
+                            <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform translate-x-0 transition ease-in-out duration-200"></span>
+                        </button>
+                    </div>
+
+                    <div class="border-t border-gray-150 pt-4 flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-700">Tự động đóng phản ánh quá hạn</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">Tự động chuyển các phản ánh quá thời hạn xử lý mà không có hoạt động sang Đã đóng</p>
+                        </div>
+                        <button type="button" class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none bg-primary" role="switch" aria-checked="true">
+                            <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform translate-x-5 transition ease-in-out duration-200"></span>
+                        </button>
+                    </div>
+
+                    <div class="border-t border-gray-150 pt-4 flex justify-end">
+                        <button type="button" onclick="alert('Đã lưu cấu hình cài đặt (Mô phỏng)!')" class="bg-[#133B2F] hover:bg-[#0E2B22] text-white font-medium py-2 px-6 rounded-xl text-xs transition-colors">
+                            Lưu cấu hình
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Database Stats Panel (1/3 width) -->
+        <div class="space-y-6">
+            <div class="bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md border border-gray-100 p-6">
+                <h3 class="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3 uppercase"><i class="fas fa-database text-primary mr-1.5"></i>Trạng thái Cơ sở dữ liệu</h3>
+                
+                <div class="mt-4 space-y-4">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Tổng tài khoản</span>
+                        <span class="font-bold text-gray-900">@usersCount tài khoản</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Cơ quan liên kết</span>
+                        <span class="font-bold text-gray-900">@unitsCount cơ quan</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Tổng số phản ánh</span>
+                        <span class="font-bold text-gray-900">@issuesCount phản ánh</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Số phản hồi (Ý kiến)</span>
+                        <span class="font-bold text-gray-900">@commentsCount bình luận</span>
+                    </div>
+
+                    <div class="border-t border-gray-150 pt-4">
+                        <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+                            <span>Máy chủ DB:</span>
+                            <span class="font-semibold text-gray-600">civicconnect_db.mssql.somee.com</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-400">
+                            <span>Trạng thái kết nối:</span>
+                            <span class="font-semibold text-green-500"><i class="fas fa-circle text-[8px] mr-1"></i>Đang kết nối</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-150 pt-4 flex space-x-2">
+                        <button type="button" onclick="alert('Đang tiến hành sao lưu dữ liệu SQL Server...')" class="flex-1 bg-gray-550 border border-gray-250 text-gray-700 py-2 rounded text-center text-xs font-semibold hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-download mr-1"></i>Sao lưu SQL
+                        </button>
+                        <button type="button" onclick="alert('Đang tiến hành tối ưu hóa chỉ mục (Indexes)...')" class="flex-1 bg-gray-550 border border-gray-250 text-gray-700 py-2 rounded text-center text-xs font-semibold hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-sync mr-1"></i>Tối ưu DB
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

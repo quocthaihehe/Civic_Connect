@@ -1,0 +1,101 @@
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Quản lý danh mục & từ khóa cấm";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Danh mục & Từ khóa cấm</h2>
+            <div class="text-muted small mt-1">Cấu hình tham số SLA mặc định cho danh mục phản ánh và bộ lọc kiểm duyệt nội dung tự động</div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- Categories & SLA Table -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-tags-fill text-primary me-2"></i>Cấu hình SLA theo danh mục</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter mb-0">
+                    <thead>
+                        <tr>
+                            <th>Danh mục</th>
+                            <th>Mô tả xử lý</th>
+                            <th>SLA mặc định</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-weight-bold">Giao thông</td>
+                            <td class="text-muted small">Ùn tắc, sự cố tín hiệu đèn, lấn chiếm làn đường</td>
+                            <td><span class="badge bg-blue-lt">5 ngày làm việc</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Môi trường</td>
+                            <td class="text-muted small">Rác thải sinh hoạt, ô nhiễm tiếng ồn, nước thải xả bừa bãi</td>
+                            <td><span class="badge bg-green-lt">3 ngày làm việc</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">An ninh</td>
+                            <td class="text-muted small">Trộm cắp, phá hoại công trình công cộng, tụ tập mất trật tự</td>
+                            <td><span class="badge bg-red-lt">24 giờ khẩn cấp</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Hạ tầng</td>
+                            <td class="text-muted small">Cây đổ, ổ gà hỏng đường, nắp cống mất, sập cáp quang</td>
+                            <td><span class="badge bg-yellow-lt">7 ngày làm việc</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Hành chính</td>
+                            <td class="text-muted small">Thái độ cán bộ, chậm trễ hồ sơ, thủ tục phiền hà</td>
+                            <td><span class="badge bg-purple-lt">10 ngày làm việc</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blacklist Keywords Form -->
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-shield-slash-fill text-primary me-2"></i>Bộ lọc từ khóa cấm (Blacklist)</h3>
+            </div>
+            <div class="card-body">
+                <form action="/Admin/Content/SaveCategories" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Danh sách từ khóa cấm (Ngăn cách bằng dấu phẩy)</label>
+                        <textarea name="blacklistKeywords" rows="6" class="form-control font-mono" placeholder="phản động, phản động, thô tục..." required>@ViewBag.Blacklist</textarea>
+                        <span class="text-muted small mt-1 d-block">
+                            Hệ thống sẽ tự động quét và từ chối duyệt các phản ánh của công dân chứa từ khóa thuộc danh sách đen này.
+                        </span>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save me-2"></i>Cập nhật cấu hình</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

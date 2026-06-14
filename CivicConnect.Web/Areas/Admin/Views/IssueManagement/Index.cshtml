@@ -1,0 +1,267 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Issue>
+@using CivicConnect.Web.Models.Enums
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Bảng dữ liệu phản ánh";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+    var errorMsg = TempData["ErrorMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Danh sách Phản ánh hiện trường</h2>
+            <div class="text-muted small mt-1">Quản lý và giải quyết ý kiến phản ánh từ công dân đô thị</div>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <div class="btn-list">
+                <a href="/Admin/Issues/Kanban" class="btn btn-white"><i class="bi bi-kanban me-2"></i>Bảng Kanban</a>
+                <a href="/Admin/Issues/ExportExcel?category=@Context.Request.Query["category"]&status=@Context.Request.Query["status"]&priority=@Context.Request.Query["priority"]" class="btn btn-primary"><i class="bi bi-file-earmark-excel me-2"></i>Xuất Excel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notifications -->
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+@if (!string.IsNullOrEmpty(errorMsg))
+{
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i></div>
+            <div>@errorMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<!-- Filters card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="/Admin/Issues" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label font-weight-bold">Tìm kiếm nhanh</label>
+                <div class="input-icon">
+                    <span class="input-icon-addon"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Tiêu đề, nội dung, địa chỉ...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label font-weight-bold">Danh mục</label>
+                <select name="category" class="form-select">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (IssueCategory cat in Enum.GetValues(typeof(IssueCategory)))
+                    {
+                        var selectedAttr = Context.Request.Query["category"] == cat.ToString() ? "selected" : "";
+                        <option value="@cat" selectedAttr>@GetCategoryName(cat)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label font-weight-bold">Trạng thái</label>
+                <select name="status" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    @foreach (IssueStatus stat in Enum.GetValues(typeof(IssueStatus)))
+                    {
+                        var selectedAttr = Context.Request.Query["status"] == stat.ToString() ? "selected" : "";
+                        <option value="@stat" selectedAttr>@GetStatusName(stat)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label font-weight-bold">Độ khẩn cấp</label>
+                <select name="priority" class="form-select">
+                    <option value="">Tất cả mức</option>
+                    @foreach (IssuePriority pri in Enum.GetValues(typeof(IssuePriority)))
+                    {
+                        var selectedAttr = Context.Request.Query["priority"] == pri.ToString() ? "selected" : "";
+                        <option value="@pri" selectedAttr>@GetPriorityName(pri)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-2"></i>Lọc dữ liệu</button>
+                <a href="/Admin/Issues" class="btn btn-white w-100">Xoá bộ lọc</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bulk Actions & Table -->
+<form action="/Admin/Issues/BulkAction" method="post" id="bulkActionForm">
+    @Html.AntiForgeryToken()
+    <div class="card">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-2">
+                <select name="actionType" id="actionType" class="form-select form-select-sm" style="width: 180px;">
+                    <option value="">-- Hành động loạt --</option>
+                    <option value="status">Cập nhật trạng thái loạt</option>
+                </select>
+                
+                <!-- Status Options for Bulk -->
+                <select name="bulkStatus" id="bulkStatus" class="form-select form-select-sm d-none" style="width: 180px;">
+                    <option value="">Chọn trạng thái mới</option>
+                    @foreach (IssueStatus stat in Enum.GetValues(typeof(IssueStatus)))
+                    {
+                        <option value="@stat">@GetStatusName(stat)</option>
+                    }
+                </select>
+                
+                <button type="submit" class="btn btn-white btn-sm" id="btnApplyBulk">Áp dụng</button>
+            </div>
+            <span class="text-muted small">Tổng số: @Model.Count() bản ghi</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-vcenter table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input type="checkbox" id="selectAllCheckbox"></th>
+                        <th>ID</th>
+                        <th>Tiêu đề phản ánh</th>
+                        <th>Danh mục</th>
+                        <th>Địa bàn</th>
+                        <th>Hạn xử lý</th>
+                        <th>Đơn vị gán</th>
+                        <th>Trạng thái</th>
+                        <th class="w-1">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">Không tìm thấy phản ánh nào phù hợp bộ lọc</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var issue in Model)
+                        {
+                            var isOverdue = issue.DueDate.HasValue && issue.DueDate.Value < DateTime.UtcNow && issue.Status != IssueStatus.Resolved && issue.Status != IssueStatus.Closed;
+                            var isWarning = issue.DueDate.HasValue && !isOverdue && (issue.DueDate.Value - DateTime.UtcNow).TotalHours <= 24 && issue.Status != IssueStatus.Resolved && issue.Status != IssueStatus.Closed;
+                            var rowClass = isOverdue ? "table-danger" : (isWarning ? "table-warning" : "");
+                            
+                            <tr class="@rowClass">
+                                <td><input type="checkbox" name="selectedIds" value="@issue.Id" class="issue-checkbox"></td>
+                                <td>#@issue.Id</td>
+                                <td>
+                                    <div class="font-weight-bold">
+                                        <a href="/Admin/Issues/Details/@issue.Id" class="text-body">@issue.Title</a>
+                                    </div>
+                                    <div class="text-muted small text-truncate" style="max-width: 300px;">@issue.Address</div>
+                                </td>
+                                <td>@GetCategoryName(issue.Category)</td>
+                                <td>@issue.WardName</td>
+                                <td class="@(isOverdue ? "text-danger font-weight-bold" : "")">
+                                    @issue.DueDate?.ToString("dd/MM/yyyy HH:mm")
+                                    @if (isOverdue)
+                                    {
+                                        <span class="d-block small text-danger font-weight-bold">(Quá hạn)</span>
+                                    }
+                                </td>
+                                <td>@(issue.AssignedUnit?.Name ?? "Chưa gán")</td>
+                                <td>
+                                    <span class="badge @GetStatusBadgeClass(issue.Status) rounded-pill px-3 py-2">
+                                        @GetStatusName(issue.Status)
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/Admin/Issues/Details/@issue.Id" class="btn btn-white btn-sm px-3 rounded-pill">Xem</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+@functions {
+    public string GetCategoryName(IssueCategory category) => category switch
+    {
+        IssueCategory.Traffic => "Giao thông",
+        IssueCategory.Environment => "Môi trường",
+        IssueCategory.Security => "An ninh",
+        IssueCategory.Infrastructure => "Hạ tầng",
+        IssueCategory.Administration => "Hành chính",
+        _ => "Khác"
+    };
+
+    public string GetStatusName(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "Mới nhận",
+        IssueStatus.Assigned => "Đã phân công",
+        IssueStatus.Processing => "Đang xử lý",
+        IssueStatus.Resolved => "Đã giải quyết",
+        IssueStatus.Rejected => "Từ chối",
+        IssueStatus.Closed => "Đã đóng",
+        _ => "Khác"
+    };
+
+    public string GetStatusBadgeClass(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "bg-blue",
+        IssueStatus.Assigned => "bg-cyan",
+        IssueStatus.Processing => "bg-yellow",
+        IssueStatus.Resolved => "bg-green",
+        IssueStatus.Rejected => "bg-red",
+        _ => "bg-gray"
+    };
+
+    public string GetPriorityName(IssuePriority priority) => priority switch
+    {
+        IssuePriority.Low => "Thấp",
+        IssuePriority.Medium => "Trung bình",
+        IssuePriority.High => "Cao",
+        IssuePriority.Critical => "Khẩn cấp",
+        _ => "Bình thường"
+    };
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Select all checkboxes
+            $('#selectAllCheckbox').on('change', function () {
+                $('.issue-checkbox').prop('checked', this.checked);
+            });
+
+            // Toggle bulk status input
+            $('#actionType').on('change', function () {
+                if (this.value === 'status') {
+                    $('#bulkStatus').removeClass('d-none');
+                } else {
+                    $('#bulkStatus').addClass('d-none');
+                }
+            });
+
+            // Handle bulk action form validation
+            $('#bulkActionForm').on('submit', function (e) {
+                const action = $('#actionType').val();
+                if (!action) {
+                    alert('Vui lòng chọn hành động loạt!');
+                    e.preventDefault();
+                    return false;
+                }
+                const checkedCount = $('.issue-checkbox:checked').length;
+                if (checkedCount === 0) {
+                    alert('Vui lòng chọn ít nhất một phản ánh!');
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+}

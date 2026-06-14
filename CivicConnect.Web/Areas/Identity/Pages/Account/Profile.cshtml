@@ -16,7 +16,7 @@
         }
 
         <form asp-page="./Profile" method="post">
-            <input type="hidden" name="AvatarUrl" id="avatarUrlInput" value="@Model.Input.AvatarUrl" />
+            <input type="hidden" asp-for="Input.AvatarUrl" id="avatarUrlInput" />
             <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 rounded-3 mb-3" style="font-size: 0.85rem;" role="alert"></div>
 
             <div class="glass-card p-0 overflow-hidden" style="border-radius: var(--radius-lg);">
@@ -99,7 +99,7 @@
                         <span asp-validation-for="Input.WardCode" class="text-danger" style="font-size: 0.7rem;"></span>
 
                         <div class="mt-3 pt-3 d-flex justify-content-end gap-2" style="border-top: 1px solid var(--gray-200);">
-                            <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-2 px-3">Hủy Bỏ</a>
+                            <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-2 px-3">Hủy Bỏ</a>
                             <button type="submit" class="btn btn-sm btn-primary rounded-2 px-4">Lưu Thay Đổi</button>
                         </div>
                     </div>

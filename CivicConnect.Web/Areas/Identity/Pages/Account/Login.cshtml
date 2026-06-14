@@ -1,86 +1,121 @@
 @page
 @model LoginModel
 @{
-    ViewData["Title"] = "Đăng nhập";
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập - CivicConnect";
     var returnUrl = ViewData["ReturnUrl"]?.ToString();
 }
 
-<div class="row justify-content-center align-items-center py-5">
-    <div class="col-md-6 col-lg-4">
-        <div class="glass-card p-4 p-md-5">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" type="image/png" href="~/images/favicon.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/variables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login-modern.css" asp-append-version="true" />
+</head>
+<body class="login-body-custom">
+
+    <div class="login-wrapper">
+        <!-- Background Ambient Floating Blobs for extra color overlays -->
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        <div class="bg-blob blob-3"></div>
+        <div class="bg-blob blob-4"></div>
+
+        <!-- Centered Soft UI Login Card (Enlarged, Opaque Watercolor Background) -->
+        <div class="soft-login-card">
             <div class="text-center mb-4">
-                <i class="bi bi-shield-lock text-primary fs-1"></i>
-                <h3 class="fw-bold mt-2">Đăng nhập</h3>
-                <p class="text-muted" style="font-size: 0.85rem;">Kết nối công dân và chính quyền đô thị</p>
+                <!-- Circular Buildings Logo matching the system branding -->
+                <div class="d-inline-flex align-items-center justify-content-center mb-3 rounded-circle" style="width: 88px; height: 88px; background: var(--primary-500); box-shadow: 0 4px 12px rgba(27, 77, 62, 0.15);">
+                    <i class="bi bi-buildings-fill text-white" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="fw-bold">Đăng nhập</h3>
+                <p class="card-subtitle-custom">Cổng thông tin phản ánh và chính quyền đô thị</p>
             </div>
 
-            <form asp-page="./Login" asp-route-returnUrl="@returnUrl" method="post">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+            <form asp-page="./Login" asp-route-returnUrl="@returnUrl" method="post" id="loginForm">
+                @if (TempData["StatusMessage"] != null)
+                {
+                    <div class="alert alert-success py-2 mb-3" style="font-size: 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); color: #047857;" role="alert">
+                        <i class="bi bi-check-circle-fill me-1"></i> @TempData["StatusMessage"]
+                    </div>
+                }
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); color: #b91c1c;" role="alert"></div>
 
-                <div class="mb-3">
-                    <label asp-for="Input.Email" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
-                        <input asp-for="Input.Email" class="form-control border-start-0 ps-0" placeholder="nguyenvana@gmail.com" type="email" required />
+                <div class="form-group-modern">
+                    <label asp-for="Input.Email" class="form-label-modern"></label>
+                    <div class="input-group-modern">
+                        <span class="input-icon-left"><i class="bi bi-envelope"></i></span>
+                        <input asp-for="Input.Email" id="email-input" class="form-control-modern" placeholder="nguyenvana@gmail.com" type="email" required autocomplete="username" />
                     </div>
                     <span asp-validation-for="Input.Email" class="text-danger" style="font-size: 0.75rem;"></span>
                 </div>
 
-                <div class="mb-3">
+                <div class="form-group-modern">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label asp-for="Input.Password" class="form-label fw-semibold mb-0" style="font-size: 0.85rem;"></label>
-                        <a href="#" class="text-primary text-decoration-none" style="font-size: 0.75rem;">Quên mật khẩu?</a>
+                        <label asp-for="Input.Password" class="form-label-modern mb-0"></label>
+                        <a asp-page="./ForgotPassword" class="text-link-bright text-decoration-none" style="font-size: 0.75rem;">Quên mật khẩu?</a>
                     </div>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-                        <input asp-for="Input.Password" class="form-control border-start-0 ps-0" type="password" placeholder="••••••••" required />
+                    <div class="input-group-modern">
+                        <span class="input-icon-left"><i class="bi bi-lock"></i></span>
+                        <input asp-for="Input.Password" id="password-input" class="form-control-modern" type="password" placeholder="••••••••" required autocomplete="current-password" />
+                        <button type="button" class="btn-toggle-password" id="togglePasswordBtn" onclick="togglePasswordVisibility()">
+                            <i class="bi bi-eye" id="passwordToggleIcon"></i>
+                        </button>
                     </div>
                     <span asp-validation-for="Input.Password" class="text-danger" style="font-size: 0.75rem;"></span>
                 </div>
 
-                <div class="mb-4 form-check">
-                    <input asp-for="Input.RememberMe" class="form-check-input" />
-                    <label asp-for="Input.RememberMe" class="form-check-label text-muted" style="font-size: 0.85rem;"></label>
+                <div class="mb-4 form-check-modern">
+                    <input asp-for="Input.RememberMe" class="form-check-input-modern" />
+                    <label asp-for="Input.RememberMe" class="form-check-label" style="font-size: 0.85rem; cursor: pointer; color: var(--gray-700);"></label>
                 </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary rounded-pill py-2">Đăng Nhập</button>
-                </div>
+                <button type="submit" class="btn-submit-modern">Đăng Nhập</button>
             </form>
 
             <div class="text-center mt-4" style="font-size: 0.85rem;">
                 <span class="text-muted">Chưa có tài khoản? </span>
-                <a asp-page="./Register" class="text-primary fw-semibold text-decoration-none">Đăng ký ngay</a>
-            </div>
-            
-            <div class="mt-4 border-top pt-3" style="border-top: 1px solid var(--border-glass) !important;">
-                <span class="text-muted d-block text-center mb-2" style="font-size: 0.75rem;">Thông tin tài khoản kiểm thử hệ thống:</span>
-                <div class="d-flex flex-column gap-2" style="font-size: 0.75rem;">
-                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass);">
-                        <strong>Công dân:</strong> <code>citizen@gmail.com</code><br/>
-                        <span class="text-muted" style="font-size: 0.7rem;">Hành động: Gửi phản ánh, upvote, bình luận.</span>
-                    </div>
-                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass);">
-                        <strong>Cán bộ Phường Bến Nghé:</strong> <code>canbo.phuong@gmail.com</code><br/>
-                        <span class="text-muted" style="font-size: 0.7rem;">Quy trình tiếp nhận, xử lý, giải quyết và chuyển cấp.</span>
-                    </div>
-                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass);">
-                        <strong>Cán bộ Quận 1:</strong> <code>canbo.quan@gmail.com</code><br/>
-                        <span class="text-muted" style="font-size: 0.7rem;">Phụ trách các phản ánh chuyển cấp từ Phường.</span>
-                    </div>
-                    <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass);">
-                        <strong>Quản trị viên:</strong> <code>admin@gmail.com</code><br/>
-                        <span class="text-muted" style="font-size: 0.7rem;">Quản lý tài khoản (Khoá/Mở khoá) và Cơ quan liên kết.</span>
-                    </div>
-                    <div class="text-center text-secondary mt-1" style="font-size: 0.75rem;">
-                        Mật khẩu đăng nhập chung: <strong class="text-white">Admin@123456</strong>
-                    </div>
-                </div>
+                <a asp-page="./Register" class="text-link-bright">Đăng ký ngay</a>
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
+    <!-- JQuery and Bootstrap Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
-}
+
+    <!-- Interactive JS Page Logic -->
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password-input');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+    </script>
+</body>
+</html>

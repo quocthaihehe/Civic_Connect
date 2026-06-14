@@ -1,0 +1,164 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.ApplicationUser>
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Quản lý tài khoản cán bộ";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+    var errorMsg = TempData["ErrorMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Tài khoản Cán bộ xử lý</h2>
+            <div class="text-muted small mt-1">Quản lý danh sách cán bộ trực ban nghiệp vụ đô thị thông minh</div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+@if (!string.IsNullOrEmpty(errorMsg))
+{
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i></div>
+            <div>@errorMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- List of Officials -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-people-fill text-primary me-2"></i>Danh sách cán bộ nghiệp vụ</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>Email & Số điện thoại</th>
+                            <th>Đơn vị cơ quan</th>
+                            <th>Trạng thái</th>
+                            <th class="w-1">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">Chưa có tài khoản cán bộ nào trên hệ thống</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-sm bg-blue-lt text-blue rounded-circle me-2">@user.FullName.Substring(0, 1)</span>
+                                            <div>
+                                                <div class="font-weight-bold">@user.FullName</div>
+                                                <div class="text-xs text-muted">Tạo lúc: @user.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>@user.Email</div>
+                                        <div class="text-xs text-muted">@user.PhoneNumber</div>
+                                    </td>
+                                    <td><span class="font-weight-bold text-blue">@(user.GovernmentUnit?.Name ?? "Chưa gán")</span></td>
+                                    <td>
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-green-lt">Đang hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-red-lt">Đã bị khóa</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form action="/Admin/Officials/Lock/@user.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            @if (user.IsActive)
+                                            {
+                                                <button type="submit" class="btn btn-white btn-xs text-danger">Khóa</button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-white btn-xs text-green">Kích hoạt</button>
+                                            }
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Official Form -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-person-plus text-primary me-2"></i>Thêm tài khoản cán bộ</h3>
+            </div>
+            <div class="card-body">
+                <form action="/Admin/Officials/Create" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Họ tên cán bộ *</label>
+                        <input type="text" name="fullName" class="form-control" placeholder="VD: Nguyễn Văn A" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Email đăng nhập *</label>
+                        <input type="email" name="email" class="form-control" placeholder="officer@@..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Số điện thoại *</label>
+                        <input type="tel" name="phoneNumber" class="form-control" placeholder="090..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Đơn vị hành chính công tác *</label>
+                        <select name="governmentUnitId" class="form-select" required>
+                            <option value="">-- Chọn đơn vị --</option>
+                            @foreach (var unit in ViewBag.Units)
+                            {
+                                <option value="@unit.Id">@unit.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Mật khẩu khởi tạo *</label>
+                        <input type="password" name="password" class="form-control" placeholder="Tối thiểu 8 ký tự, có chữ hoa, số..." required>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save me-2"></i>Tạo tài khoản</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

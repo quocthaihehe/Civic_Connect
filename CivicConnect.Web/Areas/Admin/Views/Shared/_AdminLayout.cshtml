@@ -1,0 +1,249 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    bool isDashboardActive = currentPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase) || currentPath.Equals("/Admin/Dashboard", StringComparison.OrdinalIgnoreCase);
+    bool isIssuesActive = currentPath.StartsWith("/Admin/Issues", StringComparison.OrdinalIgnoreCase);
+    bool isUsersActive = currentPath.StartsWith("/Admin/Users", StringComparison.OrdinalIgnoreCase);
+    bool isUnitsActive = currentPath.StartsWith("/Admin/Units", StringComparison.OrdinalIgnoreCase);
+    bool isPoliciesActive = currentPath.StartsWith("/Admin/Policies", StringComparison.OrdinalIgnoreCase);
+    bool isAnalyticsActive = currentPath.StartsWith("/Admin/Analytics", StringComparison.OrdinalIgnoreCase);
+    bool isSettingsActive = currentPath.StartsWith("/Admin/Settings", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản trị CivicConnect</title>
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="bg-background text-text-main font-sans antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-72 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 transition-all duration-300 shadow-sm">
+        <!-- Logo -->
+        <div class="h-20 flex items-center px-8 border-b border-gray-200">
+            <i class="bi bi-building text-primary text-3xl mr-3.5"></i>
+            <span class="text-2xl font-serif font-extrabold text-primary tracking-tight">CivicConnect</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2.5">
+            <a href="/Admin/Dashboard" class="flex items-center px-4 py-3 text-[15px] font-medium rounded-xl transition-colors @(isDashboardActive ? "bg-[#EAF1EE] text-primary fw-bold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")">
+                <i class="bi bi-house-door w-6 text-center text-lg mr-2.5"></i> Tổng quan
+            </a>
+            <a href="/Admin/Issues" class="flex items-center px-4 py-3 text-[15px] font-medium rounded-xl transition-colors @(isIssuesActive ? "bg-[#EAF1EE] text-primary fw-bold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")">
+                <i class="bi bi-exclamation-circle w-6 text-center text-lg mr-2.5"></i> Quản lý phản ánh
+            </a>
+            <a href="/Admin/Users" class="flex items-center px-4 py-3 text-[15px] font-medium rounded-xl transition-colors @(isUsersActive ? "bg-[#EAF1EE] text-primary fw-bold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")">
+                <i class="bi bi-people w-6 text-center text-lg mr-2.5"></i> Quản lý tài khoản
+            </a>
+            <a href="/Admin/Units" class="flex items-center px-4 py-3 text-[15px] font-medium rounded-xl transition-colors @(isUnitsActive ? "bg-[#EAF1EE] text-primary fw-bold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")">
+                <i class="bi bi-building w-6 text-center text-lg mr-2.5"></i> Cơ quan liên kết
+            </a>
+            <a href="/Admin/Policies" class="flex items-center px-4 py-3 text-[15px] font-medium rounded-xl transition-colors @(isPoliciesActive ? "bg-[#EAF1EE] text-primary fw-bold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")">
+                <i class="bi bi-file-earmark-text w-6 text-center text-lg mr-2.5"></i> Chính sách & Tin tức
+            </a>
+            <a href="/Admin/Analytics" class="flex items-center px-4 py-3 text-[15px] font-medium rounded-xl transition-colors @(isAnalyticsActive ? "bg-[#EAF1EE] text-primary fw-bold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")">
+                <i class="bi bi-bar-chart w-6 text-center text-lg mr-2.5"></i> Thống kê báo cáo
+            </a>
+            <a href="/Admin/Settings" class="flex items-center px-4 py-3 text-[15px] font-medium rounded-xl transition-colors @(isSettingsActive ? "bg-[#EAF1EE] text-primary fw-bold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")">
+                <i class="bi bi-gear w-6 text-center text-lg mr-2.5"></i> Cấu hình hệ thống
+            </a>
+        </nav>
+        
+        <!-- User Profile (Bottom Sidebar) -->
+        <div class="p-5 border-t border-gray-200">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg">
+                    A
+                </div>
+                <div class="ml-3.5">
+                    <p class="text-[14px] font-bold text-gray-750">Quản trị viên</p>
+                    <p class="text-[11px] font-medium text-gray-450 uppercase tracking-wider">QUẢN TRỊ VIÊN CẤP CAO</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Header -->
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0 z-10 shadow-sm">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-serif font-bold text-primary tracking-tight">@ViewData["PageHeader"]</h1>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- Search -->
+                <div class="relative flex items-center">
+                    <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
+                    <input type="text" class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-xl bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary text-sm transition duration-150 ease-in-out" placeholder="Tìm kiếm nhanh...">
+                </div>
+
+                <!-- Notifications -->
+                <div class="relative" id="notif-dropdown-wrapper">
+                    <button id="notif-dropdown-trigger" class="relative p-2 text-gray-400 hover:text-primary focus:outline-none transition-colors duration-200">
+                        <i class="bi bi-bell text-xl"></i>
+                        <span id="notif-counter" class="absolute top-1 right-1 hidden px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">0</span>
+                    </button>
+                    <!-- Dropdown Panel -->
+                    <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
+                        <div class="px-4 py-2 border-b border-gray-150 flex justify-between items-center bg-gray-50 rounded-t-xl">
+                            <span class="text-xs font-semibold text-gray-700">Thông báo mới</span>
+                            <button id="mark-all-read" class="text-[11px] text-primary hover:underline font-medium focus:outline-none">Đọc tất cả</button>
+                        </div>
+                        <div id="notif-container" class="max-h-64 overflow-y-auto divide-y divide-gray-100">
+                            <!-- Loading state or empty state -->
+                            <div class="text-center text-gray-400 py-6" id="notif-empty-state">
+                                <i class="bi bi-bell-slash text-xl mb-1 block"></i>
+                                <span class="text-[11px]">Không có thông báo mới</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 overflow-y-auto bg-background p-6">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            // Dropdown Toggle
+            const $wrapper = $('#notif-dropdown-wrapper');
+            const $trigger = $('#notif-dropdown-trigger');
+            const $dropdown = $('#notif-dropdown');
+            const $badge = $('#notif-counter');
+            const $container = $('#notif-container');
+
+            $trigger.on('click', function (e) {
+                e.stopPropagation();
+                $dropdown.toggleClass('hidden');
+            });
+
+            $(document).on('click', function (e) {
+                if (!$wrapper.is(e.target) && $wrapper.has(e.target).length === 0) {
+                    $dropdown.addClass('hidden');
+                }
+            });
+
+            // SignalR Connection
+            if ($trigger.length > 0) {
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/hubs/notification")
+                    .withAutomaticReconnect()
+                    .build();
+
+                connection.on("LoadNotifications", function (notifications) {
+                    renderNotifications(notifications);
+                });
+
+                connection.on("IssueStatusChanged", function (n) {
+                    addNewNotification(n);
+                });
+
+                connection.on("IssueAssigned", function (n) {
+                    addNewNotification(n);
+                });
+
+                connection.start()
+                    .then(() => console.log("SignalR connected to NotificationHub (Admin Layout)"))
+                    .catch(err => console.error(err.toString()));
+
+                // Mark all as read
+                $('#mark-all-read').on('click', function (e) {
+                    e.stopPropagation();
+                    $.post('/api/notifications/mark-all-read', function () {
+                        $badge.addClass('hidden').text('0');
+                        $container.html(`
+                            <div class="text-center text-gray-400 py-6" id="notif-empty-state">
+                                <i class="bi bi-bell-slash text-xl mb-1 block"></i>
+                                <span class="text-[11px]">Không có thông báo mới</span>
+                            </div>
+                        `);
+                    });
+                });
+            }
+
+            function renderNotifications(notifications) {
+                if (!notifications || notifications.length === 0) {
+                    $badge.addClass('hidden').text('0');
+                    return;
+                }
+
+                $badge.removeClass('hidden').text(notifications.length);
+                $container.empty();
+
+                notifications.forEach(n => {
+                    $container.append(createNotifHtml(n));
+                });
+            }
+
+            function addNewNotification(n) {
+                let count = parseInt($badge.text()) || 0;
+                count++;
+                $badge.removeClass('hidden').text(count);
+
+                // Shake animation
+                $trigger.addClass('animate-bounce');
+                setTimeout(() => $trigger.removeClass('animate-bounce'), 1000);
+
+                const notifData = {
+                    id: n.id || 0,
+                    title: n.title,
+                    message: n.message,
+                    relatedIssueId: n.issueId || n.relatedIssueId
+                };
+
+                $('#notif-empty-state').remove();
+                $container.prepend(createNotifHtml(notifData));
+            }
+
+            function createNotifHtml(n) {
+                const link = n.relatedIssueId ? `/Admin/Issues/Details/${n.relatedIssueId}` : '#';
+                return `
+                    <a href="${link}" class="block p-3 hover:bg-[#EAF1EE] border-b border-gray-100 transition-colors notif-item" data-id="${n.id}">
+                        <div class="flex items-start gap-2.5">
+                            <div class="bg-[#EAF1EE] text-primary rounded-full p-2 flex items-center justify-center flex-shrink-0" style="width: 32px; height: 32px;">
+                                <i class="bi bi-chat-left-text text-xs"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-semibold text-gray-900 truncate">${n.title}</div>
+                                <div class="text-[11px] text-gray-500 mt-0.5 leading-snug">${n.message}</div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }
+
+            // Click individual notification to mark read
+            $container.on('click', '.notif-item', function (e) {
+                const id = $(this).data('id');
+                if (id && id > 0) {
+                    $.post(`/api/notifications/${id}/mark-read`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

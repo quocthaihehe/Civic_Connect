@@ -1,0 +1,263 @@
+@model CivicConnect.Web.Models.Entities.Issue
+@using CivicConnect.Web.Models.Enums
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Chi tiết phản ánh #" + Model.Id;
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Chi tiết phản ánh #@Model.Id</h2>
+            <div class="text-muted small mt-1">Người gửi: @(Model.IsAnonymous ? "Ẩn danh" : Model.Author?.FullName) | Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <a href="/Admin/Issues" class="btn btn-white"><i class="bi bi-arrow-left me-2"></i>Quay lại danh sách</a>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- Left Column: Details, Images, Map, Timeline (2/3 width) -->
+    <div class="col-lg-8 space-y-4">
+        
+        <!-- Info Card -->
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold">Nội dung phản ánh</h3>
+            </div>
+            <div class="card-body">
+                <h3 class="h2 mb-3">@Model.Title</h3>
+                <div class="bg-light p-3 rounded mb-4 text-body whitespace-pre-wrap" style="line-height: 1.6;">
+                    @Model.Description
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="font-weight-bold text-muted text-xs uppercase">Địa điểm</div>
+                        <div class="mt-1 font-weight-bold"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@Model.Address</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="font-weight-bold text-muted text-xs uppercase">Danh mục</div>
+                        <div class="mt-1 font-weight-bold text-blue">@GetCategoryName(Model.Category)</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="font-weight-bold text-muted text-xs uppercase">Độ ưu tiên</div>
+                        <div class="mt-1"><span class="badge bg-red-lt">@Model.Priority</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slideshow Image Gallery -->
+        @if (Model.Images != null && Model.Images.Any())
+        {
+            var firstImg = Model.Images.First().Url;
+            <div class="card">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h3 class="card-title font-weight-bold"><i class="bi bi-images text-primary me-2"></i>Hình ảnh hiện trường</h3>
+                </div>
+                <div class="card-body">
+                    <div class="w-100 bg-dark rounded overflow-hidden d-flex align-items-center justify-content-center mb-3" style="height: 250px;">
+                        <img id="main-preview-img" src="@firstImg" class="max-h-100 object-contain" style="max-width: 100%; transition: all 0.2s ease-in-out;" alt="Preview ảnh lớn">
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" id="thumbnail-gallery">
+                        @foreach (var img in Model.Images)
+                        {
+                            var isActive = img.Url == firstImg ? "border-primary border-2" : "border-muted";
+                            <button type="button" class="btn p-0 border rounded overflow-hidden thumbnail-btn @isActive" style="width: 75px; height: 50px; outline: none;" onclick="changeDetailImage('@img.Url', this)">
+                                <img src="@img.Url" class="w-100 h-100 object-cover">
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Geographical Map -->
+        @if (Model.Latitude != 0 && Model.Longitude != 0)
+        {
+            <div class="card">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h3 class="card-title font-weight-bold"><i class="bi bi-map-fill text-primary me-2"></i>Bản đồ định vị</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div id="detailsMap" style="height: 300px; width: 100%; z-index: 1;"></div>
+                </div>
+            </div>
+        }
+
+        <!-- Status History Timeline -->
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-clock-history text-primary me-2"></i>Lịch sử trạng thái xử lý</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled space-y-3 ms-2 border-start ps-3" style="border-color: #e2e8f0 !important;">
+                    @foreach (var history in Model.StatusHistory.OrderByDescending(h => h.ChangedAt))
+                    {
+                        <li class="position-relative">
+                            <span class="position-absolute bg-primary rounded-circle" style="width: 8px; height: 8px; left: -20px; top: 6px;"></span>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="font-weight-bold text-sm">Chuyển trạng thái: @GetStatusName(history.FromStatus) &rarr; @GetStatusName(history.ToStatus)</span>
+                                <span class="text-xs text-muted">@history.ChangedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                            <div class="text-xs text-muted mb-2">Thực hiện bởi: <span class="text-dark font-weight-bold">@(history.ChangedBy?.FullName ?? "Hệ thống tự động")</span></div>
+                            @if (!string.IsNullOrEmpty(history.Note))
+                            {
+                                <div class="bg-light p-2 rounded text-xs text-muted">@history.Note</div>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Admin Actions Panel (1/3 width) -->
+    <div class="col-lg-4 space-y-4">
+        
+        <!-- Action Card -->
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-sliders text-primary me-2"></i>Thao tác chỉ đạo xử lý</h3>
+            </div>
+            <div class="card-body">
+                <form action="/Admin/Issues/UpdateDetails" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id">
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Cập nhật trạng thái</label>
+                        <select name="status" class="form-select font-weight-bold">
+                            @foreach (IssueStatus stat in Enum.GetValues(typeof(IssueStatus)))
+                            {
+                                var selectedAttr = Model.Status == stat ? "selected" : "";
+                                <option value="@stat" selectedAttr>@GetStatusName(stat)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Giao cho cán bộ phụ trách</label>
+                        <select name="assignedToUserId" class="form-select">
+                            <option value="">-- Chọn cán bộ --</option>
+                            @foreach (var user in ViewBag.Officials)
+                            {
+                                var selectedAttr = Model.AssignedToUserId == user.Id ? "selected" : "";
+                                <option value="@user.Id" selectedAttr>@user.FullName (@user.Email)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Cơ quan chịu trách nhiệm</label>
+                        <select name="assignedUnitId" class="form-select">
+                            <option value="">-- Chọn cơ quan --</option>
+                            @foreach (var unit in ViewBag.Units)
+                            {
+                                var selectedAttr = Model.AssignedUnitId == unit.Id ? "selected" : "";
+                                <option value="@unit.Id" selectedAttr>@unit.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Hạn xử lý (Deadline)</label>
+                        <input type="datetime-local" name="dueDate" class="form-control" value="@(Model.DueDate?.ToString("yyyy-MM-ddTHH:mm"))">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Ghi chú nội bộ (Chỉ cán bộ thấy)</label>
+                        <textarea name="internalNotes" rows="2" class="form-control" placeholder="Ghi chú nghiệp vụ, chỉ đạo riêng...">@Model.InternalNotes</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Nhãn dán phân loại</label>
+                        <input type="text" name="labels" class="form-control" value="@Model.Labels" placeholder="VD: Khẩn cấp, Tái phát, Cần giám sát">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Biên bản kết quả xử lý (URL)</label>
+                        <input type="text" name="resolutionDocumentUrl" class="form-control" value="@Model.ResolutionDocumentUrl" placeholder="Đường dẫn PDF biên bản...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Ảnh chứng minh kết quả (URL)</label>
+                        <input type="text" name="resolutionImageUrl" class="form-control" value="@Model.ResolutionImageUrl" placeholder="Đường dẫn ảnh kết quả thực địa...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Lý do điều chỉnh / Phản hồi của Cán bộ</label>
+                        <textarea name="note" rows="2" class="form-control" placeholder="Lý do điều chỉnh (sẽ ghi vào lịch sử)..."></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save me-2"></i>Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetCategoryName(IssueCategory category) => category switch
+    {
+        IssueCategory.Traffic => "Giao thông",
+        IssueCategory.Environment => "Môi trường",
+        IssueCategory.Security => "An ninh",
+        IssueCategory.Infrastructure => "Hạ tầng",
+        IssueCategory.Administration => "Hành chính",
+        _ => "Khác"
+    };
+
+    public string GetStatusName(IssueStatus status) => status switch
+    {
+        IssueStatus.Pending => "Mới nhận",
+        IssueStatus.Assigned => "Đã phân công",
+        IssueStatus.Processing => "Đang xử lý",
+        IssueStatus.Resolved => "Đã giải quyết",
+        IssueStatus.Rejected => "Từ chối",
+        IssueStatus.Closed => "Đã đóng",
+        _ => "Khác"
+    };
+}
+
+@section Scripts {
+    <script>
+        function changeDetailImage(url, btnElement) {
+            $('#main-preview-img').attr('src', url);
+            $('#thumbnail-gallery .thumbnail-btn').removeClass('border-primary border-2').addClass('border-muted');
+            $(btnElement).removeClass('border-muted').addClass('border-primary border-2');
+        }
+    </script>
+    @if (Model.Latitude != 0 && Model.Longitude != 0)
+    {
+        <script>
+            $(document).ready(function () {
+                var map = L.map('detailsMap').setView([@Model.Latitude, @Model.Longitude], 15);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                L.marker([@Model.Latitude, @Model.Longitude]).addTo(map)
+                    .bindPopup("Vị trí phản ánh của công dân")
+                    .openPopup();
+            });
+        </script>
+    }
+}

@@ -108,6 +108,16 @@ namespace CivicConnect.Web.Controllers
                 })
                 .ToListAsync();
 
+            // Lấy thông tin thống kê thật
+            var totalUsers = await _context.Users.CountAsync();
+            var totalIssues = await _context.Issues.CountAsync();
+            var resolvedIssues = await _context.Issues.CountAsync(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed);
+            
+            // Tính % hài lòng: Tính trung bình số điểm rating, hoặc đếm % rating >= 4
+            var ratedIssuesCount = await _context.Issues.CountAsync(i => i.Rating.HasValue);
+            var highRatedCount = await _context.Issues.CountAsync(i => i.Rating.HasValue && i.Rating.Value >= 4);
+            var satisfactionRate = ratedIssuesCount > 0 ? (int)Math.Round((double)highRatedCount / ratedIssuesCount * 100) : 100;
+
             // Resolve Ward Name and District Name
             var wardName = "khu vực của bạn";
             var districtName = "";
@@ -128,6 +138,10 @@ namespace CivicConnect.Web.Controllers
                 WardName = wardName,
                 DistrictName = districtName,
                 MyPendingCount = myPendingCount,
+                TotalUsers = totalUsers,
+                TotalIssues = totalIssues,
+                ResolvedIssues = resolvedIssues,
+                SatisfactionRate = satisfactionRate,
                 LatestPolicies = latestPolicies,
                 FeaturedIssues = featuredIssues,
                 MyRecentIssues = myRecentIssues

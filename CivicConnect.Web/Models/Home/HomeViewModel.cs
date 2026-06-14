@@ -12,6 +12,12 @@ namespace CivicConnect.Web.Models.Home
         public string DistrictName { get; set; } = string.Empty;
         public int MyPendingCount { get; set; }
         
+        // Stats
+        public int TotalUsers { get; set; }
+        public int TotalIssues { get; set; }
+        public int ResolvedIssues { get; set; }
+        public int SatisfactionRate { get; set; }
+        
         // Greeting theo giờ
         public string TimeGreeting => DateTime.Now.Hour switch
         {

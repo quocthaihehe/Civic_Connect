@@ -1,0 +1,133 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Shift>
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Quản lý ca trực cán bộ";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Lịch trực & Phân ca cán bộ</h2>
+            <div class="text-muted small mt-1">Lên lịch và phân công ca trực tiếp nhận phản ánh hiện trường trực tuyến</div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- Shift Roster list -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-calendar-week text-primary me-2"></i>Lịch phân ca hiện tại</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Cán bộ</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                            <th>Ghi chú ca trực</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">Chưa có ca trực nào được phân bổ</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var shift in Model)
+                            {
+                                var isCurrent = DateTime.UtcNow >= shift.StartTime && DateTime.UtcNow <= shift.EndTime;
+                                <tr>
+                                    <td>
+                                        <div class="font-weight-bold">@shift.User?.FullName</div>
+                                        <div class="text-xs text-muted">@shift.User?.Email</div>
+                                    </td>
+                                    <td>@shift.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@shift.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td><span class="text-muted small">@shift.Notes</span></td>
+                                    <td>
+                                        @if (isCurrent)
+                                        {
+                                            <span class="badge bg-green">Đang trực</span>
+                                        }
+                                        else if (DateTime.UtcNow > shift.EndTime)
+                                        {
+                                            <span class="badge bg-secondary">Đã xong</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-blue">Sắp tới</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Shift Form -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-calendar-plus text-primary me-2"></i>Phân ca trực mới</h3>
+            </div>
+            <div class="card-body">
+                <form action="/Admin/Officials/CreateShift" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Cán bộ trực *</label>
+                        <select name="userId" class="form-select" required>
+                            <option value="">-- Chọn cán bộ --</option>
+                            @foreach (var user in ViewBag.Officials)
+                            {
+                                <option value="@user.Id">@user.FullName (@user.Email)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Thời gian bắt đầu *</label>
+                        <input type="datetime-local" name="startTime" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Thời gian kết thúc *</label>
+                        <input type="datetime-local" name="endTime" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Ghi chú ca trực</label>
+                        <textarea name="notes" rows="3" class="form-control" placeholder="Mô tả nhiệm vụ trực hoặc liên lạc..."></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-2"></i>Thêm lịch trực</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

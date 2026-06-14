@@ -6,6 +6,15 @@
 @section Styles {
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Tailwind CSS (Cấu hình riêng cho Map tránh đụng độ) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+            }
+        }
+    </script>
     <style>
         /* Toàn màn hình cho map */
         body { overflow: hidden; } /* Ẩn scrollbar của body khi ở trang map */
@@ -208,6 +217,7 @@
 
 <div id="map-layout">
     <div id="map"></div>
+    <!-- Phần này đã chuyển thành Leaflet Control ở dưới JS -->
 
     <!-- Sidebar Trái -->
     <div id="map-sidebar">
@@ -264,7 +274,8 @@
             </div>
         </div>
     </div>
-    <!-- Kết thúc Sidebar Trái -->
+</div>
+<!-- Kết thúc Sidebar Trái -->
 
     <!-- Nút chọn Lớp bản đồ (Góc trái dưới) -->
     <div class="layer-selector">
@@ -288,7 +299,7 @@
     </div>
 
     <!-- Panel chi tiết phản ánh (Góc phải) -->
-    <div id="issue-panel" class="shadow-lg" style="position: absolute; right: 20px; top: 20px; width: 420px; border-radius: 16px; z-index: 1000; display: none; padding: 24px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5);">
+    <div id="issue-panel" class="w-[420px] rounded-2xl z-[1000] p-6 shadow-2xl border border-white/50 backdrop-blur-md bg-white/95" style="display: none; position: absolute !important; right: 20px !important; top: 20px !important; left: auto !important; bottom: auto !important;">
         <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
             <h6 class="fw-bold text-primary mb-0"><i class="bi bi-info-circle-fill me-2"></i> Thông tin phản ánh</h6>
             <button type="button" class="btn-close shadow-none" id="close-panel-btn" aria-label="Close"></button>
@@ -334,6 +345,35 @@
                 map = L.map('map', { zoomControl: false, attributionControl: false }).setView([10.7769, 106.7009], 13);
                 L.control.zoom({ position: 'bottomright' }).addTo(map);
                 markersGroup = L.featureGroup().addTo(map);
+
+                // Custom Control Vị trí của tôi để đồng bộ với nút Zoom của Leaflet
+                const LocationControl = L.Control.extend({
+                    options: { position: 'bottomright' },
+                    onAdd: function () {
+                        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                        // Reset lại border để giống nút zoom
+                        container.style.border = 'none';
+                        container.style.boxShadow = 'none';
+                        container.style.marginBottom = '10px';
+                        container.style.marginRight = '20px';
+
+                        container.innerHTML = `
+                            <button id="my-location-btn" title="Vị trí của tôi" class="bg-black text-white shadow-md hover:bg-gray-800 transition-colors flex items-center justify-center cursor-pointer" style="width: 34px; height: 34px; border-radius: 8px; border: none; padding: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                                    <circle cx="12" cy="12" r="6"></circle>
+                                    <circle cx="12" cy="12" r="2" fill="currentColor"></circle>
+                                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                                    <line x1="2" y1="12" x2="6" y2="12"></line>
+                                    <line x1="18" y1="12" x2="22" y2="12"></line>
+                                </svg>
+                            </button>
+                        `;
+                        L.DomEvent.disableClickPropagation(container);
+                        return container;
+                    }
+                });
+                map.addControl(new LocationControl());
 
                 updateMapStyle(activeStyle, 'light');
                 loadIssuesData();
@@ -465,6 +505,70 @@
             initMap();
             $('#close-panel-btn').click(() => $('#issue-panel').fadeOut(200));
             map.on('click', () => $('#issue-panel').fadeOut(200));
+
+            // 5. Tính năng Vị trí của tôi (Get Current Location)
+            let userMarker = null; // Lưu marker vị trí người dùng để xóa nếu cần
+            
+            // Dùng event delegation vì nút my-location-btn được sinh ra động bởi Leaflet
+            $(document).on('click', '#my-location-btn', function(e) {
+                e.preventDefault();
+                const btn = $(this);
+                // Hiệu ứng đang loading
+                btn.addClass('opacity-75 cursor-wait');
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            // Thành công lấy được tọa độ
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            
+                            // Trượt bản đồ tới vị trí hiện tại
+                            map.flyTo([lat, lng], 16, {
+                                animate: true,
+                                duration: 1.5
+                            });
+                            
+                            // Xóa marker cũ nếu có
+                            if (userMarker) {
+                                map.removeLayer(userMarker);
+                            }
+                            
+                            // Tạo marker báo hiệu vị trí của bạn
+                            const userIcon = L.divIcon({
+                                html: `<div style="background-color: #0d6efd; width: 24px; height: 24px; border: 3px solid white; box-shadow: 0 0 15px rgba(13,110,253,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><div style="width: 8px; height: 8px; background: white; border-radius: 50%;"></div></div>`,
+                                className: '',
+                                iconSize: [24, 24],
+                                iconAnchor: [12, 12],
+                                popupAnchor: [0, -14] // Đẩy popup lên trên marker 14px để không bị đè lên tâm
+                            });
+                            
+                            userMarker = L.marker([lat, lng], { icon: userIcon })
+                                .addTo(map)
+                                .bindPopup('<strong class="text-primary">Vị trí của bạn</strong>')
+                                .openPopup();
+                                
+                            // Khôi phục nút
+                            btn.removeClass('opacity-75 cursor-wait');
+                        },
+                        function(error) {
+                            // Thất bại
+                            btn.removeClass('opacity-75 cursor-wait');
+                            let errorMsg = "Không thể lấy vị trí của bạn.";
+                            if (error.code === 1) {
+                                errorMsg = "Bạn đã từ chối cấp quyền truy cập vị trí. Vui lòng kiểm tra lại cài đặt trình duyệt.";
+                            } else if (error.code === 2) {
+                                errorMsg = "Không có tín hiệu GPS hoặc không xác định được vị trí.";
+                            }
+                            alert(errorMsg);
+                        },
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    );
+                } else {
+                    btn.removeClass('opacity-75 cursor-wait');
+                    alert('Trình duyệt của bạn không hỗ trợ Geolocation (Định vị).');
+                }
+            });
         });
     </script>
 }

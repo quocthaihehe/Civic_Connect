@@ -18,11 +18,17 @@ $(document).ready(function() {
         previewsContainer.empty();
         const files = this.files;
 
-        if (!files || files.length === 0) return;
+        if (!files || files.length === 0) {
+            previewsContainer.addClass('d-none').removeClass('d-flex');
+            $('#upload-empty-state').removeClass('d-none');
+            return;
+        }
 
         if (files.length > 5) {
             alert("Chỉ cho phép tải lên tối đa 5 hình ảnh.");
             fileInput.val(''); // Clear input
+            previewsContainer.addClass('d-none').removeClass('d-flex');
+            $('#upload-empty-state').removeClass('d-none');
             return;
         }
 
@@ -32,6 +38,8 @@ $(document).ready(function() {
                 alert('Tệp ' + files[i].name + ' vượt quá dung lượng tối đa cho phép (5MB).');
                 fileInput.val('');
                 previewsContainer.empty();
+                previewsContainer.addClass('d-none').removeClass('d-flex');
+                $('#upload-empty-state').removeClass('d-none');
                 return;
             }
         }
@@ -39,41 +47,80 @@ $(document).ready(function() {
         // Sử dụng DocumentFragment để batch DOM updates — tránh trigger
         // Browser Link DOM mutation observer nhiều lần gây crash kết nối VS
         var fragment = document.createDocumentFragment();
-        for (let i = 0; i < files.length; i++) {
-            var imgUrl = URL.createObjectURL(files[i]);
+        
+        if (files.length === 1) {
+            // Trường hợp có 1 ảnh duy nhất: phóng to full ô tải ảnh
+            var imgUrl = URL.createObjectURL(files[0]);
             blobUrls.push(imgUrl);
 
             var wrapper = document.createElement('div');
-            wrapper.className = 'position-relative';
-            wrapper.style.cssText = 'width: 75px; height: 75px;';
+            wrapper.className = 'position-relative w-100 h-100';
 
             var img = document.createElement('img');
-            img.className = 'rounded border';
-            img.style.cssText = 'width: 75px; height: 75px; object-fit: cover;';
+            img.className = 'rounded border w-100 h-100';
+            img.style.cssText = 'object-fit: cover;';
             img.src = imgUrl;
 
             var badge = document.createElement('span');
-            badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger remove-preview-btn';
-            badge.style.cssText = 'padding: 0.25em 0.45em; font-size: 0.65rem; cursor: pointer;';
+            badge.className = 'position-absolute badge rounded-circle bg-danger remove-preview-btn';
+            badge.style.cssText = 'top: 8px; right: 8px; padding: 0.3em 0.5em; font-size: 0.8rem; cursor: pointer; z-index: 10; line-height: 1;';
             badge.textContent = 'x';
 
             wrapper.appendChild(img);
             wrapper.appendChild(badge);
             fragment.appendChild(wrapper);
+        } else {
+            // Trường hợp có nhiều ảnh: hiển thị lưới thumbnail lớn hơn
+            for (let i = 0; i < files.length; i++) {
+                var imgUrl = URL.createObjectURL(files[i]);
+                blobUrls.push(imgUrl);
+
+                var wrapper = document.createElement('div');
+                wrapper.className = 'position-relative preview-item-thumb';
+
+                var img = document.createElement('img');
+                img.className = 'rounded border w-100 h-100';
+                img.style.cssText = 'object-fit: cover;';
+                img.src = imgUrl;
+
+                var badge = document.createElement('span');
+                badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger remove-preview-btn';
+                badge.style.cssText = 'padding: 0.2em 0.4em; font-size: 0.6rem; cursor: pointer; z-index: 10;';
+                badge.textContent = 'x';
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(badge);
+                fragment.appendChild(wrapper);
+            }
         }
 
         // Dùng setTimeout(0) để insert DOM sau khi call stack hiện tại hoàn tất,
         // giúp Browser Link không bị overwhelm bởi DOM changes đồng bộ
         setTimeout(function() {
             previewsContainer[0].appendChild(fragment);
+            $('#upload-empty-state').addClass('d-none');
+            previewsContainer.removeClass('d-none').addClass('d-flex');
         }, 0);
     });
 
     // Hủy bỏ xem trước ảnh (Clear input) và giải phóng bộ nhớ
-    previewsContainer.on('click', '.remove-preview-btn', function() {
+    previewsContainer.on('click', '.remove-preview-btn', function(e) {
+        e.stopPropagation(); // Ngăn mở hộp thoại chọn file
         revokeAllBlobUrls();
         fileInput.val('');
-        previewsContainer.empty();
+        previewsContainer.empty().addClass('d-none').removeClass('d-flex');
+        $('#upload-empty-state').removeClass('d-none');
+    });
+
+    // Mở hộp thoại chọn file khi click vào dropzone (trừ nút remove-preview-btn)
+    $('.upload-dropzone').on('click', function(e) {
+        if ($(e.target).closest('.remove-preview-btn').length === 0) {
+            fileInput.click();
+        }
+    });
+
+    fileInput.on('click', function(e) {
+        e.stopPropagation();
     });
 
     // 2. Bản đồ thực tế Leaflet cho việc chọn vị trí (Quốc gia/Địa phương)
@@ -98,6 +145,17 @@ $(document).ready(function() {
             attributionControl: true
         }).setView([initialLat, initialLng], 15);
 
+        window.map = map; // Expose globally to window.map for the wizard script!
+
+        // Khắc phục lỗi hiển thị bản đồ trong container ẩn (tab/wizard)
+        if (window.ResizeObserver) {
+            const mapEl = document.getElementById('map-selector');
+            const ro = new ResizeObserver(() => {
+                map.invalidateSize();
+            });
+            ro.observe(mapEl);
+        }
+
         // Hàm lấy mapping class & icon từ mã danh mục
         function getCategoryMappings(catVal) {
             switch(catVal) {
@@ -115,7 +173,7 @@ $(document).ready(function() {
         let currentIconName = 'bi-geo-alt-fill';
 
         // Lấy danh mục được chọn sẵn nếu có
-        const initialCategory = parseInt($('#Category').val());
+        const initialCategory = parseInt($('#categoryInput').val());
         if (initialCategory) {
             const mappings = getCategoryMappings(initialCategory);
             currentIconClass = mappings.className;
@@ -147,7 +205,7 @@ $(document).ready(function() {
         }
 
         // Lắng nghe thay đổi danh mục
-        $('#Category').on('change', function() {
+        $('#categoryInput').on('change', function() {
             const catVal = parseInt($(this).val()) || 99;
             updateMarkerIcon(catVal);
         });
@@ -293,6 +351,11 @@ $(document).ready(function() {
                         $('#prov-name').val(province);
                         $('#dist-name').val(district);
                         $('#ward-name').val(ward);
+                        
+                        // Set default codes to prevent validation errors since OSM doesn't return administrative codes
+                        $('#prov-code').val("79");
+                        $('#dist-code').val("760");
+                        $('#ward-code').val("26734");
                     } else {
                         $('#address-input').val(`Tọa độ: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
                     }

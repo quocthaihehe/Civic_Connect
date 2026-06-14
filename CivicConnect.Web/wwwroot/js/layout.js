@@ -11,37 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // 9.2 Toggle Avatar Menu (Click ra ngoài để đóng)
-  const avatarMenu = document.getElementById('avatarMenu');
-  window.toggleAvatarMenu = () => {
-    if (avatarMenu) {
-      const isVisible = avatarMenu.style.display === 'block';
-      closeAllDropdowns();
-      avatarMenu.style.display = isVisible ? 'none' : 'block';
-    }
-  };
-
-  // 9.3 Toggle Notification Panel
-  const notifPanel = document.getElementById('notifPanel');
-  window.toggleNotifPanel = () => {
-    if (notifPanel) {
-      const isVisible = notifPanel.style.display === 'block';
-      closeAllDropdowns();
-      notifPanel.style.display = isVisible ? 'none' : 'block';
-    }
-  };
-
-  // Đóng dropdown khi click ra ngoài
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#avatarWrap') && !e.target.closest('#notifWrap')) {
-      closeAllDropdowns();
-    }
-  });
-
-  function closeAllDropdowns() {
-    if (avatarMenu) avatarMenu.style.display = 'none';
-    if (notifPanel) notifPanel.style.display = 'none';
-  }
+  // Legacy JS dropdown logic removed in favor of Bootstrap 5 native dropdowns
 
   // --- THEME SWITCHER LOGIC (VANILLA JS - 100% RELIABLE) ---
   const themeToggleBtn = document.getElementById('theme-toggle');

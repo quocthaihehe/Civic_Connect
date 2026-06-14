@@ -8,7 +8,8 @@
 
 <style>
     .donation-hero {
-        background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.25) 0%, rgba(var(--bs-primary-rgb), 0.1) 100%);
+        background: url('/images/nền Quỹ Cộng đồng.png') no-repeat center center;
+        background-size: cover;
         backdrop-filter: blur(10px);
         border: 1px solid var(--border-glass);
         border-radius: var(--radius-lg);
@@ -106,116 +107,120 @@
 
 <div class="container-fluid px-0">
     <!-- Hero Header & Stats -->
-    <div class="donation-hero">
-        <div class="row align-items-center position-relative" style="z-index: 1;">
-            <div class="col-lg-7">
-                <h1 class="display-5 fw-bold mb-3 d-flex align-items-center gap-3 text-dark">
-                    <i class="bi bi-heart-fill heart-pulse text-danger" style="filter: drop-shadow(0 0 10px rgba(220,53,69,0.2));"></i> 
+    <div class="donation-hero p-4 p-md-5" style="border: none; border-radius: 20px; box-shadow: none; min-height: 280px; display: flex; align-items: center;">
+        <div class="row align-items-center position-relative w-100 m-0" style="z-index: 1;">
+            <div class="col-lg-7 px-0 px-md-3">
+                <h1 class="display-5 fw-bold mb-4 d-flex align-items-center gap-3" style="color: #133B2F; font-family: 'EB Garamond', serif;">
+                    <i class="bi bi-heart-fill heart-pulse text-danger"></i> 
                     Quỹ Cộng Đồng
                 </h1>
-                <p class="lead mb-4 text-secondary" style="font-weight: 400; line-height: 1.6;">
-                    Chung tay kiến tạo và nâng cấp hạ tầng đô thị. Mỗi đóng góp của bạn đều được quản lý công khai, minh bạch 100% phục vụ trực tiếp cho các dự án địa phương.
-                </p>
-            </div>
-            <div class="col-lg-5">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="stat-badge">
-                            <div class="small text-secondary mb-2"><i class="bi bi-wallet2"></i> TỔNG QUYÊN GÓP</div>
-                            <h3 class="fw-bold mb-0 text-primary">@totalAmount.ToString("N0") <span style="font-size: 1rem; color: var(--text-main);">đ</span></h3>
-                        </div>
+                
+                <div class="d-flex flex-wrap gap-4 mt-2">
+                    <div class="stat-badge text-start p-3 px-4" style="min-width: 240px; background: rgba(245, 240, 225, 0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.6); backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <div class="text-dark mb-2 fw-bold text-uppercase d-flex align-items-center gap-2" style="font-size: 0.85rem; color: #333;"><i class="bi bi-calendar2-check"></i> TỔNG QUYÊN GÓP</div>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-size: 2.2rem; font-family: 'EB Garamond', serif;">@totalAmount.ToString("N0") <span style="font-size: 1.25rem; color: #333;">đ</span></h3>
                     </div>
-                    <div class="col-6">
-                        <div class="stat-badge">
-                            <div class="small text-secondary mb-2"><i class="bi bi-people-fill"></i> LƯỢT HẢO TÂM</div>
-                            <h3 class="fw-bold mb-0 text-primary">@totalCount.ToString("N0")</h3>
-                        </div>
+                    <div class="stat-badge text-start p-3 px-4" style="min-width: 180px; background: rgba(245, 240, 225, 0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.6); backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <div class="text-dark mb-2 fw-bold text-uppercase d-flex align-items-center gap-2" style="font-size: 0.85rem; color: #333;"><i class="bi bi-people-fill"></i> LƯỢT HẢO TÂM</div>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-size: 2.2rem; font-family: 'EB Garamond', serif;">@totalCount.ToString("N0")</h3>
                     </div>
                 </div>
+            </div>
+            <div class="col-lg-5 mt-4 mt-lg-0 px-0 px-md-3">
+                <!-- Right side is left empty so the background illustration is visible -->
             </div>
         </div>
     </div>
 
     <!-- Active Funds -->
-    <div class="row g-4 mb-5">
+    <div class="row g-4 mb-5" id="active-funds">
         <div class="col-12">
-            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-25 pb-3">
-                <h3 class="fw-bold text-white m-0"><i class="bi bi-flag-fill text-primary me-2"></i> Các Quỹ Đang Huy Động</h3>
-                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill">Đang hoạt động</span>
+            <div class="d-flex align-items-center justify-content-between mb-2 border-bottom pb-3">
+                <h4 class="fw-bold m-0" style="color: #133B2F;"><i class="bi bi-flag-fill me-2" style="color: #1E5C4A;"></i> Các Quỹ Đang Huy Động</h4>
+                <a href="#" class="btn btn-sm btn-light border rounded-pill px-3 text-dark shadow-sm">Xem tất cả &rarr;</a>
             </div>
         </div>
 
+        @{ int fundIndex = 1; }
         @foreach (var fund in Model)
         {
             var percent = fund.TargetAmount > 0 ? (double)(fund.CurrentAmount / fund.TargetAmount * 100) : 0;
             var displayPercent = percent > 100 ? 100 : percent;
+            var imgSrc = $"/images/quỹ {fundIndex}.png";
 
             <div class="col-md-6 col-lg-4">
-                <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between transition-hover" style="border-top: 3px solid var(--primary-500);">
-                    <div>
-                        <h4 class="fw-bold text-white mb-3" style="font-size: 1.2rem; line-height: 1.4;">@fund.Name</h4>
-                        <p class="text-secondary" style="font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">
-                            @fund.Description
-                        </p>
+                <div class="card h-100 p-3 border-0 shadow-sm transition-hover" style="border-radius: 16px; background-color: #FDFBF7;">
+                    <div class="d-flex mb-3 gap-3">
+                        <img src="@imgSrc" class="rounded-3 shadow-sm" style="width: 110px; height: 110px; object-fit: cover;" alt="@fund.Name">
+                        <div>
+                            <h5 class="fw-bold mb-2" style="color: #133B2F; font-size: 1.05rem; line-height: 1.4;">@fund.Name</h5>
+                            <p class="small mb-0" style="color: #555; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">
+                                @fund.Description
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
-                        <div class="d-flex justify-content-between align-items-end mb-2">
-                            <span class="text-primary fw-bold" style="font-size: 0.9rem;">@percent.ToString("F1")%</span>
+                    <div class="mt-auto border-top pt-3">
+                        <div class="progress-bar-custom mb-2 shadow-none" style="height: 6px; background-color: rgba(19, 59, 47, 0.1);">
+                            <div class="progress-fill" style="width: @displayPercent.ToString("F0")%; background: #133B2F;"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-primary" style="font-size: 0.9rem;">@percent.ToString("F1")%</span>
                             <span class="text-muted" style="font-size: 0.8rem;">Mục tiêu: @fund.TargetAmount.ToString("N0") đ</span>
                         </div>
                         
-                        <div class="progress-bar-custom mb-3 shadow-inner">
-                            <div class="progress-fill" style="width: @displayPercent.ToString("F0")%"></div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex justify-content-between align-items-end">
                             <div>
-                                <span class="text-secondary d-block" style="font-size: 0.8rem;">Đã huy động</span>
-                                <span class="fw-bold text-success" style="font-size: 1.2rem;">@fund.CurrentAmount.ToString("N0") đ</span>
+                                <span class="d-block text-muted" style="font-size: 0.75rem;">Đã huy động</span>
+                                <span class="fw-bold text-success" style="font-size: 1.15rem; color: #1E5C4A !important;">@fund.CurrentAmount.ToString("N0") đ</span>
                             </div>
-                            <a asp-action="Donate" asp-route-id="@fund.Id" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
-                                Quyên góp <i class="bi bi-arrow-right-short"></i>
+                            <a asp-action="Donate" asp-route-id="@fund.Id" class="btn rounded-pill px-4 py-2 fw-semibold shadow-sm" style="background-color: #133B2F; color: white; font-size: 0.9rem;">
+                                Quyên góp &rarr;
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
+            fundIndex = fundIndex >= 3 ? 1 : fundIndex + 1;
         }
     </div>
 
     <!-- Contributions Board -->
     <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="glass-card p-4 p-md-5">
-                <h3 class="fw-bold text-white mb-4 pb-3 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
-                    <i class="bi bi-bookmark-star-fill text-warning"></i> Bảng Vinh Danh Nhà Hảo Tâm
-                </h3>
+        <div class="col-12">
+            <div class="card p-4 p-md-5 border-0 shadow-sm" style="border-radius: 16px; background-color: #FDFBF7; position: relative; overflow: hidden;">
+                <!-- Fading Background Illustration -->
+                <div class="position-absolute top-0 end-0 w-100 h-100" style="background: url('/images/nền vinh danh.png') no-repeat right bottom; background-size: cover; opacity: 0.8; -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 80%); mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 80%); pointer-events: none;"></div>
+                
+                <h4 class="fw-bold mb-4 pb-3 border-bottom position-relative z-index-1" style="color: #133B2F; font-family: 'EB Garamond', serif; border-color: rgba(0,0,0,0.1) !important;">
+                    <i class="bi bi-bookmark-fill text-warning me-2"></i> Bảng Vinh Danh Nhà Hảo Tâm
+                </h4>
 
                 @if (recentDonations.Count == 0)
                 {
-                    <div class="text-center py-5">
+                    <div class="text-center py-5 position-relative" style="z-index: 1;">
                         <i class="bi bi-gift text-muted opacity-50 display-1 mb-3"></i>
                         <p class="text-secondary fs-5">Chưa có lượt quyên góp nào. Hãy là người mở bát đầu tiên!</p>
                     </div>
                 }
                 else
                 {
-                    <div class="contributor-list">
+                    <div class="contributor-list position-relative" style="z-index: 1;">
                         @foreach (var item in recentDonations)
                         {
                             var initial = item.IsAnonymous ? "?" : (string.IsNullOrEmpty(item.DonorName) ? "H" : item.DonorName.Substring(0, 1).ToUpper());
-                            <div class="contributor-item">
-                                <div class="contributor-avatar @(item.IsAnonymous ? "contributor-anon" : "")">
+                            <div class="contributor-item" style="border-bottom-color: rgba(0,0,0,0.05);">
+                                <div class="contributor-avatar" style="background: rgba(19, 59, 47, 0.1); color: #133B2F; border: none; box-shadow: none;">
                                     @initial
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="d-flex flex-wrap justify-content-between align-items-center mb-1 gap-2">
-                                        <span class="fw-bold text-white" style="font-size: 1.05rem;">@(item.IsAnonymous ? "Nhà hảo tâm ẩn danh" : item.DonorName)</span>
-                                        <span class="amount-text">+@item.Amount.ToString("N0") đ</span>
+                                        <span class="fw-bold" style="font-size: 1.05rem; color: #133B2F;">@(item.IsAnonymous ? "Nhà hảo tâm ẩn danh" : item.DonorName)</span>
+                                        <span class="amount-text" style="color: #28a745;">+@item.Amount.ToString("N0") đ</span>
                                     </div>
                                     <div class="d-flex flex-wrap justify-content-between align-items-center mt-1">
-                                        <span class="text-secondary font-italic" style="font-size: 0.9rem;">
+                                        <span class="font-italic" style="font-size: 0.9rem; color: #555;">
                                             @if (!string.IsNullOrEmpty(item.OrderInfo))
                                             {
                                                 <i class="bi bi-quote text-muted"></i> @item.OrderInfo
@@ -228,8 +233,8 @@
                                         <span class="text-muted" style="font-size: 0.8rem;"><i class="bi bi-clock me-1"></i> @item.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</span>
                                     </div>
                                     <div class="mt-2">
-                                        <span class="badge bg-dark border border-secondary border-opacity-50 text-light fw-normal" style="font-size: 0.75rem;">
-                                            <i class="bi bi-tag-fill text-primary me-1"></i> @item.DonationCategory?.Name
+                                        <span class="badge rounded-pill fw-normal" style="background-color: #133B2F; color: white; font-size: 0.75rem;">
+                                            <i class="bi bi-tag-fill text-warning me-1"></i> @item.DonationCategory?.Name
                                         </span>
                                     </div>
                                 </div>

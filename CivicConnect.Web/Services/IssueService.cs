@@ -1,4 +1,4 @@
-﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Models.Enums;
 using CivicConnect.Web.Repositories;
 using CivicConnect.Web.Data;
@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using CivicConnect.Web.Hubs;
 
 namespace CivicConnect.Web.Services
 {
@@ -17,17 +19,20 @@ namespace CivicConnect.Web.Services
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
         public IssueService(
             IIssueRepository issueRepository,
             AppDbContext context,
             UserManager<ApplicationUser> userManager,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IHubContext<NotificationHub> hubContext)
         {
             _issueRepository = issueRepository;
             _context = context;
             _userManager = userManager;
             _notificationService = notificationService;
+            _hubContext = hubContext;
         }
 
         public async Task<Issue?> GetIssueByIdAsync(int id)
@@ -128,6 +133,8 @@ namespace CivicConnect.Web.Services
             };
             await _context.IssueStatusHistories.AddAsync(history);
             await _context.SaveChangesAsync();
+
+            await BroadcastStatsAsync();
 
             return issue;
         }
@@ -267,16 +274,26 @@ namespace CivicConnect.Web.Services
             issue.ResolvedAt = DateTime.UtcNow;
             issue.UpdatedAt = DateTime.UtcNow;
 
+            // Cộng điểm uy tín cho người tạo phản ánh (+10 điểm)
+            var author = await _userManager.FindByIdAsync(issue.AuthorId);
+            if (author != null)
+            {
+                author.TrustScore += 10;
+                _context.Entry(author).State = EntityState.Modified;
+            }
+
             await _context.SaveChangesAsync();
             await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Resolved, officialId, note ?? "Pháº£n Ã¡nh Ä‘Ã£ Ä‘Æ°á»£c giáº£i quyáº¿t thÃ nh cÃ´ng.", attachmentUrl);
 
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
                 "Pháº£n Ã¡nh Ä‘Ã£ giáº£i quyáº¿t xong",
-                $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c Ä‘Ã¡nh dáº¥u lÃ  ÄÃ£ giáº£i quyáº¿t.",
+                $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c Ä‘Ã¡nh dáº¥u lÃ  Ä Ã£ giáº£i quyáº¿t.",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
+
+            await BroadcastStatsAsync();
 
             return true;
         }
@@ -470,6 +487,21 @@ namespace CivicConnect.Web.Services
             await _context.SaveChangesAsync();
         }
 
+        private async Task BroadcastStatsAsync()
+        {
+            try {
+                var totalUsers = await _context.Users.CountAsync();
+                var totalIssues = await _context.Issues.CountAsync();
+                var resolvedIssues = await _context.Issues.CountAsync(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed);
+                
+                var ratedIssuesCount = await _context.Issues.CountAsync(i => i.Rating.HasValue);
+                var highRatedCount = await _context.Issues.CountAsync(i => i.Rating.HasValue && i.Rating.Value >= 4);
+                var satisfactionRate = ratedIssuesCount > 0 ? (int)Math.Round((double)highRatedCount / ratedIssuesCount * 100) : 100;
+
+                await _hubContext.Clients.All.SendAsync("UpdateStats", totalUsers, totalIssues, resolvedIssues, satisfactionRate);
+            } catch { }
+        }
+
         // --- Helper Methods ---
 
         private async Task SaveHistoryAsync(int issueId, IssueStatus from, IssueStatus to, string userId, string note, string? attachmentUrl = null)
@@ -505,11 +537,13 @@ namespace CivicConnect.Web.Services
 
         private async Task<float> CalculateAreaDensityAsync(double lat, double lng, double radiusKm)
         {
-            // TÃ­nh sá»‘ lÆ°á»£ng issue khÃ¡c trong cÃ¹ng bÃ¡n kÃ­nh 2km lÃ m trá»ng sá»‘ density
-            var count = await _context.Issues
+            // TÃ­nh sá»‘ lÆ°á»£ng issue khÃ¡c trong cÃ¹ng bÃ¡n kÃ­nh 2km lÃ m trá» ng sá»‘ density (tÃ­nh toÃ¡n á»Ÿ client Ä‘á»ƒ trÃ¡nh lá»—i dá»‹ch LINQ sang SQL)
+            var activeIssues = await _context.Issues
                 .Where(i => i.Status != IssueStatus.Resolved && i.Status != IssueStatus.Rejected && i.Status != IssueStatus.Closed)
-                .CountAsync(i => CalculateDistance(lat, lng, i.Latitude, i.Longitude) <= radiusKm);
+                .Select(i => new { i.Latitude, i.Longitude })
+                .ToListAsync();
 
+            var count = activeIssues.Count(i => CalculateDistance(lat, lng, i.Latitude, i.Longitude) <= radiusKm);
             return (float)count;
         }
 

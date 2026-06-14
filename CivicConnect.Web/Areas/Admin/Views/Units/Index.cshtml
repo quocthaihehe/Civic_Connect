@@ -1,0 +1,178 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.GovernmentUnit>
+@using CivicConnect.Web.Models.Enums
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Cơ quan liên kết";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+    var errorMsg = TempData["ErrorMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Cơ quan hành chính liên kết</h2>
+            <div class="text-muted small mt-1">Cấu trúc cây sơ đồ đơn vị xử lý ý kiến phản ánh hiện trường</div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+@if (!string.IsNullOrEmpty(errorMsg))
+{
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i></div>
+            <div>@errorMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- Tree View and List of Units -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-diagram-3-fill text-primary me-2"></i>Sơ đồ tổ chức cơ quan</h3>
+            </div>
+            <div class="card-body">
+                <!-- Sơ đồ tổ chức dạng Tree View đơn giản -->
+                <div class="ps-2">
+                    <ul class="list-unstyled space-y-3 ms-2">
+                        <!-- UBND Thành phố (Root) -->
+                        <li>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="bg-blue text-white avatar avatar-sm rounded me-2"><i class="bi bi-bank"></i></span>
+                                <span class="font-weight-bold text-lg">UBND Thành Phố Hồ Chí Minh</span>
+                            </div>
+                            
+                            <ul class="list-unstyled ms-4 border-start ps-3 py-1 space-y-3" style="border-color: #cbd5e1 !important;">
+                                <!-- Cấp Quận/Huyện -->
+                                @foreach (var district in Model.Where(u => u.Type == GovernmentUnitType.District))
+                                {
+                                    <li>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="font-weight-bold"><i class="bi bi-chevron-down text-muted me-1"></i>@district.Name</span>
+                                            <div>
+                                                <span class="badge bg-blue-lt">Cấp Quận/Huyện</span>
+                                                <form action="/Admin/Units/Delete/@district.Id" method="post" class="d-inline ms-2">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-link btn-xs text-danger p-0 align-baseline" onclick="return confirm('Bạn chắc chắn muốn xoá đơn vị này?')">Xoá</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Cấp Phường/Xã thuộc Quận -->
+                                        <ul class="list-unstyled ms-3 border-start ps-3 py-1 space-y-2" style="border-color: #cbd5e1 !important;">
+                                            @foreach (var ward in Model.Where(u => u.ParentUnitId == district.Id))
+                                            {
+                                                <li class="d-flex justify-content-between align-items-center">
+                                                    <span class="text-sm"><i class="bi bi-record-circle text-primary me-1.5"></i>@ward.Name</span>
+                                                    <div>
+                                                        <span class="badge bg-green-lt">Cấp Phường/Xã</span>
+                                                        <form action="/Admin/Units/Delete/@ward.Id" method="post" class="d-inline ms-2">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-link btn-xs text-danger p-0 align-baseline" onclick="return confirm('Bạn chắc chắn muốn xoá đơn vị này?')">Xoá</button>
+                                                        </form>
+                                                    </div>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Unit Form -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-plus-circle text-primary me-2"></i>Đăng ký cơ quan</h3>
+            </div>
+            <div class="card-body">
+                <form action="/Admin/Units/Create" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Mã cơ quan (Id viết liền) *</label>
+                        <input type="text" name="id" class="form-control" placeholder="VD: UBND_Q3" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Tên cơ quan *</label>
+                        <input type="text" name="name" class="form-control" placeholder="VD: UBND Quận 3" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Phân loại cấp hành chính *</label>
+                        <select name="type" class="form-select" required>
+                            <option value="@GovernmentUnitType.District">Cấp Quận/Huyện (District)</option>
+                            <option value="@GovernmentUnitType.Ward">Cấp Phường/Xã (Ward)</option>
+                            <option value="@GovernmentUnitType.Department">Phòng ban chuyên môn (Department)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Cơ quan cấp trên trực tiếp</label>
+                        <select name="parentUnitId" class="form-select">
+                            <option value="">-- Chọn cơ quan cấp trên --</option>
+                            @foreach (var u in Model.Where(u => u.Type == GovernmentUnitType.District))
+                            {
+                                <option value="@u.Id">@u.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Mã Tỉnh/Thành phố *</label>
+                        <input type="text" name="provinceCode" class="form-control" value="79" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Mã Quận/Huyện</label>
+                        <input type="text" name="districtCode" class="form-control" placeholder="VD: 760">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Mã Phường/Xã</label>
+                        <input type="text" name="wardCode" class="form-control" placeholder="VD: 26734">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Địa chỉ</label>
+                        <input type="text" name="address" class="form-control" placeholder="Số nhà, Tên đường...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Số điện thoại liên hệ</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="028...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Email chính thức</label>
+                        <input type="email" name="email" class="form-control" placeholder="support@@..." required>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save me-2"></i>Lưu cơ quan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

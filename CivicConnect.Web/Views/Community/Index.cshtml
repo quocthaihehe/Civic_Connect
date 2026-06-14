@@ -1,0 +1,415 @@
+@{
+    ViewData["Title"] = "Cộng đồng Dân sinh";
+}
+
+<style>
+    /* Compact layout styling */
+    .community-header {
+        background-color: #FDFBF7;
+        border: 1px solid rgba(19, 59, 47, 0.08);
+        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-image: url('/images/nền kem.jpg');
+        background-size: cover;
+    }
+    
+    .community-title {
+        color: #133B2F;
+        font-family: 'EB Garamond', serif;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+    
+    .search-box {
+        position: relative;
+        width: 300px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 0.4rem 1rem 0.4rem 2.2rem;
+        border-radius: 20px;
+        border: 1px solid rgba(19, 59, 47, 0.2);
+        background-color: white;
+        font-size: 0.85rem;
+    }
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+
+    .feed-card {
+        background-color: white;
+        border: 1px solid rgba(19, 59, 47, 0.08);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem; /* very tight margin */
+    }
+    
+    .feed-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .feed-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #133B2F;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 10px;
+        font-size: 0.9rem;
+    }
+    .feed-meta h6 {
+        margin: 0;
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: #133B2F;
+    }
+    .feed-meta small {
+        color: #6b7280;
+        font-size: 0.75rem;
+    }
+    
+    .feed-title {
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+    .feed-content {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-bottom: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .feed-actions {
+        display: flex;
+        gap: 0.5rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        padding-top: 0.5rem;
+    }
+    .action-btn {
+        background: none;
+        border: none;
+        color: #6b7280;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #FDFBF7;
+        color: #133B2F;
+    }
+    
+    /* Widget specific */
+    .widget-card {
+        background-color: #FDFBF7;
+        border: 1px solid rgba(19, 59, 47, 0.08);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .widget-title {
+        color: #133B2F;
+        font-family: 'EB Garamond', serif;
+        font-weight: bold;
+        font-size: 1.05rem;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(19, 59, 47, 0.1);
+        padding-bottom: 0.5rem;
+    }
+    
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.4rem;
+        padding: 0.4rem 0.5rem;
+        border-radius: 8px;
+        background-color: white;
+        border: 1px solid rgba(19, 59, 47, 0.05);
+    }
+    .rank-badge {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+    .rank-1 { background-color: #FFD700; color: #856404; }
+    .rank-2 { background-color: #E0E0E0; color: #383d41; }
+    .rank-3 { background-color: #CD7F32; color: #721c24; }
+    
+    .trend-tag {
+        display: inline-block;
+        padding: 2px 6px;
+        background-color: white;
+        border: 1px solid rgba(19, 59, 47, 0.1);
+        border-radius: 12px;
+        font-size: 0.7rem;
+        color: #133B2F;
+        margin: 0 3px 4px 0;
+    }
+
+    .fab {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #1E5C4A;
+        color: white;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        box-shadow: 0 4px 15px rgba(30, 92, 74, 0.4);
+        z-index: 1000;
+        transition: transform 0.2s;
+    }
+    .fab:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+</style>
+
+<div class="community-header">
+    <div>
+        <h2 class="community-title">Cộng đồng Civic Connect</h2>
+        <p class="text-muted mb-0" style="font-size: 0.8rem;">Nơi tiếng nói của bạn tạo nên sự thay đổi</p>
+    </div>
+    <div class="search-box d-none d-md-block">
+        <i class="bi bi-search"></i>
+        <input type="text" id="communitySearchBox" placeholder="Tìm kiếm phản ánh, sự kiện...">
+    </div>
+</div>
+
+<div class="row g-2"> <!-- Very compact gutter -->
+    <!-- Feed Column (Left) -->
+    <div class="col-lg-8">
+        
+        <!-- Filter Tabs -->
+        <div class="d-flex gap-2 mb-2 overflow-auto pb-1" id="filterTabs">
+            <button class="btn btn-sm filter-tab" style="background-color: #133B2F; color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Mới nhất</button>
+            <button class="btn btn-sm filter-tab" style="border: 1px solid rgba(19,59,47,0.2); color: #133B2F; background-color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Được quan tâm</button>
+            <button class="btn btn-sm filter-tab" style="border: 1px solid rgba(19,59,47,0.2); color: #133B2F; background-color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Giao thông</button>
+            <button class="btn btn-sm filter-tab" style="border: 1px solid rgba(19,59,47,0.2); color: #133B2F; background-color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Môi trường</button>
+        </div>
+
+        <!-- Sample Post 1 -->
+        <div class="feed-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="feed-header">
+                    <div class="feed-avatar">H</div>
+                    <div class="feed-meta">
+                        <h6>Hoàng Trần</h6>
+                        <small>2 giờ trước • Quận 1</small>
+                    </div>
+                </div>
+                <span class="badge bg-warning text-dark" style="font-size: 0.65rem; border-radius: 12px; padding: 0.35em 0.65em;">Đang xử lý</span>
+            </div>
+            <div class="feed-title">Hố tử thần trên đường Lê Lợi</div>
+            <p class="feed-content">Xin báo cáo có một ổ gà rất to và nguy hiểm vừa xuất hiện sau đợt mưa lớn hôm qua trên đường Lê Lợi, đoạn gần phố đi bộ. Đã có 2 vụ ngã xe do không quan sát kịp. Kính mong cơ quan chức năng sớm rào chắn và khắc phục.</p>
+            <div class="feed-actions">
+                <button class="action-btn upvote-btn"><i class="bi bi-hand-thumbs-up"></i> <span>142</span></button>
+                <button class="action-btn comment-btn"><i class="bi bi-chat"></i> 15 bình luận</button>
+                <button class="action-btn share-btn"><i class="bi bi-share"></i> Chia sẻ</button>
+            </div>
+        </div>
+
+        <!-- Sample Post 2 -->
+        <div class="feed-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="feed-header">
+                    <div class="feed-avatar" style="background-color: #4b5563;">L</div>
+                    <div class="feed-meta">
+                        <h6>Lê Minh</h6>
+                        <small>5 giờ trước • Bình Thạnh</small>
+                    </div>
+                </div>
+                <span class="badge bg-success text-white" style="font-size: 0.65rem; border-radius: 12px; padding: 0.35em 0.65em;">Đã giải quyết</span>
+            </div>
+            <div class="feed-title">Tình trạng xả rác bừa bãi tại Công viên Thanh Đa</div>
+            <p class="feed-content">Cảm ơn đội ngũ vệ sinh môi trường đã xử lý dứt điểm đống rác tự phát tại công viên. Không gian đã trở lại xanh sạch đẹp cho người dân tập thể dục buổi sáng.</p>
+            <div class="feed-actions">
+                <button class="action-btn upvote-btn"><i class="bi bi-hand-thumbs-up"></i> <span>320</span></button>
+                <button class="action-btn comment-btn"><i class="bi bi-chat"></i> 45 bình luận</button>
+                <button class="action-btn share-btn"><i class="bi bi-share"></i> Chia sẻ</button>
+            </div>
+        </div>
+        
+        <!-- Sample Post 3 -->
+        <div class="feed-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="feed-header">
+                    <div class="feed-avatar" style="background-color: #1E5C4A;">N</div>
+                    <div class="feed-meta">
+                        <h6>Nguyễn Lan</h6>
+                        <small>Hôm qua • Quận 7</small>
+                    </div>
+                </div>
+                <span class="badge bg-info text-white" style="font-size: 0.65rem; border-radius: 12px; padding: 0.35em 0.65em;">Mới tiếp nhận</span>
+            </div>
+            <div class="feed-title">Đề xuất lắp thêm đèn tín hiệu ngã tư Nguyễn Thị Thập</div>
+            <p class="feed-content">Lưu lượng xe cộ tại ngã tư này hiện tại quá đông vào giờ cao điểm, tình trạng kẹt xe kéo dài thường xuyên xảy ra. Mong phường xem xét lắp đèn tín hiệu thay vì để công an giao thông phải điều tiết thủ công mỗi ngày.</p>
+            <div class="feed-actions">
+                <button class="action-btn upvote-btn"><i class="bi bi-hand-thumbs-up"></i> <span>89</span></button>
+                <button class="action-btn comment-btn"><i class="bi bi-chat"></i> 12 bình luận</button>
+                <button class="action-btn share-btn"><i class="bi bi-share"></i> Chia sẻ</button>
+            </div>
+        </div>
+        
+        <div class="text-center mt-2 mb-4">
+            <button id="btnLoadMore" class="btn btn-sm" style="color: #133B2F; border: 1px solid rgba(19,59,47,0.2); background-color: white; font-size: 0.8rem;">Tải thêm <i class="bi bi-chevron-down ms-1"></i></button>
+        </div>
+    </div>
+
+    <!-- Widgets Column (Right) -->
+    <div class="col-lg-4">
+        
+        <!-- Mini Stats -->
+        <div class="widget-card d-flex justify-content-around text-center py-2">
+            <div>
+                <h6 class="fw-bold mb-0" style="color: #133B2F;">12.4K</h6>
+                <small class="text-muted" style="font-size: 0.7rem;">Thành viên</small>
+            </div>
+            <div style="width: 1px; background-color: rgba(19,59,47,0.1);"></div>
+            <div>
+                <h6 class="fw-bold mb-0" style="color: #133B2F;">450+</h6>
+                <small class="text-muted" style="font-size: 0.7rem;">Đã giải quyết</small>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="widget-card">
+            <h4 class="widget-title"><i class="bi bi-trophy text-warning me-2"></i>Bảng vàng đóng góp</h4>
+            <div class="leaderboard-item">
+                <div class="rank-badge rank-1">1</div>
+                <div class="ms-1">
+                    <div style="font-size: 0.8rem; font-weight: bold; color: #133B2F;">Trần Văn Bình</div>
+                    <div style="font-size: 0.65rem; color: #6b7280;">42 phản ánh hữu ích</div>
+                </div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="rank-badge rank-2">2</div>
+                <div class="ms-1">
+                    <div style="font-size: 0.8rem; font-weight: bold; color: #133B2F;">Lê Thị Hoa</div>
+                    <div style="font-size: 0.65rem; color: #6b7280;">38 phản ánh hữu ích</div>
+                </div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="rank-badge rank-3">3</div>
+                <div class="ms-1">
+                    <div style="font-size: 0.8rem; font-weight: bold; color: #133B2F;">Phạm Minh Tuấn</div>
+                    <div style="font-size: 0.65rem; color: #6b7280;">25 phản ánh hữu ích</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trending Topics -->
+        <div class="widget-card">
+            <h4 class="widget-title"><i class="bi bi-hash text-primary me-2"></i>Chủ đề đang nóng</h4>
+            <div>
+                <span class="trend-tag">#GiaoThông</span>
+                <span class="trend-tag">#NgậpNước</span>
+                <span class="trend-tag">#TrậtTự</span>
+                <span class="trend-tag">#CôngViên</span>
+                <span class="trend-tag">#ChóThảRông</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<a asp-controller="Issues" asp-action="Create" class="fab text-decoration-none" title="Tạo phản ánh ngay">
+    <i class="bi bi-plus-lg"></i>
+</a>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Filter tabs functionality
+            $('.filter-tab').click(function () {
+                $('.filter-tab').css({
+                    'background-color': 'white',
+                    'color': '#133B2F'
+                });
+                $(this).css({
+                    'background-color': '#133B2F',
+                    'color': 'white'
+                });
+            });
+
+            // Upvote functionality
+            $('.upvote-btn').click(function () {
+                let $icon = $(this).find('i');
+                let $span = $(this).find('span');
+                let count = parseInt($span.text());
+                
+                if ($icon.hasClass('bi-hand-thumbs-up')) {
+                    $icon.removeClass('bi-hand-thumbs-up').addClass('bi-hand-thumbs-up-fill text-success');
+                    $(this).css('color', '#133B2F');
+                    $span.text(count + 1);
+                } else {
+                    $icon.removeClass('bi-hand-thumbs-up-fill text-success').addClass('bi-hand-thumbs-up');
+                    $(this).css('color', '#6b7280');
+                    $span.text(count - 1);
+                }
+            });
+
+            // Comment functionality (simulate)
+            $('.comment-btn').click(function () {
+                alert("Đang tải dữ liệu bình luận...");
+            });
+
+            // Share functionality (simulate)
+            $('.share-btn').click(function () {
+                alert("Đã sao chép liên kết bài viết vào khay nhớ tạm!");
+            });
+
+            // Load more
+            $('#btnLoadMore').click(function () {
+                let $btn = $(this);
+                let originalText = $btn.html();
+                $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang tải...');
+                setTimeout(function () {
+                    $btn.html('Không còn phản ánh nào');
+                    $btn.prop('disabled', true);
+                }, 1000);
+            });
+            
+            // Search
+            $('#communitySearchBox').on('keypress', function (e) {
+                if (e.which === 13) {
+                    let val = $(this).val();
+                    if(val) {
+                        alert("Chức năng tìm kiếm sẽ hiển thị kết quả cho: " + val);
+                    }
+                }
+            });
+        });
+    </script>
+}

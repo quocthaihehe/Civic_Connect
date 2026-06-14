@@ -1,0 +1,146 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.SmartRoutingRule>
+@using CivicConnect.Web.Models.Enums
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Quy tắc phân luồng thông minh";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Quy tắc Phân luồng thông minh</h2>
+            <div class="text-muted small mt-1">Cấu hình các bộ quy tắc tự động điều hướng phản ánh về cơ quan thụ lý theo địa giới hành chính</div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="bi bi-check-circle-fill me-2"></i></div>
+            <div>@successMsg</div>
+        </div>
+        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+}
+
+<div class="row row-cards">
+    <!-- List of active rules -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-list-stars text-primary me-2"></i>Danh sách quy tắc hiện hành</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter mb-0">
+                    <thead>
+                        <tr>
+                            <th>Danh mục</th>
+                            <th>Quận/Huyện</th>
+                            <th>Phường/Xã</th>
+                            <th>Cơ quan tiếp nhận</th>
+                            <th>SLA tự động</th>
+                            <th class="w-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Chưa cấu hình quy tắc phân luồng tự động nào</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var rule in Model)
+                            {
+                                <tr>
+                                    <td class="font-weight-bold text-blue">@GetCategoryName(rule.Category)</td>
+                                    <td>@(string.IsNullOrEmpty(rule.DistrictCode) ? "Tất cả" : $"Mã {rule.DistrictCode}")</td>
+                                    <td>@(string.IsNullOrEmpty(rule.WardCode) ? "Tất cả" : $"Mã {rule.WardCode}")</td>
+                                    <td>@rule.TargetUnit?.Name</td>
+                                    <td><span class="badge bg-green-lt">@rule.SLADays ngày</span></td>
+                                    <td>
+                                        <form action="/Admin/Issues/DeleteRoutingRule/@rule.Id" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-link btn-sm text-danger p-0" onclick="return confirm('Bạn chắc chắn muốn xoá quy tắc này?')">Xoá</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create new rule form -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-plus-circle text-primary me-2"></i>Thêm quy tắc mới</h3>
+            </div>
+            <div class="card-body">
+                <form action="/Admin/Issues/CreateRoutingRule" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Danh mục phản ánh *</label>
+                        <select name="category" class="form-select" required>
+                            @foreach (IssueCategory cat in Enum.GetValues(typeof(IssueCategory)))
+                            {
+                                <option value="@cat">@GetCategoryName(cat)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Mã Quận/Huyện</label>
+                        <input type="text" name="districtCode" class="form-control" placeholder="VD: 760 (Để trống nếu áp dụng tất cả)">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Mã Phường/Xã</label>
+                        <input type="text" name="wardCode" class="form-control" placeholder="VD: 26734 (Để trống nếu áp dụng tất cả)">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Cơ quan xử lý thụ lý *</label>
+                        <select name="targetUnitId" class="form-select" required>
+                            <option value="">Chọn đơn vị</option>
+                            @foreach (var unit in ViewBag.Units)
+                            {
+                                <option value="@unit.Id">@unit.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Hạn xử lý SLA (Ngày) *</label>
+                        <input type="number" name="slaDays" class="form-control" value="5" min="1" required>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save me-2"></i>Lưu cấu hình</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetCategoryName(IssueCategory category) => category switch
+    {
+        IssueCategory.Traffic => "Giao thông",
+        IssueCategory.Environment => "Môi trường",
+        IssueCategory.Security => "An ninh",
+        IssueCategory.Infrastructure => "Hạ tầng",
+        IssueCategory.Administration => "Hành chính",
+        _ => "Khác"
+    };
+}

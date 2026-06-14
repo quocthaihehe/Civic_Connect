@@ -1,0 +1,91 @@
+@{
+    Layout = "_AdminTablerLayout";
+    ViewData["Title"] = "Giám sát hiệu năng";
+}
+
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Giám sát hiệu năng (Health Check)</h2>
+            <div class="text-muted small mt-1">Thông số hiệu năng thực tế của máy chủ ứng dụng và dịch vụ nền</div>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards mb-4">
+    <!-- CPU Usage -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="text-muted small uppercase font-weight-bold">Sử dụng CPU (Kestrel)</div>
+                <div class="display-5 font-weight-bold text-primary my-2">@ViewBag.CpuUsage%</div>
+                <div class="progress progress-sm">
+                    <div class="progress-bar bg-primary" style="width: @(ViewBag.CpuUsage)%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RAM Usage -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="text-muted small uppercase font-weight-bold">Bộ nhớ RAM</div>
+                <div class="display-5 font-weight-bold text-primary my-2">@ViewBag.RamUsage%</div>
+                <div class="progress progress-sm">
+                    <div class="progress-bar bg-primary" style="width: @(ViewBag.RamUsage)%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Status -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="text-muted small uppercase font-weight-bold">Kết nối CSDL (SQL Server)</div>
+                <div class="display-6 font-weight-bold text-green my-2">@ViewBag.DbConnection</div>
+                <div class="text-xs text-muted">Mạng Somee SQL Server đang chạy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Status -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="text-muted small uppercase font-weight-bold">Hàng đợi nền (Background Jobs)</div>
+                <div class="display-5 font-weight-bold text-primary my-2">@ViewBag.QueueLength</div>
+                <div class="text-xs text-muted">Ca trực SLA Checker đang chạy</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards">
+    <!-- Server specs card -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-info-square text-primary me-2"></i>Thông số kỹ thuật máy chủ</h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="text-muted small uppercase">Runtime Environment</div>
+                        <div class="font-weight-bold text-lg">.NET 8.0 (ASP.NET Core Web SDK)</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small uppercase">Database System</div>
+                        <div class="font-weight-bold text-lg">Microsoft SQL Server Express Edition</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small uppercase">Web Server Gateway</div>
+                        <div class="font-weight-bold text-lg">Kestrel + IIS Reverse Proxy (Localhost)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

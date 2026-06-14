@@ -35,12 +35,12 @@ namespace CivicConnect.Web.Models.Issues
         [Display(Name = "Địa chỉ chi tiết")]
         public string Address { get; set; }
 
-        public string WardCode { get; set; }
-        public string WardName { get; set; }
-        public string DistrictCode { get; set; }
-        public string DistrictName { get; set; }
-        public string ProvinceCode { get; set; }
-        public string ProvinceName { get; set; }
+        public string? WardCode { get; set; }
+        public string? WardName { get; set; }
+        public string? DistrictCode { get; set; }
+        public string? DistrictName { get; set; }
+        public string? ProvinceCode { get; set; }
+        public string? ProvinceName { get; set; }
 
         [Display(Name = "Gửi ẩn danh (không hiện tên của bạn công khai)")]
         public bool IsAnonymous { get; set; }
