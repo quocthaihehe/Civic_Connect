@@ -15,6 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Configure Antiforgery to support header-based verification for JSON/AJAX POST requests
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+});
+
 // Cấu hình giới hạn upload file (tối đa 5 ảnh x 5MB = 25MB + overhead)
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
