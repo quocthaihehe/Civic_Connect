@@ -161,6 +161,15 @@ namespace CivicConnect.Web.Services
                 });
                 return result;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong SummarizePolicyAsync.");
+                return new PolicySummaryResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
+                };
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Lỗi khi gọi Gemini AI cho '{Title}', dùng dự phòng.", title);
@@ -223,6 +232,15 @@ namespace CivicConnect.Web.Services
 
                 _cache.Set(cacheKey, result, TimeSpan.FromHours(48));
                 return result;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong ExplainSelectionAsync.");
+                return new SelectionExplainResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
+                };
             }
             catch (Exception ex)
             {
@@ -297,6 +315,15 @@ namespace CivicConnect.Web.Services
                 _cache.Set(cacheKey, result, TimeSpan.FromHours(48));
                 return result;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong ReadAndExplainAsync.");
+                return new SectionedReadResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
+                };
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Lỗi khi gọi Gemini AI đọc hiểu từng phần, dùng dự phòng.");
@@ -317,6 +344,10 @@ namespace CivicConnect.Web.Services
             }
             catch (Exception ex)
             {
+                if (IsApiKeyError(ex))
+                {
+                    throw new UnauthorizedAccessException("API_KEY_INVALID", ex);
+                }
                 _logger.LogWarning(ex, "Gemini SDK thất bại với model {Model}, thử gemini-1.5-flash.", modelName);
                 try
                 {
@@ -327,10 +358,26 @@ namespace CivicConnect.Web.Services
                 }
                 catch (Exception ex2)
                 {
+                    if (IsApiKeyError(ex2))
+                    {
+                        throw new UnauthorizedAccessException("API_KEY_INVALID", ex2);
+                    }
                     _logger.LogWarning(ex2, "Gemini SDK thất bại hoàn toàn.");
                     return null;
                 }
             }
+        }
+
+        private static bool IsApiKeyError(Exception ex)
+        {
+            var msg = ex.ToString().ToLower();
+            return msg.Contains("api_key_invalid") || 
+                   msg.Contains("api key not valid") || 
+                   msg.Contains("400") || 
+                   msg.Contains("401") || 
+                   msg.Contains("403") || 
+                   msg.Contains("unauthorized") || 
+                   msg.Contains("forbidden");
         }
 
         private static PolicySummaryResult GenerateFallbackSummary(string title, string content, string modelName)
