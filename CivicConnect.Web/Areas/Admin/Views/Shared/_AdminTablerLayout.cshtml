@@ -1,6 +1,10 @@
 @{
     var currentPath = Context.Request.Path.Value ?? "";
     bool isDashboardActive = currentPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/Admin/Dashboard", StringComparison.OrdinalIgnoreCase);
+    bool isDashboardOverview = currentPath.Equals("/Admin/Dashboard", StringComparison.OrdinalIgnoreCase) || currentPath.Equals("/Admin/Dashboard/Index", StringComparison.OrdinalIgnoreCase) || currentPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase);
+    bool isDashboardAnalytics = currentPath.Equals("/Admin/Dashboard/Analytics", StringComparison.OrdinalIgnoreCase);
+    bool isDashboardFinance = currentPath.Equals("/Admin/Dashboard/Finance", StringComparison.OrdinalIgnoreCase);
+
     bool isIssuesActive = currentPath.StartsWith("/Admin/Issues", StringComparison.OrdinalIgnoreCase);
     bool isOrgActive = currentPath.StartsWith("/Admin/Units", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/Admin/Officials", StringComparison.OrdinalIgnoreCase);
     bool isUsersActive = currentPath.StartsWith("/Admin/Users", StringComparison.OrdinalIgnoreCase);
@@ -14,6 +18,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Quản trị CivicConnect</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
     <!-- Tabler CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.0.0-beta20/dist/css/tabler.min.css" />
     <!-- Bootstrap Icons -->
@@ -43,10 +48,11 @@
         }
         @@media (min-width: 992px) {
             .navbar-vertical.navbar-expand-lg {
-                width: 15rem;
+                width: 260px !important;
             }
-            .page-wrapper {
-                margin-left: 15rem;
+            .navbar-vertical.navbar-expand-lg ~ .page-wrapper,
+            .navbar-vertical.navbar-expand-lg ~ .navbar {
+                margin-left: 260px !important;
             }
         }
         .navbar-vertical .navbar-brand-autodark {
@@ -90,14 +96,15 @@
     
     <div class="page">
         <!-- Sidebar -->
-        <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark d-print-none">
+        <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark d-print-none" style="background-color: #133B2F;">
             <div class="container-fluid">
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <h1 class="navbar-brand navbar-brand-autodark">
-                    <a href="/Admin/Dashboard">
-                        <i class="bi bi-building-fill text-primary me-2"></i>CivicConnect
+                    <a href="/Admin/Dashboard" class="text-decoration-none d-flex align-items-center">
+                        <img src="/images/favicon.png" alt="CivicConnect Logo" class="me-2" style="height: 32px; width: 32px; object-fit: contain;" />
+                        <span style="color: #133B2F; font-family: 'EB Garamond', serif; font-weight: 700; font-size: 26px; letter-spacing: -0.5px; line-height: 1;">CivicConnect</span>
                     </a>
                 </h1>
                 
@@ -120,9 +127,9 @@
                                 <span class="nav-link-title">Bảng điều hành</span>
                             </a>
                             <div class="dropdown-menu @(isDashboardActive ? "show" : "")">
-                                <a class="dropdown-item" href="/Admin/Dashboard">Tổng quan điều hành</a>
-                                <a class="dropdown-item" href="/Admin/Dashboard/Analytics">Phân tích chuyên sâu</a>
-                                <a class="dropdown-item" href="/Admin/Dashboard/Finance">Quỹ & Tài chính</a>
+                                <a class="dropdown-item @(isDashboardOverview ? "active" : "")" href="/Admin/Dashboard">Tổng quan điều hành</a>
+                                <a class="dropdown-item @(isDashboardAnalytics ? "active" : "")" href="/Admin/Dashboard/Analytics">Phân tích chuyên sâu</a>
+                                <a class="dropdown-item @(isDashboardFinance ? "active" : "")" href="/Admin/Dashboard/Finance">Quỹ & Tài chính</a>
                             </div>
                         </li>
 
@@ -199,23 +206,35 @@
         </aside>
 
         <!-- Top Header -->
-        <header class="navbar navbar-expand-md navbar-light d-none d-lg-flex d-print-none sticky-top">
+        <header class="navbar navbar-expand-md navbar-light d-none d-lg-flex d-print-none sticky-top" style="background-color: #F8FAFC; min-height: 64px; border-bottom: 1px solid var(--tblr-border-color);">
             <div class="container-fluid">
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-nav flex-row order-md-last">
+                <div class="collapse navbar-collapse" id="navbar-menu">
+                    <div class="d-flex w-100 align-items-center">
+                        <form action="./" method="get" autocomplete="off" novalidate class="me-auto my-2 my-md-0" style="max-width: 350px;">
+                            <div class="input-icon">
+                                <span class="input-icon-addon">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control" placeholder="Tìm kiếm nhanh..." aria-label="Search" style="border-radius: 8px; border: 1px solid #e2e8f0; background-color: #ffffff;">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="navbar-nav flex-row order-md-last ms-auto">
                     <!-- Toggle Dark Mode -->
                     <div class="nav-item d-none d-md-flex me-3">
                         <a href="javascript:void(0)" class="nav-link px-0" onclick="toggleDarkMode()" title="Đổi chế độ sáng tối">
-                            <i class="bi bi-moon fs-3" id="dark-mode-icon"></i>
+                            <i class="bi bi-moon fs-3 text-secondary" id="dark-mode-icon"></i>
                         </a>
                     </div>
                     
                     <!-- Notifications -->
                     <div class="nav-item dropdown d-none d-md-flex me-3" id="notif-dropdown-wrapper">
                         <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications" aria-expanded="false" id="notif-trigger">
-                            <i class="bi bi-bell fs-3"></i>
+                            <i class="bi bi-bell fs-3 text-secondary"></i>
                             <span class="badge bg-red badge-notification" id="notif-counter" style="display: none;">0</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="width: 380px;">
@@ -253,22 +272,21 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="collapse navbar-collapse" id="navbar-menu">
-                    <div>
-                        <div class="input-icon">
-                            <span class="input-icon-addon">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" value="" class="form-control" placeholder="Tìm kiếm nhanh..." aria-label="Search" style="width: 250px;">
-                        </div>
-                    </div>
-                </div>
             </div>
         </header>
 
         <!-- Main Workspace -->
         <div class="page-wrapper">
+            <style>
+                .page-header {
+                    margin-top: 0.5rem !important;
+                    margin-bottom: 0.5rem !important;
+                }
+                .page-body {
+                    margin-top: 0.5rem !important;
+                    padding-top: 0 !important;
+                }
+            </style>
             <div class="page-body">
                 <div class="container-fluid">
                     @RenderBody()
@@ -281,6 +299,31 @@
     <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.0.0-beta20/dist/js/tabler.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script>
+        // Xử lý lỗi Tabler tự auto-active nhầm menu con trùng tiền tố
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(function() {
+                var dropdownMenus = document.querySelectorAll('.dropdown-menu');
+                dropdownMenus.forEach(function(menu) {
+                    var activeItems = Array.from(menu.querySelectorAll('.dropdown-item.active'));
+                    if (activeItems.length > 1) {
+                        // Sắp xếp các thẻ active theo độ dài URL giảm dần
+                        activeItems.sort(function(a, b) {
+                            return b.getAttribute('href').length - a.getAttribute('href').length;
+                        });
+                        
+                        // Thẻ có URL dài nhất là thẻ khớp chính xác nhất, giữ lại thẻ đầu tiên
+                        var bestMatch = activeItems[0];
+                        activeItems.forEach(function(item) {
+                            if (item !== bestMatch) {
+                                item.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, 150);
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>

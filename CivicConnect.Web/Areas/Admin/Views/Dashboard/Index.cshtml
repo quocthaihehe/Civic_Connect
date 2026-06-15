@@ -5,8 +5,19 @@
     ViewData["Title"] = "Tổng quan điều hành";
 }
 
+<style>
+    .card {
+        border: 1px solid #CCCCCC !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+    }
+    .card-header {
+        border-bottom: 1px solid #e2e8f0;
+    }
+</style>
+
 <!-- Page header -->
-<div class="page-header d-print-none mb-4">
+<div class="page-header d-print-none mb-2 mt-1">
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title text-2xl font-bold">Tổng quan điều hành</h2>
@@ -84,79 +95,97 @@
     </div>
 </div>
 
-<!-- Row 2: Charts -->
-<div class="row row-cards mb-4">
-    <!-- Trend Line Chart -->
-    <div class="col-lg-8">
-        <div class="card" style="height: 350px;">
-            <div class="card-header bg-transparent border-0 py-3">
-                <h3 class="card-title font-weight-bold"><i class="bi bi-graph-up text-primary me-2"></i>Xu hướng phản ánh 30 ngày</h3>
+<!-- Row 2: Charts and Widgets -->
+<div class="row row-cards mb-4 align-items-stretch">
+    <!-- Cột Trái: Trend Line + Heatmap -->
+    <div class="col-lg-8 d-flex flex-column">
+        <div class="card flex-grow-1">
+            <div class="card-header border-0 py-2">
+                <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+                    <li class="nav-item">
+                        <a href="#tabs-trend" class="nav-link active font-weight-bold" data-bs-toggle="tab"><i class="bi bi-graph-up text-primary me-2"></i>Xu hướng 30 ngày</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#tabs-heatmap" class="nav-link font-weight-bold" data-bs-toggle="tab"><i class="bi bi-map text-danger me-2"></i>Bản đồ điểm nóng</a>
+                    </li>
+                </ul>
             </div>
-            <div class="card-body">
-                <div style="height: 270px; width: 100%;">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLA Compliance Gauge -->
-    <div class="col-lg-4">
-        <div class="card" style="height: 350px;">
-            <div class="card-header bg-transparent border-0 py-3">
-                <h3 class="card-title font-weight-bold"><i class="bi bi-patch-check text-primary me-2"></i>Tỷ lệ giải quyết đúng hạn</h3>
-            </div>
-            <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                <div class="position-relative d-flex align-items-center justify-content-center" style="width: 180px; height: 180px;">
-                    <canvas id="slaGaugeCanvas"></canvas>
-                    <div class="position-absolute text-center">
-                        <span class="display-6 font-weight-bold">@ViewBag.SlaComplianceRate%</span>
-                        <div class="text-muted small">Đúng SLA</div>
+            <div class="card-body d-flex flex-column">
+                <div class="tab-content flex-grow-1 d-flex flex-column">
+                    <div class="tab-pane active show flex-grow-1" id="tabs-trend">
+                        <div class="position-relative w-100 h-100" style="min-height: 420px;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="tab-pane flex-grow-1" id="tabs-heatmap">
+                        <div id="heatmapContainer" class="w-100 h-100" style="min-height: 420px; z-index: 1;"></div>
                     </div>
                 </div>
-                <div class="text-muted small text-center mt-3">Mục tiêu hệ thống đặt ra đạt tối thiểu 95% tỷ lệ đúng hạn</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Row 3: Heatmap and Categories -->
-<div class="row row-cards mb-4">
-    <!-- Mini Heatmap -->
-    <div class="col-lg-8">
-        <div class="card" style="height: 400px;">
-            <div class="card-header bg-transparent border-0 py-3">
-                <h3 class="card-title font-weight-bold"><i class="bi bi-map text-primary me-2"></i>Bản đồ điểm nóng 7 ngày qua</h3>
-            </div>
-            <div class="card-body p-0">
-                <div id="heatmapContainer" style="height: 345px; width: 100%; z-index: 1;"></div>
             </div>
         </div>
     </div>
 
-    <!-- Categories Distribution -->
-    <div class="col-lg-4">
-        <div class="card" style="height: 400px;">
-            <div class="card-header bg-transparent border-0 py-3">
-                <h3 class="card-title font-weight-bold"><i class="bi bi-pie-chart text-primary me-2"></i>Cơ cấu danh mục</h3>
+    <!-- Cột Phải: Online Staff, Gauge, Pie -->
+    <div class="col-lg-4 d-flex flex-column gap-3">
+        <!-- Online Staff -->
+        <div class="card" style="height: 250px;">
+            <div class="card-header bg-transparent border-0 py-2">
+                <h3 class="card-title font-weight-bold mb-0" style="font-size: 0.95rem;"><i class="bi bi-person-badge text-primary me-2"></i>Cán bộ trực tuyến</h3>
             </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-center" style="height: 250px;">
-                    <canvas id="categoryChart"></canvas>
+            <div class="card-body overflow-y-auto py-2">
+                <div class="space-y-2">
+                    @foreach (var staff in ViewBag.OnlineStaff)
+                    {
+                        <div class="row align-items-center g-2">
+                            <div class="col-auto">
+                                <span class="avatar avatar-sm bg-green-lt text-green rounded-circle">@staff.FullName.Substring(0, 1)</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-bold text-truncate" style="font-size: 0.85rem;">@staff.FullName</div>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge badge-empty" title="Đang online" style="background-color: #16a34a !important;"></span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Gauge & Pie -->
+        <div class="card flex-grow-1">
+            <div class="card-body p-3 d-flex flex-column justify-content-around">
+                <!-- Gauge -->
+                <div class="text-center mb-2">
+                    <div class="text-muted small font-weight-bold mb-1">TỶ LỆ GIẢI QUYẾT ĐÚNG HẠN</div>
+                    <div class="position-relative mx-auto d-flex align-items-center justify-content-center" style="width: 140px; height: 140px;">
+                        <canvas id="slaGaugeCanvas"></canvas>
+                        <div class="position-absolute text-center" style="top: 55px;">
+                            <span class="font-weight-bold" style="font-size: 1.5rem;">@ViewBag.SlaComplianceRate%</span>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-2" />
+                <!-- Pie -->
+                <div class="text-center mt-2">
+                    <div class="text-muted small font-weight-bold mb-2">CƠ CẤU DANH MỤC</div>
+                    <div class="mx-auto" style="height: 160px; width: 100%;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Row 4: Action Table & Online Staff -->
+<!-- Row 3: Action Table -->
 <div class="row row-cards">
     <!-- Critical Issues Table -->
-    <div class="col-lg-9">
+    <div class="col-12">
         <div class="card">
             <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold"><i class="bi bi-lightning text-danger me-2"></i>Phản ánh cần hành động ngay</h3>
-                <span class="badge bg-red-lt">Hạn xử lý khẩn cấp</span>
+                <span class="badge bg-orange text-white px-2 py-1">Hạn xử lý khẩn cấp</span>
             </div>
             <div class="table-responsive" style="max-height: 400px;">
                 <table class="table table-vcenter table-hover mb-0">
@@ -185,11 +214,11 @@
                                 <tr class="@(isOverdue ? "bg-red-lt" : "")">
                                     <td>#@issue.Id</td>
                                     <td>
-                                        <a href="/Admin/Issues/Details/@issue.Id" class="font-weight-bold text-body">@issue.Title</a>
+                                        <a href="/Admin/Issues/Details/@issue.Id" class="font-weight-bold text-body text-decoration-none">@issue.Title</a>
                                         <div class="text-muted small">@issue.Address</div>
                                     </td>
                                     <td>
-                                        <span class="badge @(issue.Priority == IssuePriority.Critical ? "bg-red" : "bg-orange")">
+                                        <span class="badge @(issue.Priority == IssuePriority.Critical ? "bg-red" : "bg-orange") text-white">
                                             @issue.Priority
                                         </span>
                                     </td>
@@ -203,7 +232,7 @@
                                     </td>
                                     <td>
                                         <div class="btn-list flex-nowrap">
-                                            <a href="/Admin/Issues/Details/@issue.Id" class="btn btn-white btn-sm">Chỉ đạo</a>
+                                            <a href="/Admin/Issues/Details/@issue.Id" class="btn btn-outline-primary btn-sm">Chỉ đạo</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -214,39 +243,22 @@
             </div>
         </div>
     </div>
-
-    <!-- Online Staff Widget -->
-    <div class="col-lg-3">
-        <div class="card" style="max-height: 460px;">
-            <div class="card-header bg-transparent border-0 py-3">
-                <h3 class="card-title font-weight-bold"><i class="bi bi-person-badge text-primary me-2"></i>Cán bộ trực tuyến</h3>
-            </div>
-            <div class="card-body overflow-y-auto">
-                <div class="space-y-3">
-                    @foreach (var staff in ViewBag.OnlineStaff)
-                    {
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <span class="avatar bg-green-lt text-green rounded-circle">@staff.FullName.Substring(0, 1)</span>
-                            </div>
-                            <div class="col">
-                                <div class="font-weight-bold">@staff.FullName</div>
-                                <div class="text-muted small text-truncate">@staff.Email</div>
-                            </div>
-                            <div class="col-auto">
-                                <span class="badge bg-green badge-empty" title="Đang online"></span>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // Thiết lập font chữ mặc định chuẩn Tiếng Việt cho toàn bộ biểu đồ
+            Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+            Chart.defaults.color = '#334155';
+            
+            // Re-render map when tab becomes active
+            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                if (e.target.hash === '#tabs-heatmap') {
+                    map.invalidateSize();
+                }
+            });
+            
             // Trend Line Chart
             const trendCtx = document.getElementById('trendChart').getContext('2d');
             const trendLabels = @Html.Raw(Json.Serialize(ViewBag.TrendLabels));
@@ -315,7 +327,7 @@
                     _ => "Khác"
                 };
                 <text>
-                    catKeys.push("@catName");
+                    catKeys.push(@Html.Raw(Json.Serialize(catName)));
                     catVals.push(@entry.Value);
                 </text>
             }
@@ -332,7 +344,19 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                    plugins: { 
+                        legend: { 
+                            position: 'right', 
+                            labels: { 
+                                boxWidth: 12, 
+                                font: { size: 12, family: "'Inter', sans-serif" } 
+                            } 
+                        },
+                        tooltip: {
+                            titleFont: { family: "'Inter', sans-serif" },
+                            bodyFont: { family: "'Inter', sans-serif" }
+                        }
+                    }
                 }
             });
 
@@ -350,6 +374,15 @@
                     fillOpacity: 0.5,
                     radius: 120
                 }).addTo(map).bindPopup(spot.title);
+            });
+
+            // Update map size when tab is shown
+            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                if (e.target.hash === '#tabs-heatmap') {
+                    setTimeout(function() {
+                        map.invalidateSize();
+                    }, 10);
+                }
             });
         });
     </script>

@@ -31,6 +31,25 @@
     .offcanvas {
         transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
+
+    /* Prevent right actions from getting pushed off-screen */
+    .topbar-right {
+        flex-shrink: 0 !important;
+    }
+    
+    /* Responsive layout adjustments for Navbar to prevent layout overflow */
+    @@media (max-width: 1499.98px) {
+        .topbar-tagline {
+            display: none !important;
+        }
+        .topbar-nav {
+            gap: 0.75rem !important; /* ~12px gap */
+            padding-right: 0.75rem !important;
+        }
+        .topbar-nav .nav-link {
+            font-size: 0.85rem !important;
+        }
+    }
 </style>
 
 <header class="topbar horizontal-topbar">
