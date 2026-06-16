@@ -13,17 +13,16 @@
 <style>
     /* Smooth Dropdown Animation for Avatar and Notifications */
     .dropdown-menu.show {
-        animation: dropdownFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        transform-origin: top;
+        animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @@keyframes dropdownFadeIn {
         from {
             opacity: 0;
-            transform: translateY(-10px) scale(0.98);
+            margin-top: -10px;
         }
         to {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            margin-top: 0;
         }
     }
     

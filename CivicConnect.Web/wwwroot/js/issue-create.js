@@ -339,14 +339,30 @@ $(document).ready(function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data && data.display_name) {
-                        $('#address-input').val(data.display_name);
-                        
                         const addr = data.address || {};
                         
                         // Trích xuất tên Tỉnh, Quận, Phường động từ API Geocoding
                         const province = addr.city || addr.province || addr.state || "TP. Hồ Chí Minh";
                         const district = addr.district || addr.suburb || addr.county || addr.city_district || "Quận 1";
                         const ward = addr.suburb || addr.quarter || addr.town || addr.village || addr.ward || "Phường Bến Nghé";
+
+                        // Tự động xây dựng địa chỉ chi tiết loại bỏ mã bưu điện và quốc gia
+                        let detailedAddress = [];
+                        if (addr.house_number) detailedAddress.push(addr.house_number);
+                        if (addr.road) detailedAddress.push(addr.road);
+                        if (addr.suburb || addr.quarter || addr.neighbourhood) detailedAddress.push(addr.suburb || addr.quarter || addr.neighbourhood);
+                        
+                        let fullAddress = detailedAddress.join(', ');
+                        if (ward && !fullAddress.includes(ward)) fullAddress += (fullAddress ? ', ' : '') + ward;
+                        if (district && !fullAddress.includes(district)) fullAddress += (fullAddress ? ', ' : '') + district;
+                        if (province && !fullAddress.includes(province)) fullAddress += (fullAddress ? ', ' : '') + province;
+                        
+                        // Nếu vẫn trống, dùng display_name nhưng cắt bỏ phần ZIP code và Việt Nam
+                        if (!fullAddress) {
+                            fullAddress = data.display_name.replace(/, \d{5,6}(, Việt Nam)?$/, '').replace(/, Việt Nam$/, '');
+                        }
+
+                        $('#address-input').val(fullAddress);
 
                         $('#prov-name').val(province);
                         $('#dist-name').val(district);

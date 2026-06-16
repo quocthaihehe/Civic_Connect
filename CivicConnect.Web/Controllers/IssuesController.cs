@@ -256,11 +256,13 @@ namespace CivicConnect.Web.Controllers
             var isOfficial = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
 
             var comment = await _issueService.AddCommentAsync(id, userId, content, parentCommentId, isOfficial);
+            var author = await _userManager.FindByIdAsync(comment.AuthorId);
 
             return Json(new { 
                 success = true, 
                 id = comment.Id,
-                authorName = (await _userManager.FindByIdAsync(comment.AuthorId))?.FullName ?? "Nặc danh",
+                authorName = author?.FullName ?? "Nặc danh",
+                authorAvatar = author?.AvatarUrl ?? "/images/default-avatar.png",
                 createdAt = comment.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
                 content = comment.Content,
                 isOfficial = comment.IsOfficialResponse

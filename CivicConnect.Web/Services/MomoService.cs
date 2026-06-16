@@ -1,4 +1,4 @@
-﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Repositories;
 using CivicConnect.Web.Models;
 using Microsoft.Extensions.Configuration;
@@ -36,7 +36,7 @@ namespace CivicConnect.Web.Services
             var requestId = donation.OrderId;
             var orderId = donation.OrderId;
             var amount = (long)donation.Amount;
-            var orderInfo = $"QuyÃªn gÃ³p {category.Name}";
+            var orderInfo = $"Quyên góp {category.Name}";
             var extraData = "";
             var requestType = string.IsNullOrEmpty(paymentMethod) ? "captureWallet" : paymentMethod;
 

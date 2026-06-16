@@ -43,8 +43,8 @@ namespace CivicConnect.Web.Services
             await _context.Notifications.AddAsync(notification);
             await _context.SaveChangesAsync();
 
-            // Đẩy thông báo thời gian thực qua SignalR
-            await _hubContext.Clients.User(userId).SendAsync("IssueStatusChanged", new
+            // Đẩy thông báo thời gian thực qua SignalR (Test broadcast cho toàn bộ User để xem có phải lỗi mapping ID không)
+            await _hubContext.Clients.All.SendAsync("IssueStatusChanged", new
             {
                 id = notification.Id,
                 title = notification.Title,

@@ -167,7 +167,7 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
                 FromStatus = oldStatus,
                 ToStatus = newStatus,
                 ChangedById = adminId,
-                Note = "Di chuyển trạng thái thẻ trên bảng Kanban",
+                Note = "Đang phân công",
                 ChangedAt = DateTime.UtcNow
             });
 

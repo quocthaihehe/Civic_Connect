@@ -121,20 +121,45 @@ namespace CivicConnect.Web.Services
                 await _issueRepository.SaveChangesAsync();
             }
 
-            // Ghi nháº­n lá»‹ch sá»­ tráº¡ng thÃ¡i Ä‘áº§u tiÃªn
+            // Ghi nhận lịch sử trạng thái đầu tiên
             var history = new IssueStatusHistory
             {
                 IssueId = issue.Id,
                 FromStatus = IssueStatus.Pending,
                 ToStatus = IssueStatus.Pending,
                 ChangedById = issue.AuthorId,
-                Note = "Khá»Ÿi táº¡o pháº£n Ã¡nh má»›i.",
+                Note = "Khởi tạo phản ánh mới.",
                 ChangedAt = DateTime.UtcNow
             };
             await _context.IssueStatusHistories.AddAsync(history);
             await _context.SaveChangesAsync();
 
             await BroadcastStatsAsync();
+
+            // Gửi thông báo cho người dùng
+            if (!string.IsNullOrEmpty(issue.AuthorId))
+            {
+                await _notificationService.SendNotificationAsync(
+                    issue.AuthorId,
+                    "Gửi phản ánh thành công",
+                    $"Phản ánh '{issue.Title}' của bạn đã được hệ thống ghi nhận và đang chờ phân công xử lý.",
+                    NotificationType.IssueStatusChanged,
+                    issue.Id.ToString()
+                );
+            }
+
+            // Gửi thông báo cho toàn bộ Admin
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+            foreach (var admin in admins)
+            {
+                await _notificationService.SendNotificationAsync(
+                    admin.Id,
+                    "Có phản ánh mới",
+                    $"Một phản ánh mới '{issue.Title}' vừa được gửi lên hệ thống.",
+                    NotificationType.IssueStatusChanged,
+                    issue.Id.ToString()
+                );
+            }
 
             return issue;
         }

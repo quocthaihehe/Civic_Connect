@@ -99,9 +99,20 @@ $(document).ready(function () {
 
     // Đánh dấu đã đọc khi click vào thông báo
     container.on('click', '.notif-item', function(e) {
+        e.preventDefault();
         const id = $(this).data('id');
+        const href = $(this).attr('href');
+        
         if (id && id > 0) {
-            $.post(`/api/notifications/${id}/mark-read`);
+            $.post(`/api/notifications/${id}/mark-read`).always(function() {
+                if (href && href !== '#') {
+                    window.location.href = href;
+                }
+            });
+        } else {
+            if (href && href !== '#') {
+                window.location.href = href;
+            }
         }
     });
 });

@@ -42,7 +42,7 @@
         border-radius: var(--radius-lg);
         overflow: hidden;
         background: rgba(0, 0, 0, 0.05);
-        height: 350px;
+        height: 280px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -59,14 +59,14 @@
         background: rgba(255,255,255,0.03);
         border: 1px solid var(--border-glass);
         border-radius: var(--radius-md);
-        padding: 15px;
+        padding: 12px;
     }
 
     .comment-bubble {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid var(--border-glass) !important;
         border-radius: 12px;
-        padding: 16px;
+        padding: 12px;
         transition: transform 0.2s;
     }
     .comment-bubble:hover {
@@ -92,7 +92,7 @@
         content: '';
         position: absolute;
         left: -6px;
-        top: 0;
+        top: 6px;
         width: 10px;
         height: 10px;
         border-radius: 50%;
@@ -103,29 +103,58 @@
         background-color: var(--bs-success);
         box-shadow: 0 0 0 3px rgba(var(--bs-success-rgb), 0.2);
     }
+    /* Premium Vote Buttons */
+    .vote-btn-agree {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+        color: white;
+        border: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+    }
+    .vote-btn-agree:hover, .vote-btn-agree.vote-active {
+        background: linear-gradient(135deg, #0a58ca, #084298);
+        color: white;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 12px rgba(13, 110, 253, 0.4);
+    }
+    
+    .vote-btn-disagree {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        color: white;
+        border: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+    }
+    .vote-btn-disagree:hover, .vote-btn-disagree.vote-active {
+        background: linear-gradient(135deg, #b02a37, #842029);
+        color: white;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 12px rgba(220, 53, 69, 0.4);
+    }
 </style>
 
-<div class="row g-4 mt-2">
+<div class="row g-3 mt-0">
     <!-- Left Column: Issue Content, Images & Comments -->
     <div class="col-lg-7">
         <div class="d-flex flex-column gap-3">
             
             <!-- Issue Details Card -->
-            <div class="glass-card p-4">
+            <div class="glass-card p-3">
                 
                 <!-- Header Info -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                    <span class="badge @GetStatusClass(Model.Status) rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.9rem;">
-                        @GetStatusName(Model.Status)
-                    </span>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <h4 class="fw-bold mb-0 text-dark" style="line-height: 1.4;">@Model.Title</h4>
+                        <span class="badge @GetStatusClass(Model.Status) rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.85rem;">
+                            @GetStatusName(Model.Status)
+                        </span>
+                    </div>
                     <span class="text-muted" style="font-size: 0.85rem;">
                         <i class="bi bi-clock me-1"></i> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
                     </span>
                 </div>
 
-                <h2 class="fw-bold mb-3 text-dark" style="line-height: 1.4;">@Model.Title</h2>
-
-                <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-4 border-bottom border-secondary border-opacity-25 text-muted" style="font-size: 0.9rem;">
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-3 pb-3 border-bottom border-secondary border-opacity-25 text-muted" style="font-size: 0.9rem;">
                     <div class="d-flex align-items-center gap-2">
                         <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
                             <i class="bi bi-person-fill text-primary" style="font-size: 0.85rem;"></i>
@@ -169,17 +198,17 @@
                 }
 
                 <!-- Content Description -->
-                <div class="mb-5">
-                    <h5 class="fw-bold mb-3 text-dark d-flex align-items-center gap-2">
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2 text-dark d-flex align-items-center gap-2">
                         <i class="bi bi-card-text text-primary"></i> Nội dung chi tiết
-                    </h5>
-                    <div class="text-secondary" style="line-height: 1.8; white-space: pre-line; font-size: 1.05rem;">
+                    </h6>
+                    <div class="text-secondary" style="line-height: 1.6; white-space: pre-line; font-size: 0.95rem;">
                         @Model.Description
                     </div>
                 </div>
 
                 <!-- Address Box -->
-                <div class="p-3 rounded-3 mb-4" style="background: rgba(var(--bs-primary-rgb), 0.05); border: 1px dashed rgba(var(--bs-primary-rgb), 0.3);">
+                <div class="p-3 rounded-3 mb-3" style="background: rgba(var(--bs-primary-rgb), 0.05); border: 1px dashed rgba(var(--bs-primary-rgb), 0.3);">
                     <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-geo-alt-fill text-danger me-2"></i> Địa điểm sự việc</h6>
                     <p class="text-secondary mb-1">@Model.Address</p>
                     <div class="text-muted" style="font-size: 0.85rem;">
@@ -189,27 +218,27 @@
                 </div>
 
                 <!-- Action Bar (Vote & Share) -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top border-secondary border-opacity-25">
                     <div class="d-flex align-items-center gap-3">
-                        <button class="btn btn-outline-primary rounded-pill vote-btn px-4 py-2 d-flex align-items-center gap-2" data-id="@Model.Id" data-type="1">
-                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                        <button class="btn btn-sm rounded-pill vote-btn vote-btn-agree px-4 py-2 d-flex align-items-center gap-2 fw-medium" data-id="@Model.Id" data-type="1">
+                            <i class="bi bi-hand-thumbs-up-fill fs-6"></i>
                             <span>Đồng tình (<strong id="upvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Up)</strong>)</span>
                         </button>
-                        <button class="btn btn-outline-danger rounded-pill vote-btn px-4 py-2 d-flex align-items-center gap-2" data-id="@Model.Id" data-type="-1">
-                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                        <button class="btn btn-sm rounded-pill vote-btn vote-btn-disagree px-4 py-2 d-flex align-items-center gap-2 fw-medium" data-id="@Model.Id" data-type="-1">
+                            <i class="bi bi-hand-thumbs-down-fill fs-6"></i>
                             <span>Không đồng tình (<strong id="downvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Down)</strong>)</span>
                         </button>
                     </div>
-                    <div class="d-flex align-items-center gap-4 mt-3 mt-md-0">
+                    <div class="d-flex align-items-center gap-3 mt-3 mt-md-0">
                         <div class="d-flex gap-2">
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=@encodedUrl" target="_blank" class="btn btn-sm btn-light text-primary rounded-circle shadow-sm border" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Facebook">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=@encodedUrl" target="_blank" class="btn btn-sm btn-light text-primary rounded-circle shadow-sm border" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Facebook">
                                 <i class="bi bi-facebook fs-6"></i>
                             </a>
-                            <a href="https://sp.zalo.me/plugins/share?link=@encodedUrl" target="_blank" class="btn btn-sm btn-light text-info rounded-circle shadow-sm border" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Zalo">
+                            <a href="https://sp.zalo.me/plugins/share?link=@encodedUrl" target="_blank" class="btn btn-sm btn-light text-info rounded-circle shadow-sm border" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="Chia sẻ Zalo">
                                 <i class="bi bi-chat-fill fs-6"></i>
                             </a>
                         </div>
-                        <div class="text-muted fs-5">
+                        <div class="text-muted" style="font-size: 0.95rem;">
                             <i class="bi bi-chat-dots-fill text-primary me-1"></i> 
                             <strong id="comments-counter" class="text-dark">@Model.Comments.Count</strong> bình luận
                         </div>
@@ -220,8 +249,8 @@
             <!-- Rating Section for Author -->
             @if ((Model.Status == IssueStatus.Resolved || Model.Status == IssueStatus.Closed) && Model.AuthorId == currentUserId)
             {
-                <div class="glass-card p-4 mt-2" id="rating-section">
-                    <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-star-fill text-warning me-2"></i> Đánh giá kết quả xử lý</h5>
+                <div class="glass-card p-3 mt-2" id="rating-section">
+                    <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-star-fill text-warning me-2"></i> Đánh giá kết quả xử lý</h6>
                     @if (Model.Rating.HasValue)
                     {
                         <div class="p-3 rounded-3" style="background: rgba(var(--bs-success-rgb), 0.1); border: 1px solid rgba(var(--bs-success-rgb), 0.3);">
@@ -258,40 +287,39 @@
                 </div>
             }
 
-            <div class="glass-card p-4 mt-2">
-                <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-chat-square-quote-fill text-primary me-2"></i> Thảo luận</h5>
+            <div class="glass-card p-3 mt-2">
+                <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-chat-square-quote-fill text-primary me-2"></i> Thảo luận</h6>
                 
                 <!-- New Comment Form -->
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <div class="comment-box-wrapper mb-5 shadow-sm">
-                        <div class="d-flex gap-3">
-                            <img src="@(UserManager.GetUserAsync(User).Result?.AvatarUrl ?? "/images/default-avatar.png")" 
-                                 onerror="this.onerror=null; this.src='/images/default-avatar.png';" 
-                                 class="rounded-circle shadow-sm mt-1 border border-2 border-primary border-opacity-25" 
-                                 style="width: 45px; height: 45px; object-fit: cover;" />
-                            
-                            <div class="w-100">
-                                <textarea id="new-comment-content" class="form-control bg-light text-dark border-0 px-3 py-2 shadow-sm" 
-                                          rows="2" placeholder="Chia sẻ góc nhìn của bạn về vấn đề này..."
-                                          style="resize: none; border-radius: 8px;"></textarea>
-                                
-                                <div class="d-flex justify-content-end align-items-center mt-3 pt-2">
-                                    <button class="btn btn-primary rounded-pill px-4" id="submit-comment-btn" data-id="@Model.Id">
-                                        <i class="bi bi-send-fill me-1"></i> Gửi bình luận
-                                    </button>
-                                </div>
+                    <div class="comment-box-wrapper mb-3 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@(UserManager.GetUserAsync(User).Result?.AvatarUrl ?? "/images/default-avatar.png")" 
+                                     onerror="this.onerror=null; this.src='/images/default-avatar.png';" 
+                                     class="rounded-circle shadow-sm border border-2 border-primary border-opacity-25" 
+                                     style="width: 32px; height: 32px; object-fit: cover;" />
+                                <strong class="text-dark" style="font-size: 0.95rem;">@(UserManager.GetUserAsync(User).Result?.FullName ?? "Bạn")</strong>
                             </div>
+                            <button class="btn btn-sm btn-primary rounded-pill px-3" id="submit-comment-btn" data-id="@Model.Id">
+                                <i class="bi bi-send-fill me-1"></i> Gửi bình luận
+                            </button>
+                        </div>
+                        <div class="w-100">
+                            <textarea id="new-comment-content" class="form-control bg-light text-dark border-0 px-3 py-2 shadow-sm" 
+                                      rows="2" placeholder="Chia sẻ góc nhìn của bạn về vấn đề này..."
+                                      style="resize: none; border-radius: 8px;"></textarea>
                         </div>
                     </div>
                 }
                 else
                 {
-                    <div class="glass-card p-4 text-center mb-5" style="border-style: dashed;">
-                        <i class="bi bi-person-lock fs-1 text-muted mb-2 d-block"></i>
-                        <p class="mb-3 text-secondary">Bạn cần đăng nhập để tham gia thảo luận cùng cộng đồng.</p>
-                        <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Issues/Details/@Model.Id" class="btn btn-primary rounded-pill px-4">
-                            Đăng nhập ngay
+                    <div class="glass-card p-3 text-center mb-3" style="border-style: dashed;">
+                        <i class="bi bi-person-lock fs-3 text-muted mb-2 d-block"></i>
+                        <p class="mb-2 text-secondary" style="font-size: 0.9rem;">Bạn cần đăng nhập để thảo luận.</p>
+                        <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Issues/Details/@Model.Id" class="btn btn-sm btn-primary rounded-pill px-4">
+                            Đăng nhập
                         </a>
                     </div>
                 }
@@ -317,7 +345,7 @@
                                              class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;" />
                                         
                                         <div>
-                                            <div class="fw-bold @(comment.IsOfficialResponse ? "text-warning" : "text-white")" style="font-size: 0.95rem;">
+                                            <div class="fw-bold @(comment.IsOfficialResponse ? "text-warning" : "text-dark")" style="font-size: 0.95rem;">
                                                 @comment.Author?.FullName
                                                 @if (comment.IsOfficialResponse)
                                                 {
@@ -342,9 +370,9 @@
         <div class="d-flex flex-column gap-3 position-sticky" style="top: 80px;">
             
             <!-- Mini Map Card -->
-            <div class="glass-card p-4">
-                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-map-fill text-primary me-2"></i> Bản đồ sự cố</h5>
-                <div class="rounded-3 position-relative shadow-sm" style="height: 250px; border: 1px solid var(--border-glass); overflow: hidden; background-color: #f8f9fa;">
+            <div class="glass-card p-3">
+                <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-map-fill text-primary me-2"></i> Bản đồ sự cố</h6>
+                <div class="rounded-3 position-relative shadow-sm" style="height: 200px; border: 1px solid var(--border-glass); overflow: hidden; background-color: #f8f9fa;">
                     @{
                         // Tính toán bounding box cho OpenStreetMap iframe
                         var lonStr = Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -357,14 +385,14 @@
                     }
                     <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="@mapUrl" style="border: none; pointer-events: none;"></iframe>
                 </div>
-                <div class="mt-3 p-3 rounded-3 bg-dark bg-opacity-25 text-center">
-                    <span class="text-muted d-block mb-1" style="font-size: 0.8rem;">TỌA ĐỘ</span>
-                    <strong class="text-primary font-monospace" style="font-size: 0.9rem;">@Model.Latitude, @Model.Longitude</strong>
+                <div class="mt-2 p-2 rounded-3 bg-dark bg-opacity-25 text-center">
+                    <span class="text-muted d-block mb-1" style="font-size: 0.75rem;">TỌA ĐỘ</span>
+                    <strong class="text-primary font-monospace" style="font-size: 0.85rem;">@Model.Latitude, @Model.Longitude</strong>
                 </div>
             </div>
 
             <!-- Processing Timeline Audit History -->
-            <div class="glass-card p-4">
+            <div class="glass-card p-3">
                 <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-hourglass-split text-primary me-2"></i> Tiến độ xử lý</h6>
                 
                 <div class="timeline-flow mt-3">
@@ -372,17 +400,26 @@
                     {
                         @foreach (var hist in Model.StatusHistory.OrderByDescending(h => h.ChangedAt))
                         {
-                            <div class="timeline-step active position-relative ps-4 pb-4">
+                            <div class="timeline-step active position-relative ps-4 pb-3">
                                 <!-- Line and dot are handled by .timeline-step css -->
                                 <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <strong class="text-white">@GetStatusName(hist.ToStatus)</strong>
+                                    <strong class="text-dark">@GetStatusName(hist.ToStatus)</strong>
                                     <span class="badge bg-secondary bg-opacity-25 text-muted fw-normal">@hist.ChangedAt.ToString("dd/MM HH:mm")</span>
                                 </div>
                                 
                                 @if (!string.IsNullOrEmpty(hist.Note))
                                 {
                                     <div class="text-secondary mt-2 p-2 rounded-2" style="font-size: 0.85rem; line-height: 1.4; background: rgba(255,255,255,0.03);">
-                                        @hist.Note
+                                        @hist.Note.Replace("Khá»Ÿi táº¡o pháº£n Ã¡nh má»›i.", "Khởi tạo phản ánh mới.").Replace("Di chuyển trạng thái thẻ trên bảng Kanban", "Đang phân công")
+                                        <span class="text-muted ms-1" style="font-size: 0.8rem;">
+                                            - <i class="bi bi-person-circle"></i> @(hist.ChangedBy?.FullName ?? "Hệ thống")
+                                        </span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted mt-2 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                                        <i class="bi bi-person-circle"></i> @(hist.ChangedBy?.FullName ?? "Hệ thống")
                                     </div>
                                 }
                                 
@@ -394,10 +431,6 @@
                                         </a>
                                     </div>
                                 }
-                                
-                                <div class="text-muted mt-2 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
-                                    <i class="bi bi-person-circle"></i> @(hist.ChangedBy?.FullName ?? "Hệ thống")
-                                </div>
                             </div>
                         }
                     }
@@ -435,12 +468,11 @@
                         $('#upvotes-count').text(res.upvotes);
                         $('#downvotes-count').text(res.downvotes);
                         
-                        // Thêm hiệu ứng nhấp nháy cho nút
-                        btn.addClass('btn-primary text-white').removeClass('btn-outline-primary btn-outline-danger');
+                        // Thêm hiệu ứng nhấp nháy cho nút siêu nhanh
+                        btn.addClass('vote-active');
                         setTimeout(() => {
-                            if (voteType === 1) btn.removeClass('btn-primary text-white').addClass('btn-outline-primary');
-                            if (voteType === -1) btn.removeClass('btn-primary text-white').addClass('btn-outline-danger');
-                        }, 500);
+                            btn.removeClass('vote-active');
+                        }, 150);
                     }
                 }).fail(function() {
                     alert("Có lỗi xảy ra hoặc bạn chưa đăng nhập.");
@@ -469,13 +501,13 @@
 
                         // Tạo thẻ HTML cho bình luận mới
                         const officialBadge = res.isOfficial ? `<span class="badge bg-primary ms-2"><i class="bi bi-check-circle-fill me-1"></i> Cán bộ</span>` : '';
-                        const textClass = res.isOfficial ? 'text-warning' : 'text-white';
+                        const textClass = res.isOfficial ? 'text-warning' : 'text-dark';
 
                         const commentHtml = `
                             <div class="comment-bubble shadow-sm" style="animation: fadeIn 0.5s ease;">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div class="d-flex align-items-center gap-3">
-                                        <img src="/images/default-avatar.png" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;" />
+                                        <img src="${res.authorAvatar}" onerror="this.onerror=null; this.src='/images/default-avatar.png';" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;" />
                                         <div>
                                             <div class="fw-bold ${textClass}" style="font-size: 0.95rem;">
                                                 ${res.authorName} ${officialBadge}

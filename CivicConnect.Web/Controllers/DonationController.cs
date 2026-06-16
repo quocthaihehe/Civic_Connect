@@ -129,7 +129,7 @@ namespace CivicConnect.Web.Controllers
                 _context.Donations.Add(donation);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Pay", new { orderId = donation.OrderId });
+                return Redirect(momoResponse.PayUrl);
             }
             else
             {
@@ -139,30 +139,7 @@ namespace CivicConnect.Web.Controllers
             }
         }
 
-        // GET: /Donation/Pay?orderId=...
-        public async Task<IActionResult> Pay(string orderId)
-        {
-            var donation = await _context.Donations
-                .Include(d => d.DonationCategory)
-                .FirstOrDefaultAsync(d => d.OrderId == orderId);
 
-            if (donation == null)
-            {
-                return NotFound();
-            }
-
-            if (donation.Status == "Completed")
-            {
-                return RedirectToAction("Success", new { orderId = donation.OrderId });
-            }
-
-            if (donation.Status == "Failed")
-            {
-                return RedirectToAction("Error", new { orderId = donation.OrderId, message = "Thanh toán thất bại." });
-            }
-
-            return View(donation);
-        }
 
         // GET: /Donation/CheckStatus?orderId=...
         [HttpGet]

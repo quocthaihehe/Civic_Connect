@@ -375,6 +375,36 @@
                 });
                 map.addControl(new LocationControl());
 
+                // Custom Control cho thanh tìm kiếm địa điểm
+                const SearchLocationControl = L.Control.extend({
+                    options: { position: 'topright' },
+                    onAdd: function () {
+                        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control custom-search-control');
+                        container.style.backgroundColor = 'white';
+                        container.style.padding = '5px';
+                        container.style.borderRadius = '8px';
+                        container.style.display = 'flex';
+                        container.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+                        container.style.marginTop = '20px';
+                        container.style.marginRight = '20px';
+                        container.style.border = 'none';
+
+                        container.innerHTML = `
+                            <input type="text" id="map-location-search" placeholder="Tìm kiếm địa điểm..." style="border: none; outline: none; padding: 5px 10px; width: 250px; border-radius: 4px; background: transparent;">
+                            <button id="map-location-search-btn" title="Tìm kiếm" style="background: none; border: none; cursor: pointer; color: #5f6368; padding: 0 10px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                                </svg>
+                            </button>
+                        `;
+
+                        // Prevent map click when interacting with the search box
+                        L.DomEvent.disableClickPropagation(container);
+                        return container;
+                    }
+                });
+                map.addControl(new SearchLocationControl());
+
                 updateMapStyle(activeStyle, 'light');
                 loadIssuesData();
             }
@@ -506,6 +536,63 @@
             $('#close-panel-btn').click(() => $('#issue-panel').fadeOut(200));
             map.on('click', () => $('#issue-panel').fadeOut(200));
 
+            // Logic tìm kiếm địa điểm Nominatim
+            let searchMarker = null;
+
+            function searchLocation() {
+                const query = $('#map-location-search').val();
+                if (!query) return;
+
+                const btn = $('#map-location-search-btn');
+                btn.addClass('opacity-50 cursor-wait');
+
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&accept-language=vi`;
+                
+                $.getJSON(url, function(data) {
+                    btn.removeClass('opacity-50 cursor-wait');
+                    if (data && data.length > 0) {
+                        const result = data[0];
+                        const lat = result.lat;
+                        const lon = result.lon;
+
+                        map.flyTo([lat, lon], 15);
+
+                        if (searchMarker) {
+                            map.removeLayer(searchMarker);
+                        }
+                        
+                        searchMarker = L.marker([lat, lon], {
+                            icon: L.divIcon({
+                                html: `<div style="background-color: #f59e0b; width: 24px; height: 24px; border: 3px solid white; box-shadow: 0 0 15px rgba(245,158,11,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="white" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg></div>`,
+                                className: '',
+                                iconSize: [24, 24],
+                                iconAnchor: [12, 12],
+                                popupAnchor: [0, -14]
+                            })
+                        }).addTo(map)
+                        .bindPopup(`<strong class="text-warning">Kết quả tìm kiếm:</strong><br>${result.display_name}`)
+                        .openPopup();
+                    } else {
+                        alert("Không tìm thấy địa điểm này. Vui lòng thử từ khóa khác.");
+                    }
+                }).fail(function() {
+                    btn.removeClass('opacity-50 cursor-wait');
+                    alert("Có lỗi xảy ra khi tìm kiếm địa điểm.");
+                });
+            }
+
+            $(document).on('click', '#map-location-search-btn', function(e) {
+                e.preventDefault();
+                searchLocation();
+            });
+
+            $(document).on('keypress', '#map-location-search', function(e) {
+                if (e.which == 13) {
+                    e.preventDefault();
+                    searchLocation();
+                }
+            });
+
             // 5. Tính năng Vị trí của tôi (Get Current Location)
             let userMarker = null; // Lưu marker vị trí người dùng để xóa nếu cần
             
@@ -562,7 +649,7 @@
                             }
                             alert(errorMsg);
                         },
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                     );
                 } else {
                     btn.removeClass('opacity-75 cursor-wait');

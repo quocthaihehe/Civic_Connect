@@ -28,8 +28,8 @@
         .glass-card { padding: 1.25rem !important; }
         
         .wizard-stepper { display: flex; justify-content: space-between; margin-bottom: 0.75rem; position: relative; }
-        .wizard-stepper::before { content: ''; position: absolute; top: 13px; left: 10%; right: 10%; height: 2px; background: var(--gray-200); z-index: 1; }
-        .progress-bar-stepper { position: absolute; top: 13px; left: 10%; height: 2px; background: var(--primary-500); z-index: 2; transition: width 0.4s ease; width: 0%; }
+        .wizard-stepper::before { content: ''; position: absolute; top: 13px; left: 12.5%; right: 12.5%; height: 2px; background: var(--gray-200); z-index: 1; }
+        .progress-bar-stepper { position: absolute; top: 13px; left: 12.5%; height: 2px; background: var(--primary-500); z-index: 2; transition: width 0.4s ease; width: 0%; }
         .step { position: relative; z-index: 3; text-align: center; width: 25%; }
         .step-icon { width: 28px; height: 28px; background: white; border: 2px solid var(--gray-300); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.25rem auto; font-weight: 600; color: var(--gray-500); transition: all 0.3s; font-size: 0.85rem; }
         .step.active .step-icon { border-color: var(--primary-500); background: var(--primary-500); color: white; box-shadow: 0 0 0 4px rgba(27, 77, 62, 0.15); }
@@ -125,7 +125,7 @@
             </div>
 
             <form asp-action="Create" method="post" enctype="multipart/form-data" id="issueWizardForm">
-                <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                <div asp-validation-summary="All" class="text-danger" role="alert"></div>
 
                 <!-- STEP 1: CHỌN DANH MỤC -->
                 <div class="step-content active" id="step1">
@@ -338,7 +338,7 @@
                 });
 
                 // Update progress bar
-                const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+                const progress = ((currentStep - 1) / (totalSteps - 1)) * 75;
                 $('#wizardProgress').css('width', progress + '%');
 
                 // Update buttons

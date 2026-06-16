@@ -4,6 +4,7 @@ using CivicConnect.Web.Repositories;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mscc.GenerativeAI;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -122,92 +123,25 @@ namespace CivicConnect.Web.Services
 
             try
             {
+                var modelName = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
                 var prompt = PROMPT_TEMPLATE
                     .Replace("{TITLE}", title)
                     .Replace("{CONTENT}", effectiveContent);
 
-                var requestBody = new
-                {
-                    contents = new[]
-                    {
-                        new
-                        {
-                            parts = new[] { new { text = prompt } }
-                        }
-                    },
-                    generationConfig = new
-                    {
-                        temperature = 0.3,
-                        responseMimeType = "application/json"
-                    }
-                };
-
-                var modelName = string.IsNullOrWhiteSpace(_settings.ModelName)
-                    ? "gemini-1.5-flash"
-                    : _settings.ModelName;
-
-                var apiKey = _settings.ApiKey;
-                bool isOAuthToken = apiKey.StartsWith("ya29.");
-
-                var endpoints = new[]
-                {
-                    ($"https://generativelanguage.googleapis.com/v1/models/{modelName}:generateContent", isOAuthToken),
-                    ($"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent", isOAuthToken),
-                    ($"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent", isOAuthToken),
-                    ($"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent", isOAuthToken),
-                };
-
-                var client = _httpClientFactory.CreateClient();
-                HttpResponseMessage? response = null;
-                string responseString = string.Empty;
-
-                foreach (var (baseUrl, useBearer) in endpoints)
-                {
-                    var url = useBearer ? baseUrl : $"{baseUrl}?key={apiKey}";
-                    var request = new HttpRequestMessage(HttpMethod.Post, url);
-                    request.Content = new StringContent(
-                        JsonSerializer.Serialize(requestBody),
-                        Encoding.UTF8,
-                        "application/json");
-
-                    if (useBearer)
-                        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-
-                    _logger.LogInformation("Thử gọi Gemini: {Url}", url);
-                    response = await client.SendAsync(request);
-                    responseString = await response.Content.ReadAsStringAsync();
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        _logger.LogInformation("Gemini gọi thành công: {Url}", url);
-                        break;
-                    }
-
-                    _logger.LogWarning("Gemini endpoint {Url} trả {Status}: {Body}", url, response.StatusCode, responseString[..Math.Min(200, responseString.Length)]);
-                }
-
-                if (response == null || !response.IsSuccessStatusCode)
-                {
-                    _logger.LogWarning("Tất cả Gemini endpoints đều thất bại. Sử dụng bộ sinh tóm tắt dự phòng (Fallback).");
-                    return GenerateFallbackSummary(title, effectiveContent, modelName);
-                }
-
-                var geminiDoc = JsonNode.Parse(responseString);
-                var aiText = geminiDoc?["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.GetValue<string>();
+                var aiText = await CallGeminiSdkAsync(prompt, modelName);
 
                 if (string.IsNullOrWhiteSpace(aiText))
                 {
-                    _logger.LogWarning("Gemini API trả về nội dung rỗng. Sử dụng bộ sinh tóm tắt dự phòng.");
+                    _logger.LogWarning("Gemini SDK trả về nội dung rỗng. Dùng dự phòng.");
                     return GenerateFallbackSummary(title, effectiveContent, modelName);
                 }
 
-                var tokensUsed = geminiDoc?["usageMetadata"]?["totalTokenCount"]?.GetValue<int>() ?? 0;
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var aiResult = JsonSerializer.Deserialize<GeminiPolicyJson>(aiText, options);
 
                 if (aiResult == null)
                 {
-                    _logger.LogWarning("Không thể parse JSON từ Gemini. Sử dụng bộ sinh tóm tắt dự phòng.");
+                    _logger.LogWarning("Không thể parse JSON từ Gemini. Dùng dự phòng.");
                     return GenerateFallbackSummary(title, effectiveContent, modelName);
                 }
 
@@ -218,20 +152,27 @@ namespace CivicConnect.Web.Services
                     BulletPoints = aiResult.BulletPoints ?? new List<string>(),
                     RealWorldExample = aiResult.RealWorldExample ?? string.Empty,
                     ModelUsed = modelName,
-                    TokensUsed = tokensUsed
+                    TokensUsed = 0
                 };
 
-                var cacheOptions = new MemoryCacheEntryOptions
+                _cache.Set(cacheKey, result, new MemoryCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(48)
-                };
-                _cache.Set(cacheKey, result, cacheOptions);
-
+                });
                 return result;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong SummarizePolicyAsync.");
+                return new PolicySummaryResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Lỗi xảy ra khi gọi Gemini AI cho '{Title}', sử dụng dự phòng.", title);
+                _logger.LogWarning(ex, "Lỗi khi gọi Gemini AI cho '{Title}', dùng dự phòng.", title);
                 var fallbackModel = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
                 return GenerateFallbackSummary(title, effectiveContent, fallbackModel);
             }
@@ -264,75 +205,12 @@ namespace CivicConnect.Web.Services
 
             try
             {
+                var modelName = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
                 var prompt = EXPLAIN_PROMPT_TEMPLATE
                     .Replace("{SELECTED_TEXT}", trimmed)
                     .Replace("{POLICY_TITLE}", policyTitle);
 
-                var requestBody = new
-                {
-                    contents = new[]
-                    {
-                        new
-                        {
-                            parts = new[] { new { text = prompt } }
-                        }
-                    },
-                    generationConfig = new
-                    {
-                        temperature = 0.3,
-                        responseMimeType = "application/json"
-                    }
-                };
-
-                var modelName = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
-                var apiKey = _settings.ApiKey;
-                bool isOAuthToken = apiKey.StartsWith("ya29.");
-
-                var endpoints = new[]
-                {
-                    ($"https://generativelanguage.googleapis.com/v1/models/{modelName}:generateContent", isOAuthToken),
-                    ($"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent", isOAuthToken),
-                };
-
-                var client = _httpClientFactory.CreateClient();
-                HttpResponseMessage? response = null;
-                string responseString = string.Empty;
-
-                foreach (var (baseUrl, useBearer) in endpoints)
-                {
-                    var url = useBearer ? baseUrl : $"{baseUrl}?key={apiKey}";
-                    var request = new HttpRequestMessage(HttpMethod.Post, url);
-                    request.Content = new StringContent(
-                        JsonSerializer.Serialize(requestBody),
-                        Encoding.UTF8,
-                        "application/json");
-
-                    if (useBearer)
-                        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-
-                    _logger.LogInformation("Thử gọi Gemini (Explain): {Url}", url);
-                    response = await client.SendAsync(request);
-                    responseString = await response.Content.ReadAsStringAsync();
-
-                    if (response.IsSuccessStatusCode) break;
-                }
-
-                if (response == null || !response.IsSuccessStatusCode)
-                {
-                    _logger.LogWarning("Tất cả Gemini endpoints giải thích thất bại. Đang kiểm tra mã trạng thái.");
-                    if (response != null && (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden))
-                    {
-                        return new SelectionExplainResult
-                        {
-                            IsSuccess = false,
-                            ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403 Unauthorized). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
-                        };
-                    }
-                    return GenerateFallbackExplain(trimmed, policyTitle, modelName);
-                }
-
-                var geminiDoc = JsonNode.Parse(responseString);
-                var aiText = geminiDoc?["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.GetValue<string>();
+                var aiText = await CallGeminiSdkAsync(prompt, modelName);
 
                 if (string.IsNullOrWhiteSpace(aiText))
                     return GenerateFallbackExplain(trimmed, policyTitle, modelName);
@@ -354,6 +232,15 @@ namespace CivicConnect.Web.Services
 
                 _cache.Set(cacheKey, result, TimeSpan.FromHours(48));
                 return result;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong ExplainSelectionAsync.");
+                return new SelectionExplainResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
+                };
             }
             catch (Exception ex)
             {
@@ -386,67 +273,12 @@ namespace CivicConnect.Web.Services
 
             try
             {
+                var modelName = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
                 var prompt = READ_EXPLAIN_PROMPT_TEMPLATE
                     .Replace("{TITLE}", title)
                     .Replace("{CONTENT}", effectiveContent);
 
-                var requestBody = new
-                {
-                    contents = new[]
-                    {
-                        new
-                        {
-                            parts = new[] { new { text = prompt } }
-                        }
-                    },
-                    generationConfig = new
-                    {
-                        temperature = 0.3,
-                        responseMimeType = "application/json"
-                    }
-                };
-
-                var modelName = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
-                var apiKey = _settings.ApiKey;
-                bool isOAuthToken = apiKey.StartsWith("ya29.");
-
-                var endpoints = new[]
-                {
-                    ($"https://generativelanguage.googleapis.com/v1/models/{modelName}:generateContent", isOAuthToken),
-                    ($"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent", isOAuthToken),
-                };
-
-                var client = _httpClientFactory.CreateClient();
-                HttpResponseMessage? response = null;
-                string responseString = string.Empty;
-
-                foreach (var (baseUrl, useBearer) in endpoints)
-                {
-                    var url = useBearer ? baseUrl : $"{baseUrl}?key={apiKey}";
-                    var request = new HttpRequestMessage(HttpMethod.Post, url);
-                    request.Content = new StringContent(
-                        JsonSerializer.Serialize(requestBody),
-                        Encoding.UTF8,
-                        "application/json");
-
-                    if (useBearer)
-                        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-
-                    _logger.LogInformation("Thử gọi Gemini (Read & Explain): {Url}", url);
-                    response = await client.SendAsync(request);
-                    responseString = await response.Content.ReadAsStringAsync();
-
-                    if (response.IsSuccessStatusCode) break;
-                }
-
-                if (response == null || !response.IsSuccessStatusCode)
-                {
-                    _logger.LogWarning("Tất cả Gemini endpoints đọc giải thích thất bại. Dùng dự phòng.");
-                    return GenerateFallbackReadExplain(title, effectiveContent, modelName);
-                }
-
-                var geminiDoc = JsonNode.Parse(responseString);
-                var aiText = geminiDoc?["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.GetValue<string>();
+                var aiText = await CallGeminiSdkAsync(prompt, modelName);
 
                 if (string.IsNullOrWhiteSpace(aiText))
                     return GenerateFallbackReadExplain(title, effectiveContent, modelName);
@@ -483,11 +315,69 @@ namespace CivicConnect.Web.Services
                 _cache.Set(cacheKey, result, TimeSpan.FromHours(48));
                 return result;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong ReadAndExplainAsync.");
+                return new SectionedReadResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
+                };
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Lỗi khi gọi Gemini AI đọc hiểu từng phần, dùng dự phòng.");
                 return GenerateFallbackReadExplain(title, effectiveContent, _settings.ModelName);
             }
+        }
+
+        private async Task<string?> CallGeminiSdkAsync(string prompt, string modelName)
+        {
+            try
+            {
+                var googleAI = new GoogleAI(_settings.ApiKey);
+                var model = googleAI.GenerativeModel(model: modelName);
+                var response = await model.GenerateContent(prompt);
+                var text = response.Text;
+                _logger.LogInformation("Gemini SDK gọi thành công, model: {Model}", modelName);
+                return text;
+            }
+            catch (Exception ex)
+            {
+                if (IsApiKeyError(ex))
+                {
+                    throw new UnauthorizedAccessException("API_KEY_INVALID", ex);
+                }
+                _logger.LogWarning(ex, "Gemini SDK thất bại với model {Model}, thử gemini-1.5-flash.", modelName);
+                try
+                {
+                    var googleAI = new GoogleAI(_settings.ApiKey);
+                    var model = googleAI.GenerativeModel(model: "gemini-1.5-flash");
+                    var response = await model.GenerateContent(prompt);
+                    return response.Text;
+                }
+                catch (Exception ex2)
+                {
+                    if (IsApiKeyError(ex2))
+                    {
+                        throw new UnauthorizedAccessException("API_KEY_INVALID", ex2);
+                    }
+                    _logger.LogWarning(ex2, "Gemini SDK thất bại hoàn toàn.");
+                    return null;
+                }
+            }
+        }
+
+        private static bool IsApiKeyError(Exception ex)
+        {
+            var msg = ex.ToString().ToLower();
+            return msg.Contains("api_key_invalid") || 
+                   msg.Contains("api key not valid") || 
+                   msg.Contains("400") || 
+                   msg.Contains("401") || 
+                   msg.Contains("403") || 
+                   msg.Contains("unauthorized") || 
+                   msg.Contains("forbidden");
         }
 
         private static PolicySummaryResult GenerateFallbackSummary(string title, string content, string modelName)
@@ -546,28 +436,51 @@ namespace CivicConnect.Web.Services
             string? keyTerm = null;
             string practicalMeaning;
 
+            // Trích đoạn ngắn để hiển thị trong giải thích
+            var preview = selectedText.Length > 80 ? selectedText[..80].Trim() + "..." : selectedText.Trim();
+
             if (lower.Contains("phạt tiền") || lower.Contains("xử phạt"))
             {
-                simpleExplanation = "Đoạn này quy định về hình thức xử phạt bằng tiền mặt đối với các hành vi vi phạm pháp luật bảo vệ môi trường.";
-                keyTerm = "Xử phạt hành chính: Là việc cơ quan nhà nước có thẩm quyền áp dụng các biện pháp phạt tiền hoặc phạt cảnh cáo đối với người vi phạm quy định quản lý nhà nước.";
-                practicalMeaning = "Bạn cần lưu ý thực hiện đúng quy định để tránh bị phạt tiền từ 1 triệu đồng đến hàng chục triệu đồng tùy theo lỗi vi phạm.";
+                simpleExplanation = $"Đoạn này quy định về hình thức xử phạt bằng tiền mặt đối với các hành vi vi phạm hành chính.";
+                keyTerm = "Xử phạt hành chính: Là việc cơ quan nhà nước có thẩm quyền áp dụng các biện pháp phạt tiền hoặc cảnh cáo đối với người vi phạm quy định.";
+                practicalMeaning = "Bạn cần lưu ý thực hiện đúng quy định để tránh bị phạt tiền theo mức quy định.";
             }
-            else if (lower.Contains("hạ ngầm") || lower.Contains("cải tạo"))
+            else if (lower.Contains("hạ ngầm") || lower.Contains("cải tạo") || lower.Contains("vỉa hè"))
             {
-                simpleExplanation = "Quy định về việc chuyển toàn bộ dây cáp điện và viễn thông treo lơ lửng xuống lòng đất, đồng thời lát lại vỉa hè để khu vực đường phố đẹp đẽ, an toàn hơn.";
-                keyTerm = "Hạ ngầm: Việc đào rãnh kỹ thuật dưới lòng đường, vỉa hè để lắp đặt các đường dây cáp, loại bỏ dây treo nổi trên không.";
-                practicalMeaning = "Đường phố trước cửa nhà bạn sẽ thông thoáng hơn, không còn cảnh dây cáp chằng chịt, lối đi bộ sẽ được lát gạch đá phẳng phiu.";
+                simpleExplanation = $"Đoạn này nói về việc cải tạo, nâng cấp hạ tầng đô thị (vỉa hè, đường phố, hệ thống điện/cáp) nhằm làm đẹp và an toàn hơn.";
+                keyTerm = "Hạ ngầm: Đưa dây cáp điện, viễn thông từ trên không xuống lòng đất để đảm bảo mỹ quan và an toàn.";
+                practicalMeaning = "Người dân sống trong khu vực cải tạo cần hợp tác bàn giao mặt bằng và có thể phải đóng góp một phần kinh phí theo quy định.";
             }
-            else if (lower.Contains("xã hội hóa"))
+            else if (lower.Contains("xã hội hóa") || lower.Contains("đóng góp") || lower.Contains("kinh phí"))
             {
-                simpleExplanation = "Cơ chế huy động sự đóng góp kinh phí và công sức từ cộng đồng người dân và doanh nghiệp cùng với nguồn vốn hỗ trợ từ nhà nước.";
-                keyTerm = "Xã hội hóa: Sự kết hợp đóng góp tài chính, nhân lực giữa Nhà nước và Nhân dân cùng làm dự án lợi ích chung.";
-                practicalMeaning = "Hộ kinh doanh mặt tiền sẽ đóng góp 30% chi phí cải tạo vỉa hè trước cửa tiệm của mình, nhà nước lo 70% còn lại.";
+                simpleExplanation = $"Đoạn này nói về cơ chế huy động vốn từ người dân và doanh nghiệp cùng nhà nước để thực hiện dự án công ích.";
+                keyTerm = "Xã hội hóa: Nhà nước và người dân/doanh nghiệp cùng đóng góp kinh phí để thực hiện dự án lợi ích chung.";
+                practicalMeaning = "Tuỳ vào đối tượng, bạn có thể được miễn phí (hộ nghèo, chính sách) hoặc đóng góp một phần chi phí theo tỷ lệ quy định.";
+            }
+            else if (lower.Contains("tặng") || lower.Contains("hoa") || lower.Contains("cây xanh") || lower.Contains("môi trường sống"))
+            {
+                simpleExplanation = $"Đoạn này mô tả hoạt động của lãnh đạo/tổ chức đến trao tặng quà hoặc cây xanh cho người dân, khuyến khích bảo vệ môi trường sống xanh sạch đẹp.";
+                keyTerm = null;
+                practicalMeaning = "Đây là hoạt động cộng đồng mang tính khuyến khích, người dân được hưởng lợi trực tiếp từ các phần quà và chương trình trồng cây xanh tại khu vực sinh sống.";
+            }
+            else if (lower.Contains("kỷ niệm") || lower.Contains("hưởng ứng") || lower.Contains("ra quân") || lower.Contains("thành đoàn") || lower.Contains("hội liên hiệp"))
+            {
+                simpleExplanation = $"Đoạn này mô tả hoạt động kỷ niệm hoặc phong trào thi đua của tổ chức chính trị/xã hội, kêu gọi người dân cùng tham gia hưởng ứng.";
+                keyTerm = null;
+                practicalMeaning = "Người dân có thể tham gia các hoạt động cộng đồng này để đóng góp vào phong trào chung của địa phương và thể hiện tinh thần công dân.";
+            }
+            else if (lower.Contains("phát biểu") || lower.Contains("bí thư") || lower.Contains("chủ tịch") || lower.Contains("lãnh đạo"))
+            {
+                simpleExplanation = $"Đoạn này ghi lại phát biểu hoặc chỉ đạo của lãnh đạo tại sự kiện, thể hiện định hướng và thông điệp chính sách của chính quyền.";
+                keyTerm = null;
+                practicalMeaning = "Những phát biểu này phản ánh chủ trương, định hướng của chính quyền địa phương mà người dân nên nắm bắt để hiểu rõ chính sách đang được thực thi.";
             }
             else
             {
-                simpleExplanation = "Đoạn văn bản quy định các nghĩa vụ hoặc quyền lợi hành chính công của bạn liên quan đến chính sách.";
-                practicalMeaning = "Bạn cần tìm hiểu và thực hiện đúng hướng dẫn của cơ quan chức năng để đảm bảo quyền lợi hợp pháp của mình.";
+                // Fallback thông minh dựa trên nội dung thực tế
+                var wordCount = selectedText.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+                simpleExplanation = $"Đoạn văn bản này (gồm {wordCount} từ) là một phần nội dung trong chính sách \"{policyTitle}\", đề cập đến các quy định hoặc thông tin hành chính liên quan.";
+                practicalMeaning = $"Để hiểu rõ hơn ý nghĩa cụ thể của đoạn: \"{preview}\", bạn nên đọc toàn bộ văn bản hoặc liên hệ cơ quan chức năng để được giải thích chi tiết.";
             }
 
             return new SelectionExplainResult
