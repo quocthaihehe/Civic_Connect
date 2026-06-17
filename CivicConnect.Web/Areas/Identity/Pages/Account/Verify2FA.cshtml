@@ -1,0 +1,69 @@
+@page
+@model Verify2FAModel
+@{
+    ViewData["Title"] = "Xác thực hai lớp (2FA)";
+    var systemOtp = TempData["2FA_OtpCode"]?.ToString();
+    TempData.Keep("2FA_OtpCode");
+    TempData.Keep("2FA_UserId");
+    TempData.Keep("2FA_ReturnUrl");
+}
+
+<div class="row justify-content-center align-items-center py-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 2.2rem;"></i>
+                </div>
+                <h3 class="fw-bold">Xác thực 2FA</h3>
+                <p class="text-muted mt-2" style="font-size: 0.85rem;">
+                    Tài khoản của bạn đã được cấu hình xác thực hai lớp qua 
+                    <strong class="text-primary">@Model.TwoFactorType</strong>.
+                </p>
+                <div class="badge bg-secondary text-wrap py-2 px-3 mt-1" style="font-size: 0.8rem;">
+                    @Model.MaskedContact
+                </div>
+            </div>
+
+            <form asp-page="./Verify2FA" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="font-size: 0.85rem;" role="alert"></div>
+
+                <div class="mb-4">
+                    <label asp-for="Input.OtpCode" class="form-label fw-semibold" style="font-size: 0.85rem;">Mã OTP 6 số:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-key-fill"></i></span>
+                        <input asp-for="Input.OtpCode" class="form-control border-start-0 ps-0 text-center fw-bold fs-4 letter-spacing-md" placeholder="000000" maxlength="6" required autocomplete="one-time-code" autofocus />
+                    </div>
+                    <span asp-validation-for="Input.OtpCode" class="text-danger" style="font-size: 0.75rem;"></span>
+                </div>
+
+                <div class="d-grid gap-2 mb-3">
+                    <button type="submit" class="btn btn-primary rounded-pill py-2.5 fw-semibold"><i class="bi bi-unlock-fill me-1"></i> Xác Nhận Đăng Nhập</button>
+                </div>
+                
+                <div class="text-center">
+                    <a asp-page="./Login" class="btn btn-link text-decoration-none text-muted p-0 small" style="font-size: 0.8rem;">
+                        Quay lại trang Đăng nhập
+                    </a>
+                </div>
+            </form>
+
+            <div class="mt-4 border-top pt-3" style="border-top: 1px solid var(--border-glass) !important;">
+                <div class="alert alert-info py-2 mb-0" style="font-size: 0.75rem;">
+                    <strong>Môi trường phát triển:</strong><br/>
+                    - OTP đã gửi tới hòm thư: <code class="text-danger">@systemOtp</code><br/>
+                    - Hoặc dùng OTP mặc định: <code>123456</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        .letter-spacing-md {
+            letter-spacing: 4px;
+        }
+    </style>
+}

@@ -436,6 +436,69 @@ namespace CivicConnect.Web.Data
                     Signer = "Chủ tịch UBND Quận 1",
                     SourceUrl = "https://tuoitre.vn/khanh-hoa-trien-khai-ung-dung-de-dan-phan-anh-hien-truong-tra-cuu-dich-vu-cong-20260415093301147.htm",
                     EffectiveDate = new DateTime(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 7,
+                    Title = "Luật số 10/2022/QH15 về thực hiện dân chủ ở cơ sở",
+                    Excerpt = "Quốc hội ban hành luật quy định về quyền và nghĩa vụ của công dân trong việc giám sát, kiểm tra và phản ánh ý kiến đến chính quyền địa phương.",
+                    Content = """
+                              <p><strong>LUẬT</strong><br/>
+                              <strong>THỰC HIỆN DÂN CHỦ Ở CƠ SỞ</strong></p>
+
+                              <p>Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;<br/>
+                              Quốc hội ban hành Luật Thực hiện dân chủ ở cơ sở.</p>
+
+                              <p><strong>Chương I: QUY ĐỊNH CHUNG</strong></p>
+
+                              <p><strong>Điều 5. Quyền của công dân trong thực hiện dân chủ ở cơ sở</strong><br/>
+                              1. Được thụ hưởng thông tin công khai từ cơ quan nhà nước đầy đủ và minh bạch.<br/>
+                              2. Đề xuất, kiến nghị, phản ánh, thảo luận và tham gia đóng góp ý kiến về các nội dung liên quan trực tiếp đến đời sống xã hội và hạ tầng đô thị tại cơ sở.<br/>
+                              3. Thực hiện quyền kiểm tra, giám sát hoạt động của chính quyền cấp cơ sở theo đúng quy định pháp luật.</p>
+
+                              <p><strong>Điều 6. Nghĩa vụ của công dân</strong><br/>
+                              1. Tuân thủ Hiến pháp và pháp luật, tôn trọng trật tự văn minh đô thị.<br/>
+                              2. Phối hợp cùng cơ quan chức năng phản ánh kịp thời các hành vi vi phạm trật tự công cộng, gây ô nhiễm môi trường hoặc hư hỏng hạ tầng kỹ thuật.</p>
+                              """,
+                    Tag = "Luật",
+                    TagClass = "tag-law",
+                    IssuingUnit = "Quốc hội",
+                    PublishedDate = new DateTime(2022, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "10/2022/QH15",
+                    DocumentType = "Luật",
+                    Signer = "Chủ tịch Quốc hội Vương Đình Huệ",
+                    SourceUrl = "https://chinhphu.vn/",
+                    EffectiveDate = new DateTime(2023, 7, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 8,
+                    Title = "Nghị định 59/2022/NĐ-CP của Chính phủ quy định về định danh và xác thực điện tử qua VNeID",
+                    Excerpt = "Chính phủ quy định về danh tính điện tử, xác thực điện tử và việc sử dụng tài khoản VNeID thay thế giấy tờ vật lý.",
+                    Content = """
+                              <p><strong>NGHỊ ĐỊNH</strong><br/>
+                              <strong>Quy định về định danh và xác thực điện tử</strong></p>
+
+                              <p>Căn cứ Luật Tổ chức Chính phủ ngày 19 tháng 6 năm 2015;<br/>
+                              Căn cứ Luật An toàn thông tin mạng ngày 19 tháng 11 năm 2015;<br/>
+                              Theo đề nghị của Bộ trưởng Bộ Công an;<br/>
+                              Chính phủ ban hành Nghị định quy định về định danh và xác thực điện tử.</p>
+
+                              <p><strong>Điều 6. Phân loại mức độ tài khoản định danh điện tử</strong><br/>
+                              1. Mức độ 1: Xác thực qua thông tin cá nhân và ảnh chân dung đối chiếu với Cơ sở dữ liệu quốc gia về dân cư.<br/>
+                              2. Mức độ 2: Xác thực mức độ cao nhất tích hợp sinh trắc học vân tay hoặc chíp điện tử CCCD, có giá trị tương đương thẻ căn cước công dân vật lý trong thực hiện thủ tục hành chính.</p>
+                              """,
+                    Tag = "Nghị định",
+                    TagClass = "tag-law",
+                    IssuingUnit = "Chính phủ",
+                    PublishedDate = new DateTime(2022, 9, 5, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "59/2022/NĐ-CP",
+                    DocumentType = "Nghị định",
+                    Signer = "Thủ tướng Phạm Minh Chính",
+                    SourceUrl = "https://chinhphu.vn/",
+                    EffectiveDate = new DateTime(2022, 10, 20, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
 

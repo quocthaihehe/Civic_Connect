@@ -14,6 +14,15 @@ namespace CivicConnect.Web.Models.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int Upvotes { get; set; }
         public string Tags { get; set; } // e.g. "giaothong, an_ninh"
+        
+        // Community Threads upgrades
+        public bool IsApproved { get; set; } = false;
+        public string? ImageUrl { get; set; }
+        public string? VideoUrl { get; set; }
+        public string PostType { get; set; } = "Text"; // "Text", "Image", "Video", "Issue"
+        public int? RelatedIssueId { get; set; }
+        public Issue? RelatedIssue { get; set; }
+
         public List<ForumComment> Comments { get; set; } = new List<ForumComment>();
     }
 

@@ -29,6 +29,13 @@ namespace CivicConnect.Web.Models.Entities
         public string? RestrictionReason { get; set; }
         public DateTime? RestrictedUntil { get; set; }
         public bool IsOnline { get; set; } = false;
+
+        // Custom 2FA fields
+        public bool TwoFactorEnabledCustom { get; set; } = false;
+        public string? TwoFactorType { get; set; } // "Telegram", "Discord", "Authenticator"
+        public string? TwoFactorSecret { get; set; }
+        public string? TwoFactorContact { get; set; }
+
         public string BadgeLevel => TrustScore switch
         {
             >= 500 => "Kim cương",

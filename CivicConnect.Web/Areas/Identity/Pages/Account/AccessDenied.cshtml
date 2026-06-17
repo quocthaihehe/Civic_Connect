@@ -1,0 +1,39 @@
+@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Từ chối truy cập";
+}
+
+<div class="row justify-content-center align-items-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="glass-card p-4 p-md-5 text-center shadow-lg border-danger-subtle">
+            <div class="mb-4">
+                <div class="rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                    <i class="bi bi-shield-slash-fill" style="font-size: 2.5rem;"></i>
+                </div>
+            </div>
+            
+            <h2 class="fw-bold text-danger mb-2">Không Có Quyền Truy Cập</h2>
+            <h5 class="text-secondary mb-4">Access Denied</h5>
+            
+            <div class="alert alert-warning py-3 rounded-3 mb-4 text-start" style="font-size: 0.9rem;">
+                <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+                Tài khoản của bạn không có vai trò phù hợp hoặc không được phân quyền để truy cập tài nguyên này (khu vực Admin / Cán bộ).
+            </div>
+            
+            <p class="text-muted small mb-4">Nếu đây là sự nhầm lẫn, vui lòng liên hệ Ban quản trị để nâng cấp tài khoản hoặc đăng nhập lại bằng tài khoản thích hợp.</p>
+            
+            <div class="d-grid gap-2">
+                <a href="/" class="btn btn-primary rounded-pill py-2 fw-semibold">
+                    <i class="bi bi-house-door me-2"></i>Quay lại Trang chủ
+                </a>
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="m-0">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger w-100 rounded-pill py-2 fw-semibold">
+                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất tài khoản
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

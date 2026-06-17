@@ -77,6 +77,16 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
                     return Page();
                 }
 
+                if (await _userManager.CheckPasswordAsync(user, Input.Password))
+                {
+                    if (user.TwoFactorEnabledCustom)
+                    {
+                        TempData["2FA_UserId"] = user.Id;
+                        TempData["2FA_ReturnUrl"] = returnUrl;
+                        return RedirectToPage("./Verify2FA", new { returnUrl = returnUrl });
+                    }
+                }
+
                 var result = await _signInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
