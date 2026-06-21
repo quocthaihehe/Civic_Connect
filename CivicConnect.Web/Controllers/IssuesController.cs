@@ -102,8 +102,18 @@ namespace CivicConnect.Web.Controllers
 
         [HttpGet]
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Challenge();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || !user.IsPhoneVerified)
+            {
+                TempData["ErrorMessage"] = "Tài khoản của bạn cần được xác thực hoặc được Admin duyệt trước khi đăng phản ánh.";
+                return RedirectToAction("Index");
+            }
+
             ViewData["PageHeader"] = "Gửi Phản Ánh Mới";
             return View();
         }
@@ -119,6 +129,13 @@ namespace CivicConnect.Web.Controllers
             {
                 var userId = _userManager.GetUserId(User);
                 if (string.IsNullOrEmpty(userId)) return Challenge();
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null || !user.IsPhoneVerified)
+                {
+                    TempData["ErrorMessage"] = "Tài khoản của bạn cần được xác thực hoặc được Admin duyệt trước khi đăng phản ánh.";
+                    return RedirectToAction("Index");
+                }
 
                 // A5 — Validate MIME type tại Backend
                 if (model.ImageFiles != null && model.ImageFiles.Count > 0)
@@ -277,6 +294,12 @@ namespace CivicConnect.Web.Controllers
         {
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || !user.IsPhoneVerified)
+            {
+                return Json(new { success = false, message = "Tài khoản của bạn cần được xác thực hoặc được Admin duyệt trước khi bình luận." });
+            }
 
             if (string.IsNullOrWhiteSpace(content)) return BadRequest("Nội dung bình luận không được để trống.");
 

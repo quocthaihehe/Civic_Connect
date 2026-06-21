@@ -99,6 +99,7 @@ builder.Services.AddScoped<IAiService, GeminiAiService>();
 // Đăng ký các Hosted Services (Background Jobs chạy nền)
 builder.Services.AddHostedService<PriorityScoreJob>();
 builder.Services.AddHostedService<DeadlineCheckJob>();
+builder.Services.AddHostedService<SlaCheckerService>();
 
 // Đăng ký SignalR để gửi thông báo realtime
 builder.Services.AddSignalR(options =>
