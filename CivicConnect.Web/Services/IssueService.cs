@@ -1,4 +1,4 @@
-﻿using CivicConnect.Web.Models.Entities;
+using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Models.Enums;
 using CivicConnect.Web.Repositories;
 using CivicConnect.Web.Data;
@@ -102,6 +102,47 @@ namespace CivicConnect.Web.Services
 
         public async Task<Issue> CreateIssueAsync(Issue issue, List<IssueImage> images)
         {
+            // Validation 1 (A2 - Geo-fencing)
+            if (!string.IsNullOrEmpty(issue.ProvinceCode))
+            {
+                var boundary = await _context.ProvinceBoundaries
+                    .FirstOrDefaultAsync(b => b.ProvinceCode == issue.ProvinceCode);
+                
+                if (boundary != null)
+                {
+                    if (issue.Latitude < boundary.MinLat || issue.Latitude > boundary.MaxLat ||
+                        issue.Longitude < boundary.MinLng || issue.Longitude > boundary.MaxLng)
+                    {
+                        throw new ArgumentException("Tọa độ không hợp lệ hoặc nằm ngoài ranh giới cho phép");
+                    }
+                }
+            }
+
+            // Validation 2 (A7 - Duplicate Check)
+            var thresholdDate = DateTime.UtcNow.AddDays(-30);
+            var similarIssues = await _context.Issues
+                .Where(i => i.Category == issue.Category &&
+                            i.WardCode == issue.WardCode &&
+                            i.CreatedAt >= thresholdDate &&
+                            (i.Status == IssueStatus.Pending || i.Status == IssueStatus.Assigned || i.Status == IssueStatus.Processing))
+                .ToListAsync();
+
+            bool isDuplicate = false;
+            foreach (var existingIssue in similarIssues)
+            {
+                var distance = CalculateDistance(issue.Latitude, issue.Longitude, existingIssue.Latitude, existingIssue.Longitude);
+                if (distance <= 0.05)
+                {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (isDuplicate)
+            {
+                issue.Description = $"[CẢNH BÁO: Trùng lặp phản ánh trong bán kính 50m]\n{issue.Description}";
+            }
+
             issue.Status = IssueStatus.Pending;
             issue.DueDate = CalculateDueDate(issue.Priority);
             issue.CreatedAt = DateTime.UtcNow;
@@ -218,14 +259,14 @@ namespace CivicConnect.Web.Services
             await _context.Comments.AddAsync(comment);
             await _context.SaveChangesAsync();
 
-            // Cáº­p nháº­t thá»i gian thay Ä‘á»•i pháº£n Ã¡nh
+            // Cáº­p nháº­t thá» i gian thay Ä‘á»•i pháº£n Ã¡nh
             var issue = await _context.Issues.FindAsync(issueId);
             if (issue != null)
             {
                 issue.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                // Gá»­i thÃ´ng bÃ¡o cho ngÆ°á»i viáº¿t pháº£n Ã¡nh náº¿u cÃ³ comment má»›i tá»« cÃ¡n bá»™
+                // Gá»­i thÃ´ng bÃ¡o cho ngÆ°á» i viáº¿t pháº£n Ã¡nh náº¿u cÃ³ comment má»›i tá»« cÃ¡n bá»™
                 if (isOfficial && issue.AuthorId != authorId)
                 {
                     await _notificationService.SendNotificationAsync(
@@ -363,7 +404,7 @@ namespace CivicConnect.Web.Services
             var issue = await _issueRepository.GetByIdAsync(issueId);
             if (issue == null) return false;
 
-            // Chá»‰ cho phÃ©p chuyá»ƒn cáº¥p tá»« PhÆ°á»ng lÃªn Quáº­n
+            // Chá»‰ cho phÃ©p chuyá»ƒn cáº¥p tá»« PhÆ°á» ng lÃªn Quáº­n
             var official = await _userManager.FindByIdAsync(officialId);
             if (official == null || string.IsNullOrEmpty(official.DistrictCode)) return false;
 
@@ -402,7 +443,7 @@ namespace CivicConnect.Web.Services
                 AuthorId = issue.AuthorId,
                 IsAnonymous = issue.IsAnonymous,
                 IsVerified = true,
-                ParentIssueId = issue.Id, // LiÃªn káº¿t vá» issue gá»‘c
+                ParentIssueId = issue.Id, // LiÃªn káº¿t vá»  issue gá»‘c
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -641,5 +682,3 @@ namespace CivicConnect.Web.Services
         }
     }
 }
-
-

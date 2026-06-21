@@ -41,6 +41,8 @@ namespace CivicConnect.Web.Data
         public DbSet<PetitionSignature> PetitionSignatures { get; set; }
         public DbSet<CommunityEvent> CommunityEvents { get; set; }
         public DbSet<EventRegistration> EventRegistrations { get; set; }
+        public DbSet<ProvinceBoundary> ProvinceBoundaries { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -58,6 +60,13 @@ namespace CivicConnect.Web.Data
             
             modelBuilder.Entity<EventRegistration>().HasIndex(r => new { r.UserId, r.EventId }).IsUnique();
             modelBuilder.Entity<EventRegistration>().HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Restrict);
+
+            // D6: Mã hóa CitizenId bằng ValueConverter
+            modelBuilder.Entity<ApplicationUser>()
+                .Property(u => u.CitizenId)
+                .HasConversion(
+                    v => CivicConnect.Web.Helpers.EncryptionHelper.Encrypt(v),
+                    v => CivicConnect.Web.Helpers.EncryptionHelper.Decrypt(v));
 
             // Cấu hình bảng biểu quyết Vote
             modelBuilder.Entity<Vote>(entity =>

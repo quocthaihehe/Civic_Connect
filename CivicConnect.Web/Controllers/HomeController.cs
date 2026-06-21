@@ -192,6 +192,46 @@ namespace CivicConnect.Web.Controllers
         };
 
         [AllowAnonymous]
+        public async Task<IActionResult> Statistics()
+        {
+            var totalIssues = await _context.Issues.CountAsync();
+            var resolvedOrClosed = await _context.Issues
+                .Where(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed)
+                .ToListAsync();
+                
+            var resolvedCount = resolvedOrClosed.Count;
+            var resolvedPercentage = totalIssues > 0 ? (double)resolvedCount / totalIssues * 100 : 0;
+            
+            double averageProcessingTimeHours = 0;
+            var issuesWithTime = resolvedOrClosed.Where(i => i.ResolvedAt.HasValue && i.CreatedAt != default).ToList();
+            if (issuesWithTime.Any())
+            {
+                averageProcessingTimeHours = issuesWithTime.Average(i => (i.ResolvedAt.Value - i.CreatedAt).TotalHours);
+            }
+            
+            var categoryGroups = await _context.Issues
+                .GroupBy(i => i.Category)
+                .Select(g => new { Category = g.Key, Count = g.Count() })
+                .ToListAsync();
+                
+            var issuesByCategory = categoryGroups.ToDictionary(
+                g => GetCategoryName(g.Category), 
+                g => g.Count
+            );
+
+            var vm = new StatisticsViewModel
+            {
+                TotalIssues = totalIssues,
+                ResolvedPercentage = resolvedPercentage,
+                AverageProcessingHours = averageProcessingTimeHours,
+                IssuesByCategory = issuesByCategory
+            };
+            
+            ViewData["Title"] = "Thống kê công khai";
+            return View(vm);
+        }
+
+        [AllowAnonymous]
         public IActionResult Privacy()
         {
             ViewData["PageHeader"] = "Chính Sách & Điều Khoản";

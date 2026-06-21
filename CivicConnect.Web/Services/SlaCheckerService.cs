@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using CivicConnect.Web.Repositories;
 using System;
 using System.Linq;
 using System.Threading;
@@ -38,7 +39,7 @@ namespace CivicConnect.Web.Services
                     _logger.LogError(ex, "Error occurred executing SlaCheckerService.");
                 }
 
-                // Run every 1 hour
+                // Chạy lặp mỗi 1 giờ
                 await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
 
@@ -54,6 +55,7 @@ namespace CivicConnect.Web.Services
 
                 var now = DateTime.UtcNow;
 
+                // Tìm các Issue có Status == Processing hoặc Assigned VÀ DueDate < DateTime.UtcNow
                 var breachedIssues = await context.Issues
                     .Where(i => (i.Status == IssueStatus.Processing || i.Status == IssueStatus.Assigned) 
                                 && i.DueDate.HasValue 
@@ -65,9 +67,9 @@ namespace CivicConnect.Web.Services
                 int count = 0;
                 foreach (var issue in breachedIssues)
                 {
-                    // Check if already breached to avoid duplicate logs every hour
+                    // Đối với mỗi Issue quá hạn: Ghi nhận lịch sử (chỉ 1 lần cho mỗi issue)
                     var alreadyLogged = await context.IssueStatusHistories
-                        .AnyAsync(h => h.IssueId == issue.Id && h.Note.Contains("[SLA_BREACH]"));
+                        .AnyAsync(h => h.IssueId == issue.Id && h.Note != null && h.Note.Contains("[SLA_BREACH]"));
                         
                     if (!alreadyLogged)
                     {
@@ -76,7 +78,8 @@ namespace CivicConnect.Web.Services
                             IssueId = issue.Id,
                             FromStatus = issue.Status,
                             ToStatus = issue.Status,
-                            ChangedById = "System",
+                            // Dùng AuthorId hoặc ID hợp lệ để tránh lỗi FK Constraint
+                            ChangedById = !string.IsNullOrEmpty(issue.AuthorId) ? issue.AuthorId : (issue.AssignedToUserId ?? ""),
                             Note = "[SLA_BREACH] Phản ánh đã quá hạn xử lý theo quy định.",
                             ChangedAt = now
                         };
@@ -84,11 +87,12 @@ namespace CivicConnect.Web.Services
 
                         if (!string.IsNullOrEmpty(issue.AssignedToUserId))
                         {
+                            // Gọi NotificationService gửi thông báo tới AssignedToUserId
                             await notificationService.SendNotificationAsync(
                                 issue.AssignedToUserId,
                                 "Cảnh báo: Phản ánh quá hạn SLA",
                                 $"Phản ánh '{issue.Title}' mà bạn đang phụ trách đã quá hạn xử lý. Vui lòng cập nhật tiến độ ngay.",
-                                NotificationType.SystemAlert,
+                                NotificationType.General,
                                 issue.Id.ToString()
                             );
                         }
