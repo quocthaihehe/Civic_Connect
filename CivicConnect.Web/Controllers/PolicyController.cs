@@ -98,7 +98,9 @@ namespace CivicConnect.Web.Controllers
             {
                 var handler = new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true,
+                    // Tự động giải nén GZIP/Deflate/Brotli - fix lỗi ký tự lạ trên các trang nén nội dung
+                    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
                 };
                 using (var client = new HttpClient(handler))
                 {
@@ -111,7 +113,9 @@ namespace CivicConnect.Web.Controllers
                         throw new HttpRequestException($"HTTP Error {response.StatusCode}");
                     }
                     
-                    var html = await response.Content.ReadAsStringAsync();
+                    // Đọc raw bytes để tránh lỗi encoding sai (nhiều trang VN dùng Windows-1252)
+                    var rawBytes = await response.Content.ReadAsByteArrayAsync();
+                    var html = DecodeHtmlBytes(rawBytes, response.Content.Headers.ContentType?.CharSet);
                     
                     // Attempt to extract clean reader mode (content only)
                     var readerHtml = ExtractReaderMode(html, url);
@@ -217,6 +221,75 @@ namespace CivicConnect.Web.Controllers
 </html>";
                 return Content(fallbackHtml, "text/html; charset=utf-8");
             }
+        }
+
+        /// <summary>
+        /// Đọc raw bytes và decode đúng encoding của trang web.
+        /// Ưu tiên: 1) HTTP Content-Type header charset, 2) HTML meta charset, 3) UTF-8 mặc định.
+        /// </summary>
+        private static string DecodeHtmlBytes(byte[] bytes, string? headerCharset)
+        {
+            System.Text.Encoding encoding = null;
+
+            // 1. Thử dùng charset từ HTTP Content-Type header
+            if (!string.IsNullOrWhiteSpace(headerCharset))
+            {
+                try
+                {
+                    encoding = System.Text.Encoding.GetEncoding(headerCharset.Trim());
+                }
+                catch { }
+            }
+
+            // 2. Nếu không có hoặc sai, đọc tạm bằng ISO-8859-1 để tìm meta charset trong HTML
+            if (encoding == null || encoding.WebName == "utf-8")
+            {
+                // Đọc 4KB đầu để tìm meta charset (không cần đọc hết file)
+                var preview = System.Text.Encoding.GetEncoding("iso-8859-1").GetString(bytes, 0, Math.Min(bytes.Length, 4096));
+
+                // Tìm: <meta charset="windows-1252"> hoặc <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+                var charsetMatch = System.Text.RegularExpressions.Regex.Match(
+                    preview,
+                    @"charset\s*=\s*[""']?\s*([\w\-]+)\s*[""']?",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                if (charsetMatch.Success)
+                {
+                    var detectedCharset = charsetMatch.Groups[1].Value.Trim();
+                    try
+                    {
+                        var detected = System.Text.Encoding.GetEncoding(detectedCharset);
+                        // Chỉ ghi đè nếu encoding tìm thấy khác UTF-8 hoặc chưa có encoding
+                        if (encoding == null || detected.WebName != "utf-8")
+                        {
+                            encoding = detected;
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            // 3. Fallback về UTF-8
+            if (encoding == null)
+            {
+                encoding = System.Text.Encoding.UTF8;
+            }
+
+            // Decode bytes sang string với encoding đúng
+            var html = encoding.GetString(bytes);
+
+            // Nếu encoding không phải UTF-8, cần thay charset trong meta tag thành utf-8
+            // để trình duyệt không tự re-interpret sai
+            if (encoding.WebName != "utf-8")
+            {
+                html = System.Text.RegularExpressions.Regex.Replace(
+                    html,
+                    @"charset\s*=\s*[""']?\s*[\w\-]+\s*[""']?",
+                    "charset=utf-8",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            }
+
+            return html;
         }
 
         private string? ExtractReaderMode(string html, string url)
@@ -762,7 +835,9 @@ namespace CivicConnect.Web.Controllers
             {
                 var handler = new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true,
+                    // Tự động giải nén GZIP/Deflate - fix lỗi ký tự lạ khi scrape
+                    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
                 };
                 using (var client = new HttpClient(handler))
                 {
@@ -772,7 +847,9 @@ namespace CivicConnect.Web.Controllers
                     var response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode) return null;
                     
-                    var html = await response.Content.ReadAsStringAsync();
+                    // Đọc raw bytes để tránh lỗi encoding (giống Proxy method)
+                    var rawBytes = await response.Content.ReadAsByteArrayAsync();
+                    var html = DecodeHtmlBytes(rawBytes, response.Content.Headers.ContentType?.CharSet);
                     
                     // Xóa các thẻ script và style
                     html = System.Text.RegularExpressions.Regex.Replace(html, "<script[^>]*?>.*?</script>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
@@ -805,31 +882,45 @@ namespace CivicConnect.Web.Controllers
         private async Task<List<Policy>> FetchRssNewsAsync()
         {
             var newsList = new List<Policy>();
-            try
+            
+            // Define RSS sources: (url, isGovSource, sourceName)
+            var rssSources = new[]
             {
-                using (var client = new HttpClient())
+                // ===== Nguồn chính thống từ Báo điện tử Chính phủ (baochinhphu.vn) =====
+                new { Url = "https://baochinhphu.vn/rss", IsGov = true, Name = "Báo Chính phủ", Tag = "Chính phủ", TagClass = "tag-news" },
+                // ===== Nguồn báo điện tử =====
+                new { Url = "https://vnexpress.net/rss/tin-moi-nhat.rss", IsGov = false, Name = "VnExpress", Tag = "Tin tức", TagClass = "tag-news" },
+            };
+
+            using (var client = new HttpClient())
+            {
+                client.Timeout = TimeSpan.FromMilliseconds(3500);
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+
+                foreach (var source in rssSources)
                 {
-                    client.Timeout = TimeSpan.FromMilliseconds(2500);
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-
-                    // Fetch live RSS feed from VnExpress
-                    var xmlContent = await client.GetStringAsync("https://vnexpress.net/rss/tin-moi-nhat.rss");
-
-                    var xmlDoc = new XmlDocument();
-                    xmlDoc.LoadXml(xmlContent);
-
-                    var items = xmlDoc.SelectNodes("//item");
-                    if (items != null)
+                    try
                     {
+                        var xmlContent = await client.GetStringAsync(source.Url);
+                        var xmlDoc = new XmlDocument();
+                        xmlDoc.LoadXml(xmlContent);
+
+                        var items = xmlDoc.SelectNodes("//item");
+                        if (items == null) continue;
+
+                        int maxPerSource = source.IsGov ? 12 : 5;
                         int count = 0;
+
                         foreach (XmlNode item in items)
                         {
-                            if (count >= 5) break;
+                            if (count >= maxPerSource) break;
 
                             var title = item.SelectSingleNode("title")?.InnerText ?? "";
                             var link = item.SelectSingleNode("link")?.InnerText ?? "";
                             var description = item.SelectSingleNode("description")?.InnerText ?? "";
                             var pubDateStr = item.SelectSingleNode("pubDate")?.InnerText ?? "";
+
+                            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(link)) continue;
 
                             DateTime pubDate = DateTime.UtcNow;
                             if (DateTime.TryParse(pubDateStr, out var parsedDate))
@@ -837,8 +928,9 @@ namespace CivicConnect.Web.Controllers
                                 pubDate = parsedDate;
                             }
 
-                            // Clean description by removing HTML tags
+                            // Clean description HTML
                             var cleanDescription = System.Text.RegularExpressions.Regex.Replace(description, "<.*?>", string.Empty).Trim();
+                            if (cleanDescription.Length > 300) cleanDescription = cleanDescription.Substring(0, 300) + "...";
 
                             newsList.Add(new Policy
                             {
@@ -846,9 +938,9 @@ namespace CivicConnect.Web.Controllers
                                 Title = title,
                                 Excerpt = cleanDescription,
                                 Content = cleanDescription,
-                                Tag = "Tin tức",
-                                TagClass = "tag-news",
-                                IssuingUnit = "Báo điện tử",
+                                Tag = source.Tag,
+                                TagClass = source.TagClass,
+                                IssuingUnit = source.Name,
                                 PublishedDate = pubDate,
                                 IsActive = true,
                                 SourceUrl = link
@@ -857,11 +949,11 @@ namespace CivicConnect.Web.Controllers
                             count++;
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"RSS Fetch Error [{source.Name}]: {ex.Message}");
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"RSS Fetch Error: {ex.Message}");
             }
             return newsList;
         }
