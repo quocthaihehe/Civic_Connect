@@ -34,6 +34,70 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Route("Admin/Reports/ExportCsv")]
+        public async Task<IActionResult> ExportCsv(DateTime? fromDate, DateTime? toDate, IssueCategory? category, IssueStatus? status)
+        {
+            var query = _context.Issues.Include(i => i.Author).AsQueryable();
+
+            if (fromDate.HasValue)
+                query = query.Where(i => i.CreatedAt >= fromDate.Value);
+            if (toDate.HasValue)
+                query = query.Where(i => i.CreatedAt <= toDate.Value);
+            if (category.HasValue)
+                query = query.Where(i => i.Category == category.Value);
+            if (status.HasValue)
+                query = query.Where(i => i.Status == status.Value);
+
+            var issues = await query.ToListAsync();
+
+            var sb = new System.Text.StringBuilder();
+            // Header: Id, Tiêu đề, Người gửi, Ngày gửi, Trạng thái, Phường/Quận
+            sb.AppendLine("Id,Tiêu đề,Người gửi,Ngày gửi,Trạng thái,Phường/Quận");
+
+            foreach (var issue in issues)
+            {
+                var id = issue.Id.ToString();
+                var title = EscapeCsv(issue.Title);
+                var authorName = issue.Author != null ? (!string.IsNullOrEmpty(issue.Author.FullName) ? issue.Author.FullName : issue.Author.UserName) : "";
+                var author = EscapeCsv(authorName);
+                var date = issue.CreatedAt.ToString("dd/MM/yyyy HH:mm");
+                var statusStr = EscapeCsv(issue.Status.ToString());
+                
+                var locationStr = "";
+                if (!string.IsNullOrEmpty(issue.WardName) && !string.IsNullOrEmpty(issue.DistrictName))
+                {
+                    locationStr = $"{issue.WardName}, {issue.DistrictName}";
+                }
+                else if (!string.IsNullOrEmpty(issue.DistrictName))
+                {
+                    locationStr = issue.DistrictName;
+                }
+                else if (!string.IsNullOrEmpty(issue.WardName))
+                {
+                    locationStr = issue.WardName;
+                }
+                var location = EscapeCsv(locationStr);
+
+                sb.AppendLine($"{id},{title},{author},{date},{statusStr},{location}");
+            }
+
+            // UTF8 with BOM for Excel compatibility
+            var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+            return File(bytes, "text/csv", "BaoCaoPhanAnh.csv");
+        }
+
+        private string EscapeCsv(string field)
+        {
+            if (string.IsNullOrEmpty(field)) return "";
+            field = field.Replace("\"", "\"\"");
+            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
+            {
+                return $"\"{field}\"";
+            }
+            return field;
+        }
+
         [HttpPost]
         [Route("Admin/Reports/CustomQuery")]
         public async Task<IActionResult> CustomQuery(List<string> columns, IssueStatus? status, IssuePriority? priority, DateTime? fromDate, DateTime? toDate)

@@ -102,8 +102,18 @@ namespace CivicConnect.Web.Controllers
 
         [HttpGet]
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Challenge();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || !user.IsPhoneVerified)
+            {
+                TempData["ErrorMessage"] = "Tài khoản của bạn cần được xác thực hoặc được Admin duyệt trước khi đăng phản ánh.";
+                return RedirectToAction("Index");
+            }
+
             ViewData["PageHeader"] = "Gửi Phản Ánh Mới";
             return View();
         }
@@ -119,6 +129,40 @@ namespace CivicConnect.Web.Controllers
             {
                 var userId = _userManager.GetUserId(User);
                 if (string.IsNullOrEmpty(userId)) return Challenge();
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null || !user.IsPhoneVerified)
+                {
+                    TempData["ErrorMessage"] = "Tài khoản của bạn cần được xác thực hoặc được Admin duyệt trước khi đăng phản ánh.";
+                    return RedirectToAction("Index");
+                }
+
+                // A5 — Validate MIME type tại Backend
+                if (model.ImageFiles != null && model.ImageFiles.Count > 0)
+                {
+                    var allowedMimes = new[] { "image/jpeg", "image/png", "image/webp" };
+                    foreach (var file in model.ImageFiles)
+                    {
+                        if (!allowedMimes.Contains(file.ContentType.ToLower()))
+                        {
+                            ModelState.AddModelError(nameof(model.ImageFiles), $"Tệp '{file.FileName}' không hợp lệ. Chỉ chấp nhận JPEG, PNG, WEBP.");
+                            ViewData["PageHeader"] = "Gửi Phản Ánh Mới";
+                            return View(model);
+                        }
+                    }
+                }
+
+                // A3 — Rate Limit tạo phản ánh (5/ngày)
+                var today = DateTime.UtcNow.Date;
+                var issueCountToday = await _context.Issues
+                    .CountAsync(i => i.AuthorId == userId && i.CreatedAt.Date == today);
+                var limit = 5; // Sau này có thể dựa vào KYC level
+                if (issueCountToday >= limit)
+                {
+                    ModelState.AddModelError("", $"Bạn đã đạt giới hạn {limit} phản ánh trong ngày hôm nay. Vui lòng thử lại vào ngày mai.");
+                    ViewData["PageHeader"] = "Gửi Phản Ánh Mới";
+                    return View(model);
+                }
 
                 var issue = new Issue
                 {
@@ -251,7 +295,24 @@ namespace CivicConnect.Web.Controllers
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || !user.IsPhoneVerified)
+            {
+                return Json(new { success = false, message = "Tài khoản của bạn cần được xác thực hoặc được Admin duyệt trước khi bình luận." });
+            }
+
             if (string.IsNullOrWhiteSpace(content)) return BadRequest("Nội dung bình luận không được để trống.");
+
+            // A4 — Cooldown bình luận 15 giây
+            var lastComment = await _context.Comments
+                .Where(c => c.AuthorId == userId)
+                .OrderByDescending(c => c.CreatedAt)
+                .FirstOrDefaultAsync();
+            if (lastComment != null && (DateTime.UtcNow - lastComment.CreatedAt).TotalSeconds < 15)
+            {
+                var remaining = (int)(15 - (DateTime.UtcNow - lastComment.CreatedAt).TotalSeconds);
+                return Json(new { success = false, message = $"Vui lòng đợi {remaining} giây trước khi bình luận tiếp." });
+            }
 
             var isOfficial = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
 
@@ -302,6 +363,99 @@ namespace CivicConnect.Web.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true });
+        }
+
+        // A1 — GET Edit: Chỉ cho phép tác giả và trạng thái Pending
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Challenge();
+
+            var issue = await _context.Issues
+                .Include(i => i.Images)
+                .FirstOrDefaultAsync(i => i.Id == id);
+            if (issue == null) return NotFound();
+            if (issue.AuthorId != userId) return Forbid();
+
+            if (issue.Status != IssueStatus.Pending)
+            {
+                TempData["ErrorMessage"] = "Phản ánh đã được tiếp nhận, không thể chỉnh sửa.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            ViewData["PageHeader"] = "Chỉnh Sửa Phản Ánh";
+            return View(issue);
+        }
+
+        // A1 — POST Edit: Cập nhật các trường được phép
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, string title, string description, IssueCategory category, string address, double latitude, double longitude)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Challenge();
+
+            var issue = await _context.Issues.FirstOrDefaultAsync(i => i.Id == id);
+            if (issue == null) return NotFound();
+            if (issue.AuthorId != userId) return Forbid();
+
+            if (issue.Status != IssueStatus.Pending)
+            {
+                TempData["ErrorMessage"] = "Phản ánh đã được tiếp nhận, không thể chỉnh sửa.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            issue.Title = title;
+            issue.Description = description;
+            issue.Category = category;
+            issue.Address = address;
+            issue.Latitude = latitude;
+            issue.Longitude = longitude;
+            issue.UpdatedAt = DateTime.UtcNow;
+
+            _context.Entry(issue).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Phản ánh đã được cập nhật thành công.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // A1 — POST Delete: Xóa Issue và Images, chỉ khi Pending
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var issue = await _context.Issues
+                .Include(i => i.Images)
+                .FirstOrDefaultAsync(i => i.Id == id);
+            if (issue == null) return NotFound();
+            if (issue.AuthorId != userId) return Forbid();
+
+            if (issue.Status != IssueStatus.Pending)
+            {
+                return Json(new { success = false, message = "Phản ánh đã được tiếp nhận, không thể chỉnh sửa." });
+            }
+
+            // Xóa ảnh trên Cloudinary và trong DB
+            foreach (var image in issue.Images)
+            {
+                if (!string.IsNullOrEmpty(image.PublicId))
+                {
+                    await _photoService.DeletePhotoAsync(image.PublicId);
+                }
+            }
+            _context.IssueImages.RemoveRange(issue.Images);
+            _context.Issues.Remove(issue);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Phản ánh đã được xóa thành công." });
         }
     }
 }
