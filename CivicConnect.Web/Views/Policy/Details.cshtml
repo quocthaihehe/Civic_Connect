@@ -2,11 +2,40 @@
 @{
     ViewData["Title"] = Model.Title;
     bool isOfficialDoc = !string.IsNullOrEmpty(Model.DocumentNumber);
+    ViewData["IsFullWidth"] = true;
 }
 
 @Html.AntiForgeryToken()
 
 <style>
+    .policy-detail-container-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #198754;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+        animation: pulsing 1.2s infinite;
+    }
+    @@keyframes pulsing {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 5px rgba(25, 135, 84, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+        }
+    }
     .policy-detail-container {
         display: grid;
         grid-template-columns: 2fr 1fr;
@@ -396,6 +425,7 @@
     .selectable-content { user-select: text; cursor: text; }
 </style>
 
+<div class="policy-detail-container-wrapper py-3">
 <div class="section-block fade-in-up">
     <!-- Nút quay lại -->
     <div class="mb-4">
@@ -537,15 +567,18 @@
 
         <!-- Trợ lý pháp luật AI -->
         <div class="policy-sidebar-meta mt-4" style="background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
-            <h4 class="fw-bold border-bottom pb-2 mb-3 text-primary" style="font-size: 1.05rem;">
-                <i class="bi bi-robot"></i> Trợ lý Pháp luật AI
+            <h4 class="fw-bold border-bottom pb-2 mb-3 text-primary d-flex align-items-center justify-content-between" style="font-size: 1.05rem;">
+                <span><i class="bi bi-robot"></i> Trợ lý Pháp luật AI</span>
+                <span class="d-flex align-items-center text-success" style="font-size: 0.75rem; font-weight: normal; gap: 6px;">
+                    <span class="pulse-dot"></span> Trực tuyến
+                </span>
             </h4>
             <p class="text-muted mb-3" style="font-size: 0.825rem; line-height: 1.4;">
-                Bạn chưa rõ về điểm nào của văn bản này? Hãy đặt câu hỏi để AI giải đáp ngay lập tức!
+                Bạn chưa rõ về điểm nào của văn bản này? Hãy đặt câu hỏi hoặc <b>bôi đen một đoạn văn bản</b> để Trợ lý AI giải thích trực tiếp tại đây!
             </p>
             
             <!-- Khung chứa tin nhắn chat -->
-            <div id="aiChatHistory" style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; background: white; font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px;">
+            <div id="aiChatHistory" style="height: 380px; max-height: 380px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; background: white; font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px;">
                 <div class="ai-msg">
                     Xin chào! Tôi có thể giải đáp các vấn đề xử phạt, ngày hiệu lực hoặc nội dung cốt lõi của văn bản này. Bạn muốn hỏi gì nào?
                 </div>
@@ -579,6 +612,7 @@
         </div>
     </div>
 </div>
+</div> <!-- Đóng policy-detail-container-wrapper -->
 
 <!-- Nút cuộn lên đầu trang (Scroll-to-top) -->
 <button class="scroll-btn" id="scrollToTopBtn" title="Cuộn lên đầu trang">
@@ -725,17 +759,12 @@
 
     <script>
         // ============================================================
-        // GIẢI THÍCH ĐOẠN BÔI ĐEN (Text Selection AI Explain)
+        // GIẢI THÍCH ĐOẠN BÔI ĐEN (Text Selection AI Explain) - TÍCH HỢP CHATBOT
         // ============================================================
         (function () {
             const POLICY_ID  = @Model.Id;
             const TOKEN = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
             const selBtn     = document.getElementById('ai-selection-btn');
-            const popover    = document.getElementById('ai-explain-popover');
-            const epBody     = document.getElementById('ep-body');
-            const epModel    = document.getElementById('ep-model');
-            const epCloseBtn = document.getElementById('ep-close-btn');
             const content    = document.getElementById('policy-content');
 
             let selectionTimeout = null;
@@ -743,11 +772,6 @@
 
             // Hiện floating button khi bôi đen trong vùng nội dung
             document.addEventListener('mouseup', function (e) {
-                if (popover.classList.contains('visible')) {
-                    selBtn.classList.remove('visible');
-                    return;
-                }
-
                 clearTimeout(selectionTimeout);
                 selectionTimeout = setTimeout(function () {
                     const sel  = window.getSelection();
@@ -765,9 +789,8 @@
                         currentSelected = text;
                         positionSelectionBtn(e);
                     } else {
-                        // Nếu click ra ngoài popover thì ẩn cả
-                        if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
-                            hideSelectionUI();
+                        if (!selBtn.contains(e.target)) {
+                            selBtn.classList.remove('visible');
                         }
                     }
                 }, 160);
@@ -785,7 +808,6 @@
                         const x = iframeRect.left + event.data.clientX;
                         const y = iframeRect.top + event.data.clientY;
                         
-                        // Fake an event object to position the button
                         const fakeEvent = {
                             clientX: x,
                             clientY: y
@@ -793,16 +815,29 @@
                         positionSelectionBtn(fakeEvent);
                     }
                 } else if (event.data.type === 'iframeSelectionCleared') {
-                    if (!popover.classList.contains('visible')) {
-                        hideSelectionUI();
-                    }
+                    selBtn.classList.remove('visible');
                 }
             });
 
-            // Ẩn khi bắt đầu drag mới
+            const popover = document.getElementById('ai-explain-popover');
+            const epBody  = document.getElementById('ep-body');
+            const epClose = document.getElementById('ep-close-btn');
+
+            // Thiết lập sự kiện click nút đóng popover
+            if (epClose) {
+                epClose.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    popover.classList.remove('visible');
+                });
+            }
+
+            // Ẩn khi click ra ngoài
             document.addEventListener('mousedown', function (e) {
-                if (!popover.contains(e.target) && !selBtn.contains(e.target)) {
+                if (!selBtn.contains(e.target)) {
                     selBtn.classList.remove('visible');
+                }
+                if (popover && !popover.contains(e.target) && !selBtn.contains(e.target)) {
+                    popover.classList.remove('visible');
                 }
             });
 
@@ -810,7 +845,6 @@
                 const margin = 10;
                 let x = e.clientX - 40;
                 let y = e.clientY - 48;
-                // Giữ trong viewport
                 x = Math.max(margin, Math.min(x, window.innerWidth  - 130 - margin));
                 y = Math.max(margin, Math.min(y, window.innerHeight - 40  - margin));
                 selBtn.style.left = x + 'px';
@@ -819,111 +853,92 @@
             }
 
             // Click nút “Giải thích”
-            selBtn.addEventListener('click', async function () {
+            selBtn.addEventListener('click', function () {
                 if (!currentSelected) return;
                 selBtn.classList.remove('visible');
-                openPopoverLoading(currentSelected);
 
-                // Xoá vùng bôi đen để tránh hiện lại nút nổi khi mouseup
-                if (window.getSelection) {
-                    window.getSelection().removeAllRanges();
-                }
-
-                try {
-                    const resp = await fetch('/Policy/ExplainSelection', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': TOKEN || ''
-                        },
-                        body: JSON.stringify({ policyId: POLICY_ID, selectedText: currentSelected })
-                    });
-                    const data = await resp.json();
-
-                    if (data.success) {
-                        renderExplanation(currentSelected, data);
-                    } else {
-                        renderExplainError(data.error || 'Không thể giải thích lúc này.');
-                    }
-                } catch (_) {
-                    renderExplainError('Lỗi kết nối. Vui lòng thử lại.');
-                }
-            });
-
-            if (epCloseBtn) {
-                epCloseBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    hideSelectionUI();
-                });
-            }
-
-            function openPopoverLoading(selectedText) {
-                positionPopoverCenter();
+                // Định vị popover ở giữa màn hình
+                popover.style.top = '50%';
+                popover.style.left = '50%';
+                popover.style.transform = 'translate(-50%, -50%)';
                 popover.classList.add('visible');
 
-                const shortQuote = selectedText.length > 250
-                    ? selectedText.slice(0, 250) + '...'
-                    : selectedText;
-
-                epBody.innerHTML =
-                    '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
-                    '<div class="ep-skeleton-line l"></div>' +
-                    '<div class="ep-skeleton-line m"></div>' +
-                    '<div class="ep-skeleton-line s"></div>' +
-                    '<div style="margin-top:10px;"></div>' +
-                    '<div class="ep-skeleton-line m"></div>' +
-                    '<div class="ep-skeleton-line l"></div>';
-            }
-
-            function renderExplanation(selectedText, data) {
-                const shortQuote = selectedText.length > 250
-                    ? selectedText.slice(0, 250) + '...'
-                    : selectedText;
-
-                let keyTermHtml = '';
-                if (data.keyTerm) {
-                    keyTermHtml =
-                        '<div class="ep-key-term">' +
-                        '<span>📚</span>' +
-                        '<span><b>Thuật ngữ:</b> ' + escHtml(data.keyTerm) + '</span>' +
-                        '</div>';
+                // Kiểm tra xem người dùng đã đăng nhập chưa
+                const isAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+                if (!isAuthenticated) {
+                    epBody.innerHTML = `
+                        <div class="text-danger p-2">
+                            <i class="bi bi-lock-fill"></i> Vui lòng đăng nhập để sử dụng tính năng giải thích đoạn bôi đen.
+                        </div>`;
+                    return;
                 }
 
-                epBody.innerHTML =
-                    '<div class="ep-quote">\u201C' + escHtml(shortQuote) + '\u201D</div>' +
-                    '<div class="ep-label">💡 Ý nghĩa</div>' +
-                    '<div class="ep-text">' + escHtml(data.simpleExplanation) + '</div>' +
-                    keyTermHtml +
-                    '<div class="ep-practical">' + escHtml(data.practicalMeaning) + '</div>';
+                // Hiển thị trạng thái tải (Skeleton Loading)
+                const displayQuote = currentSelected.length > 180 ? currentSelected.slice(0, 180) + '...' : currentSelected;
+                epBody.innerHTML = `
+                    <div class="ep-quote">"${escapeHtml(displayQuote)}"</div>
+                    <div class="ep-label">💡 Ý nghĩa giản lược</div>
+                    <div class="ep-skeleton-line l"></div>
+                    <div class="ep-skeleton-line m"></div>
+                    <div class="ep-skeleton-line s"></div>
+                    
+                    <div class="ep-label mt-3">⚖️ Tác động thực tế</div>
+                    <div class="ep-skeleton-line l"></div>
+                    <div class="ep-skeleton-line m"></div>
+                `;
+                document.getElementById('ep-model').textContent = 'Gemini AI';
 
-                epModel.textContent = data.modelUsed || 'Gemini AI';
-            }
+                // Gửi yêu cầu giải thích qua AJAX
+                $.ajax({
+                    url: '/Policy/ExplainSelection',
+                    type: 'POST',
+                    headers: {
+                        'RequestVerificationToken': TOKEN || ''
+                    },
+                    contentType: 'application/json',
+                    data: JSON.stringify({ policyId: POLICY_ID, selectedText: currentSelected }),
+                    success: function(response) {
+                        if (response.success) {
+                            let html = `
+                                <div class="ep-quote">"${escapeHtml(currentSelected)}"</div>
+                                <div class="ep-label">💡 Ý nghĩa giản lược</div>
+                                <div class="ep-text">${formatResponse(response.simpleExplanation)}</div>
+                            `;
+                            
+                            if (response.keyTerm) {
+                                html += `
+                                    <div class="ep-key-term">
+                                        <i class="bi bi-journal-bookmark-fill" style="margin-top:2px;"></i>
+                                        <div><strong>Thuật ngữ:</strong> ${formatResponse(response.keyTerm)}</div>
+                                    </div>
+                                `;
+                            }
+                            
+                            html += `
+                                <div class="ep-label mt-2">⚖️ Tác động thực tế</div>
+                                <div class="ep-practical">${formatResponse(response.practicalMeaning)}</div>
+                            `;
+                            
+                            epBody.innerHTML = html;
+                            document.getElementById('ep-model').textContent = response.modelUsed || "Gemini AI";
+                        } else {
+                            epBody.innerHTML = `
+                                <div class="text-danger p-2">
+                                    <i class="bi bi-exclamation-circle-fill"></i> Có lỗi xảy ra: ${escapeHtml(response.error)}
+                                </div>`;
+                        }
+                    },
+                    error: function() {
+                        epBody.innerHTML = `
+                            <div class="text-danger p-2">
+                                <i class="bi bi-exclamation-circle-fill"></i> Lỗi kết nối đến máy chủ.
+                            </div>`;
+                    }
+                });
 
-            function renderExplainError(msg) {
-                epBody.innerHTML =
-                    '<div style="color:#b91c1c; font-size:0.88rem; display:flex; gap:0.5rem; align-items:center;">' +
-                    '<i class="bi bi-exclamation-circle-fill"></i> ' + escHtml(msg) +
-                    '</div>';
-            }
-
-            function positionPopoverCenter() {
-                popover.style.left = '50%';
-                popover.style.top  = '50%';
-                popover.style.transform = 'translate(-50%, -50%)';
-            }
-
-            function hideSelectionUI() {
-                selBtn.classList.remove('visible');
-                popover.classList.remove('visible');
-                currentSelected = '';
-            }
-
-            document.addEventListener('click', function (e) {
-                if (popover.classList.contains('visible') &&
-                    !popover.contains(e.target) &&
-                    e.target !== selBtn) {
-                    hideSelectionUI();
+                // Xoá vùng bôi đen
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
                 }
             });
 

@@ -3,9 +3,15 @@
     ViewData["Title"] = "Chính sách & Tin tức";
     var laws = Model.Where(p => p.Id > 0);
     var newsAndNotices = Model.Where(p => p.Id == 0);
+    ViewData["IsFullWidth"] = true;
 }
 
 <style>
+    .policy-index-container-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
     .page-container {
         display: grid;
         grid-template-columns: 1.8fr 1.2fr;
@@ -165,6 +171,7 @@
     }
 </style>
 
+<div class="policy-index-container-wrapper py-3">
 <div class="section-block fade-in-up">
     <div class="section-header">
         <div class="section-title-wrap">
@@ -250,3 +257,4 @@
         </div>
     </div>
 </div>
+</div> <!-- Đóng policy-index-container-wrapper -->

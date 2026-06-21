@@ -1106,6 +1106,14 @@ namespace CivicConnect.Web.Controllers
                 Content = "Người dân có quyền và trách nhiệm gửi phản ánh, kiến nghị về các hành vi vi phạm trật tự công cộng, lấn chiếm vỉa hè hoặc xả rác bừa bãi lên chính quyền địa phương qua ứng dụng đô thị thông minh để kịp thời xử lý.",
                 DocumentNumber = "Luật Thực hiện dân chủ ở cơ sở 2022",
                 PenaltyInfo = "Chính quyền cấp Phường/Quận có nghĩa vụ tiếp nhận, phản hồi và công khai tiến độ xử lý đơn thư phản ánh của cư dân trong thời hạn từ 3 - 5 ngày làm việc."
+            },
+            new LawEntry
+            {
+                Title = "Bồi thường và tái định cư khi Nhà nước thu hồi đất",
+                Keywords = "đất đai, thu hồi đất, bồi thường đất, tái định cư, giá đất, bồi thường thu hồi, thu hồi",
+                Content = "Quy định nguyên tắc bồi thường về đất khi Nhà nước thu hồi đất. Việc bồi thường được thực hiện bằng cách giao đất cùng mục đích sử dụng hoặc bồi thường bằng tiền theo giá đất cụ thể. Người dân bị thu hồi đất ở phải được bố trí nhà ở hoặc đất ở tái định cư, đảm bảo chỗ ở và ổn định cuộc sống trước khi phê duyệt phương án.",
+                DocumentNumber = "Luật Đất đai 2024 (Luật số 31/2024/QH15)",
+                PenaltyInfo = "Ủy ban nhân dân cấp có thẩm quyền có nghĩa vụ hoàn thiện khu tái định cư (hạ tầng kỹ thuật, hạ tầng xã hội đồng bộ) trước khi phê duyệt phương án bồi thường, hỗ trợ, tái định cư."
             }
         };
     }
