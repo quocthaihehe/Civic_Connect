@@ -199,9 +199,20 @@ namespace CivicConnect.Web.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult About()
+        public async Task<IActionResult> About()
         {
             ViewData["Title"] = "Giới thiệu";
+
+            var totalUsers = await _context.Users.CountAsync();
+            var totalIssues = await _context.Issues.CountAsync();
+            var resolvedIssues = await _context.Issues.CountAsync(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed);
+            var satisfactionRate = totalIssues > 0 ? (int)Math.Round((double)resolvedIssues / totalIssues * 100) : 95;
+
+            ViewData["TotalUsers"] = totalUsers;
+            ViewData["TotalIssues"] = totalIssues;
+            ViewData["ResolvedIssues"] = resolvedIssues;
+            ViewData["SatisfactionRate"] = satisfactionRate;
+
             return View();
         }
 
