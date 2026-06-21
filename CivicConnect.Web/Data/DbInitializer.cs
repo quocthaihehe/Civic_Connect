@@ -82,7 +82,8 @@ namespace CivicConnect.Web.Data
             }
 
             // 4. Seed Công dân
-            if (await userManager.FindByEmailAsync("citizen@gmail.com") == null)
+            var existingCitizen = await userManager.FindByEmailAsync("citizen@gmail.com");
+            if (existingCitizen == null)
             {
                 var citizen = new ApplicationUser
                 {
@@ -95,6 +96,9 @@ namespace CivicConnect.Web.Data
                     IsEmailVerified = true,
                     IsActive = true,
                     EmailConfirmed = true,
+                    TwoFactorEnabledCustom = true,
+                    TwoFactorType = "Telegram",
+                    TwoFactorContact = "7905261972",
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -103,6 +107,14 @@ namespace CivicConnect.Web.Data
                 {
                     await userManager.AddToRoleAsync(citizen, "Citizen");
                 }
+            }
+            else
+            {
+                // Tự động bật 2FA qua Telegram cho tài khoản hiện có để bạn dễ dàng test
+                existingCitizen.TwoFactorEnabledCustom = true;
+                existingCitizen.TwoFactorType = "Telegram";
+                existingCitizen.TwoFactorContact = "7905261972";
+                await userManager.UpdateAsync(existingCitizen);
             }
         }
     }
