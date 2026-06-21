@@ -113,6 +113,37 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
                 // Ignored - fallback will show OTP in dev box
             }
 
+            // Real Telegram OTP Delivery using Bot API
+            if (user.TwoFactorType == "Telegram")
+            {
+                string botToken = "8589963228:AAGOblMSNSW9ZXjGTR-D3BbIc6teIrnyNUY";
+                string chatId = !string.IsNullOrEmpty(user.TwoFactorContact) && user.TwoFactorContact.Trim().Length > 3 
+                    ? user.TwoFactorContact.Trim() 
+                    : "7905261972";
+
+                string messageText = $"[CivicConnect] Mã xác thực 2FA của bạn là: {otpCode}. Mã có hiệu lực trong 5 phút. Vui lòng không chia sẻ mã này.";
+
+                try
+                {
+                    using (var httpClient = new System.Net.Http.HttpClient())
+                    {
+                        var telegramUrl = $"https://api.telegram.org/bot{botToken}/sendMessage";
+                        var payload = new
+                        {
+                            chat_id = chatId,
+                            text = messageText
+                        };
+                        var json = System.Text.Json.JsonSerializer.Serialize(payload);
+                        var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                        await httpClient.PostAsync(telegramUrl, content);
+                    }
+                }
+                catch (Exception)
+                {
+                    // Ignored to avoid blocking login if Telegram API fails
+                }
+            }
+
             return Page();
         }
 
