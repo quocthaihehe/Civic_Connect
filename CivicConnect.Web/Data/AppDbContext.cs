@@ -436,6 +436,181 @@ namespace CivicConnect.Web.Data
                     Signer = "Chủ tịch UBND Quận 1",
                     SourceUrl = "https://tuoitre.vn/khanh-hoa-trien-khai-ung-dung-de-dan-phan-anh-hien-truong-tra-cuu-dich-vu-cong-20260415093301147.htm",
                     EffectiveDate = new DateTime(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 7,
+                    Title = "Luật số 10/2022/QH15 về thực hiện dân chủ ở cơ sở",
+                    Excerpt = "Quốc hội ban hành luật quy định về quyền và nghĩa vụ của công dân trong việc giám sát, kiểm tra và phản ánh ý kiến đến chính quyền địa phương.",
+                    Content = """
+                              <p><strong>LUẬT</strong><br/>
+                              <strong>THỰC HIỆN DÂN CHỦ Ở CƠ SỞ</strong></p>
+
+                              <p>Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;<br/>
+                              Quốc hội ban hành Luật Thực hiện dân chủ ở cơ sở.</p>
+
+                              <p><strong>Chương I: QUY ĐỊNH CHUNG</strong></p>
+
+                              <p><strong>Điều 5. Quyền của công dân trong thực hiện dân chủ ở cơ sở</strong><br/>
+                              1. Được thụ hưởng thông tin công khai từ cơ quan nhà nước đầy đủ và minh bạch.<br/>
+                              2. Đề xuất, kiến nghị, phản ánh, thảo luận và tham gia đóng góp ý kiến về các nội dung liên quan trực tiếp đến đời sống xã hội và hạ tầng đô thị tại cơ sở.<br/>
+                              3. Thực hiện quyền kiểm tra, giám sát hoạt động của chính quyền cấp cơ sở theo đúng quy định pháp luật.</p>
+
+                              <p><strong>Điều 6. Nghĩa vụ của công dân</strong><br/>
+                              1. Tuân thủ Hiến pháp và pháp luật, tôn trọng trật tự văn minh đô thị.<br/>
+                              2. Phối hợp cùng cơ quan chức năng phản ánh kịp thời các hành vi vi phạm trật tự công cộng, gây ô nhiễm môi trường hoặc hư hỏng hạ tầng kỹ thuật.</p>
+                              """,
+                    Tag = "Luật",
+                    TagClass = "tag-law",
+                    IssuingUnit = "Quốc hội",
+                    PublishedDate = new DateTime(2022, 11, 10, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "10/2022/QH15",
+                    DocumentType = "Luật",
+                    Signer = "Chủ tịch Quốc hội Vương Đình Huệ",
+                    SourceUrl = "https://chinhphu.vn/",
+                    EffectiveDate = new DateTime(2023, 7, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 8,
+                    Title = "Nghị định 59/2022/NĐ-CP của Chính phủ quy định về định danh và xác thực điện tử qua VNeID",
+                    Excerpt = "Chính phủ quy định về danh tính điện tử, xác thực điện tử và việc sử dụng tài khoản VNeID thay thế giấy tờ vật lý.",
+                    Content = """
+                              <p><strong>NGHỊ ĐỊNH</strong><br/>
+                              <strong>Quy định về định danh và xác thực điện tử</strong></p>
+
+                              <p>Căn cứ Luật Tổ chức Chính phủ ngày 19 tháng 6 năm 2015;<br/>
+                              Căn cứ Luật An toàn thông tin mạng ngày 19 tháng 11 năm 2015;<br/>
+                              Theo đề nghị của Bộ trưởng Bộ Công an;<br/>
+                              Chính phủ ban hành Nghị định quy định về định danh và xác thực điện tử.</p>
+
+                              <p><strong>Điều 6. Phân loại mức độ tài khoản định danh điện tử</strong><br/>
+                              1. Mức độ 1: Xác thực qua thông tin cá nhân và ảnh chân dung đối chiếu với Cơ sở dữ liệu quốc gia về dân cư.<br/>
+                              2. Mức độ 2: Xác thực mức độ cao nhất tích hợp sinh trắc học vân tay hoặc chíp điện tử CCCD, có giá trị tương đương thẻ căn cước công dân vật lý trong thực hiện thủ tục hành chính.</p>
+                              """,
+                    Tag = "Nghị định",
+                    TagClass = "tag-law",
+                    IssuingUnit = "Chính phủ",
+                    PublishedDate = new DateTime(2022, 9, 5, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "59/2022/NĐ-CP",
+                    DocumentType = "Nghị định",
+                    Signer = "Thủ tướng Phạm Minh Chính",
+                    SourceUrl = "https://chinhphu.vn/",
+                    EffectiveDate = new DateTime(2022, 10, 20, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 9,
+                    Title = "Luật số 31/2024/QH15 về Đất đai (Luật Đất đai năm 2024)",
+                    Excerpt = "Quốc hội ban hành Luật Đất đai sửa đổi toàn diện quy định về chế độ sở hữu đất đai, quyền hạn và trách nhiệm của Nhà nước đại diện chủ sở hữu, quy định về bồi thường, hỗ trợ, tái định cư khi Nhà nước thu hồi đất.",
+                    Content = """
+                              <p><strong>LUẬT ĐẤT ĐAI (NĂM 2024)</strong><br/>
+                              Số: 31/2024/QH15<br/>
+                              <em>Hà Nội, ngày 18 tháng 01 năm 2024</em></p>
+
+                              <p>Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;<br/>
+                              Quốc hội ban hành Luật Đất đai.</p>
+
+                              <p><strong>Chương VI: THU HỒI ĐẤT, TRƯNG DỤNG ĐẤT</strong></p>
+
+                              <p><strong>Điều 79. Thu hồi đất để phát triển kinh tế - xã hội vì lợi ích quốc gia, công cộng</strong><br/>
+                              Nhà nước thu hồi đất trong trường hợp thật cần thiết để thực hiện dự án phát triển kinh tế - xã hội vì lợi ích quốc gia, công cộng nhằm phát huy nguồn lực đất đai, nâng cao hiệu quả sử dụng đất, phát triển hạ tầng kỹ thuật, hạ tầng xã hội.</p>
+
+                              <p><strong>Chương VII: BỒI THƯỜNG, HỖ TRỢ, TÁI ĐỊNH CƯ KHI NHÀ NƯỚC THU HỒI ĐẤT</strong></p>
+
+                              <p><strong>Điều 91. Nguyên tắc bồi thường, hỗ trợ, tái định cư khi Nhà nước thu hồi đất</strong><br/>
+                              1. Việc bồi thường về đất được thực hiện bằng việc giao đất có cùng mục đích sử dụng với loại đất thu hồi; nếu không có đất để bồi thường thì được bồi thường bằng tiền theo giá đất cụ thể của loại đất thu hồi do Ủy ban nhân dân cấp có thẩm quyền quyết định tại thời điểm phê duyệt phương án bồi thường.<br/>
+                              2. Việc bồi thường khi Nhà nước thu hồi đất phải bảo đảm dân chủ, khách quan, công bằng, công khai, kịp thời và đúng quy định của pháp luật; bảo đảm người có đất bị thu hồi có chỗ ở, ổn định đời sống, sản xuất.<br/>
+                              3. Khu tái định cư phải hoàn thiện hệ thống hạ tầng kỹ thuật, hạ tầng xã hội đồng bộ trước khi phê duyệt phương án bồi thường, hỗ trợ, tái định cư.</p>
+
+                              <p><strong>Điều 110. Hỗ trợ tái định cư khi Nhà nước thu hồi đất ở</strong><br/>
+                              Hộ gia đình, cá nhân bị thu hồi đất ở được hỗ trợ tái định cư bằng nhà ở tái định cư hoặc đất ở tái định cư. Trường hợp hộ gia đình, cá nhân tự lo chỗ ở thì ngoài việc được bồi thường về đất còn được hỗ trợ một khoản tiền tự lo chỗ ở.</p>
+                              """,
+                    Tag = "Luật",
+                    TagClass = "tag-law",
+                    IssuingUnit = "Quốc hội",
+                    PublishedDate = new DateTime(2024, 1, 18, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "31/2024/QH15",
+                    DocumentType = "Luật",
+                    Signer = "Chủ tịch Quốc hội Vương Đình Huệ",
+                    SourceUrl = "https://chinhphu.vn/",
+                    EffectiveDate = new DateTime(2024, 8, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 10,
+                    Title = "Nghị định 100/2019/NĐ-CP của Chính phủ về xử phạt vi phạm hành chính trong lĩnh vực giao thông đường bộ",
+                    Excerpt = "Chính phủ ban hành quy định chi tiết về xử phạt hành vi vi phạm trật tự, an toàn giao thông, trong đó có mức phạt nghiêm khắc đối với nồng độ cồn và không đội mũ bảo hiểm.",
+                    Content = """
+                              <p><strong>NGHỊ ĐỊNH</strong><br/>
+                              <strong>Quy định xử phạt vi phạm hành chính trong lĩnh vực giao thông đường bộ và đường sắt</strong></p>
+
+                              <p>Căn cứ Luật Tổ chức Chính phủ ngày 19 tháng 6 năm 2015;<br/>
+                              Căn cứ Luật Xử lý vi phạm hành chính ngày 20 tháng 6 năm 2012;<br/>
+                              Căn cứ Luật Giao thông đường bộ ngày 13 tháng 11 năm 2008;<br/>
+                              Chính phủ ban hành Nghị định quy định xử phạt vi phạm hành chính trong lĩnh vực giao thông đường bộ và đường sắt.</p>
+
+                              <p><strong>Điều 5. Xử phạt người điều khiển xe ô tô vi phạm quy định về giao thông đường bộ</strong><br/>
+                              1. Phạt tiền từ 6.000.000 đồng đến 8.000.000 đồng đối với người điều khiển xe trên đường mà trong máu hoặc hơi thở có nồng độ cồn nhưng chưa vượt quá 50 miligam/100 mililít máu hoặc chưa vượt quá 0,25 miligam/1 lít khí thở.<br/>
+                              2. Phạt tiền từ 16.000.000 đồng đến 18.000.000 đồng đối với nồng độ cồn vượt quá 50 miligam đến 80 miligam/100 mililít máu.<br/>
+                              3. Phạt tiền từ 30.000.000 đồng đến 40.000.000 đồng đối với nồng độ cồn vượt quá 80 miligam/100 mililít máu hoặc vượt quá 0,4 miligam/1 lít khí thở, kèm theo tước quyền sử dụng Giấy phép lái xe từ 22 tháng đến 24 tháng.</p>
+
+                              <p><strong>Điều 6. Xử phạt người điều khiển xe mô tô, xe gắn máy vi phạm</strong><br/>
+                              1. Phạt tiền từ 2.000.000 đồng đến 3.000.000 đồng đối với hành vi điều khiển xe trên đường mà trong hơi thở có nồng độ cồn chưa vượt quá 0,25 miligam/1 lít khí thở.<br/>
+                              2. Phạt tiền từ 4.000.000 đồng đến 5.000.000 đồng đối với nồng độ cồn vượt quá 0,25 đến 0,4 miligam/1 lít khí thở.<br/>
+                              3. Phạt tiền từ 6.000.000 đồng đến 8.000.000 đồng đối với nồng độ cồn vượt quá 0,4 miligam/1 lít khí thở, tước Giấy phép lái xe từ 22 đến 24 tháng.</p>
+
+                              <p><strong>Điều 30. Xử phạt chủ phương tiện vi phạm quy định liên quan đến giao thông đường bộ</strong><br/>
+                              Phạt tiền từ 400.000 đồng đến 600.000 đồng đối với người điều khiển xe mô tô, xe gắn máy và các loại xe tương tự không đội mũ bảo hiểm cho người đi mô tô, xe máy hoặc đội mũ bảo hiểm không cài quai đúng quy cách khi tham gia giao thông.</p>
+                              """,
+                    Tag = "Nghị định",
+                    TagClass = "tag-law",
+                    IssuingUnit = "Chính phủ",
+                    PublishedDate = new DateTime(2019, 12, 30, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "100/2019/NĐ-CP",
+                    DocumentType = "Nghị định",
+                    Signer = "Thủ tướng Nguyễn Xuân Phúc",
+                    SourceUrl = "https://chinhphu.vn/",
+                    EffectiveDate = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Policy
+                {
+                    Id = 11,
+                    Title = "Nghị định 144/2021/NĐ-CP xử phạt vi phạm hành chính về an ninh, trật tự xã hội và tiếng ồn khu dân cư",
+                    Excerpt = "Quy định chi tiết các mức xử phạt đối với các hành vi gây mất trật tự công cộng, đặc biệt là hát karaoke lớn tiếng, loa kéo gây ồn ào sau 22h đêm trong khu dân cư đô thị.",
+                    Content = """
+                              <p><strong>NGHỊ ĐỊNH</strong><br/>
+                              <strong>Quy định xử phạt vi phạm hành chính trong lĩnh vực an ninh, trật tự, an toàn xã hội; phòng, chống tệ nạn xã hội; phòng cháy, chữa cháy; cứu nạn, cứu hộ; phòng, chống bạo lực gia đình</strong></p>
+
+                              <p>Căn cứ Luật Tổ chức Chính phủ ngày 19 tháng 6 năm 2015;<br/>
+                              Căn cứ Luật Xử lý vi phạm hành chính ngày 20 tháng 6 năm 2012;<br/>
+                              Theo đề nghị của Bộ trưởng Bộ Công an;<br/>
+                              Chính phủ ban hành Nghị định.</p>
+
+                              <p><strong>Điều 8. Vi phạm quy định về bảo đảm sự yên tĩnh chung</strong><br/>
+                              1. Phạt cảnh cáo hoặc phạt tiền từ 500.000 đồng đến 1.000.000 đồng đối với một trong các hành vi sau đây thực hiện trong khoảng thời gian từ 22 giờ ngày hôm trước đến 06 giờ sáng ngày hôm sau:<br/>
+                              a) Gây tiếng động lớn, làm ồn ào, huyên náo tại khu dân cư, nơi công cộng;<br/>
+                              b) Dùng loa phóng thanh, loa kéo, thiết bị âm thanh công suất lớn phát nhạc, hát karaoke gây ảnh hưởng đến sự yên tĩnh chung của khu dân cư.<br/>
+                              2. Tịch thu tang vật, phương tiện vi phạm hành chính đối với hành vi quy định tại khoản 1 Điều này nếu tái phạm nhiều lần.</p>
+
+                              <p><strong>Điều 7. Vi phạm quy định về nếp sống văn minh, trật tự công cộng</strong><br/>
+                              1. Phạt cảnh cáo hoặc phạt tiền từ 300.000 đồng đến 500.000 đồng đối với hành vi thả rông động vật nuôi nơi đô thị hoặc nơi công cộng mà không có rọ mõm hoặc không có người dắt.<br/>
+                              2. Phạt tiền từ 1.000.000 đồng đến 2.000.000 đồng đối với hành vi phun sơn, vẽ, viết, treo, dán tranh, ảnh, quảng cáo lên tường, cột điện, công trình công cộng mà không được phép của cơ quan có thẩm quyền.</p>
+                              """,
+                    Tag = "Nghị định",
+                    TagClass = "tag-law",
+                    IssuingUnit = "Chính phủ",
+                    PublishedDate = new DateTime(2021, 12, 31, 0, 0, 0, DateTimeKind.Utc),
+                    IsActive = true,
+                    DocumentNumber = "144/2021/NĐ-CP",
+                    DocumentType = "Nghị định",
+                    Signer = "Thủ tướng Phạm Minh Chính",
+                    SourceUrl = "https://chinhphu.vn/",
+                    EffectiveDate = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
 

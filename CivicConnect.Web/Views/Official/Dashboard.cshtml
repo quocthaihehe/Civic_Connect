@@ -49,7 +49,7 @@
 
     <!-- Issues Table -->
     <div class="glass-card p-4 p-md-5">
-        <h5 class="fw-bold mb-4 text-white"><i class="bi bi-table text-primary me-2"></i> Danh sách quản lý phản ánh địa bàn</h5>
+        <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-table text-primary me-2"></i> Danh sách quản lý phản ánh địa bàn</h5>
 
         @if (!Model.Any())
         {
@@ -78,10 +78,10 @@
                         {
                             <tr>
                                 <td>#@issue.Id</td>
-                                <td class="fw-bold text-white text-truncate" style="max-width: 200px;">
-                                    <a asp-action="Details" asp-route-id="@issue.Id" class="text-decoration-none text-white hover-lift">@issue.Title</a>
+                                <td class="fw-bold text-truncate" style="max-width: 200px;">
+                                    <a asp-action="Details" asp-route-id="@issue.Id" class="text-decoration-none text-dark hover-lift">@issue.Title</a>
                                 </td>
-                                <td>@GetCategoryName(issue.Category)</td>
+                                <td class="text-dark">@GetCategoryName(issue.Category)</td>
                                 <td class="text-secondary text-truncate" style="max-width: 200px;">@issue.Address</td>
                                 <td>
                                     <span class="badge @GetPriorityClass(issue.Priority) rounded-pill">@GetPriorityName(issue.Priority)</span>

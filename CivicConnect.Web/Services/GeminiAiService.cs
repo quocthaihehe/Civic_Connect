@@ -114,11 +114,10 @@ namespace CivicConnect.Web.Services
 
             if (string.IsNullOrWhiteSpace(_settings.ApiKey) || _settings.ApiKey == "YOUR_GEMINI_API_KEY_HERE")
             {
-                return new PolicySummaryResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Tính năng AI chưa được cấu hình. Vui lòng liên hệ quản trị viên."
-                };
+                var fallbackModel = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
+                var fallback = GenerateFallbackSummary(title, effectiveContent, fallbackModel);
+                fallback.ShortSummary += "\n\n*(Lưu ý: Hệ thống đang chạy ở chế độ Offline do chưa cấu hình API Key)*";
+                return fallback;
             }
 
             try
@@ -164,11 +163,10 @@ namespace CivicConnect.Web.Services
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong SummarizePolicyAsync.");
-                return new PolicySummaryResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
-                };
+                var fallbackModel = string.IsNullOrWhiteSpace(_settings.ModelName) ? "gemini-1.5-flash" : _settings.ModelName;
+                var fallback = GenerateFallbackSummary(title, effectiveContent, fallbackModel);
+                fallback.ShortSummary += "\n\n*(Lưu ý: Hệ thống tự động chuyển sang chế độ Offline do API Key bị lỗi hoặc hết hạn)*";
+                return fallback;
             }
             catch (Exception ex)
             {
@@ -196,11 +194,9 @@ namespace CivicConnect.Web.Services
 
             if (string.IsNullOrWhiteSpace(_settings.ApiKey) || _settings.ApiKey == "YOUR_GEMINI_API_KEY_HERE")
             {
-                return new SelectionExplainResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Tính năng AI chưa được cấu hình. Vui lòng liên hệ quản trị viên."
-                };
+                var fallback = GenerateFallbackExplain(trimmed, policyTitle, _settings.ModelName);
+                fallback.SimpleExplanation += "\n\n*(Lưu ý: Hệ thống đang chạy ở chế độ Offline do chưa cấu hình API Key)*";
+                return fallback;
             }
 
             try
@@ -236,11 +232,9 @@ namespace CivicConnect.Web.Services
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong ExplainSelectionAsync.");
-                return new SelectionExplainResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
-                };
+                var fallback = GenerateFallbackExplain(trimmed, policyTitle, _settings.ModelName);
+                fallback.SimpleExplanation += "\n\n*(Lưu ý: Hệ thống tự động chuyển sang chế độ Offline do API Key bị lỗi hoặc hết hạn)*";
+                return fallback;
             }
             catch (Exception ex)
             {
@@ -264,11 +258,9 @@ namespace CivicConnect.Web.Services
 
             if (string.IsNullOrWhiteSpace(_settings.ApiKey) || _settings.ApiKey == "YOUR_GEMINI_API_KEY_HERE")
             {
-                return new SectionedReadResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Tính năng AI chưa được cấu hình. Vui lòng liên hệ quản trị viên."
-                };
+                var fallback = GenerateFallbackReadExplain(title, effectiveContent, _settings.ModelName);
+                fallback.OverallGist += " *(Hệ thống đang chạy ở chế độ Offline do chưa cấu hình API Key)*";
+                return fallback;
             }
 
             try
@@ -318,11 +310,9 @@ namespace CivicConnect.Web.Services
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Lỗi xác thực API Key Gemini trong ReadAndExplainAsync.");
-                return new SectionedReadResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "API Key Gemini cấu hình trong file 'appsettings.json' không hợp lệ hoặc đã hết hạn (Lỗi 401/403/400). Vui lòng cập nhật API Key chính xác từ Google AI Studio (bắt đầu bằng 'AIzaSy')."
-                };
+                var fallback = GenerateFallbackReadExplain(title, effectiveContent, _settings.ModelName);
+                fallback.OverallGist += " *(Hệ thống tự động chuyển sang chế độ Offline do API Key bị lỗi hoặc hết hạn)*";
+                return fallback;
             }
             catch (Exception ex)
             {

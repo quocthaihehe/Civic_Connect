@@ -1,252 +1,690 @@
 @model IEnumerable<CivicConnect.Web.Models.Entities.Policy>
 @{
     ViewData["Title"] = "Chính sách & Tin tức";
-    var laws = Model.Where(p => p.Id > 0);
-    var newsAndNotices = Model.Where(p => p.Id == 0);
+    var laws = Model.Where(p => p.Id > 0).ToList();
+    var govNews = Model.Where(p => p.Id == 0 && (p.Tag == "Chính phủ" || (p.IssuingUnit != null && p.IssuingUnit.Contains("Chính phủ")))).ToList();
+    var otherNews = Model.Where(p => p.Id == 0 && !govNews.Contains(p)).ToList();
+    ViewData["IsFullWidth"] = true;
 }
 
 <style>
-    .page-container {
-        display: grid;
-        grid-template-columns: 1.8fr 1.2fr;
-        gap: 30px;
-        margin-top: 20px;
+    /* ===== POLICY PAGE - FULL REDESIGN ===== */
+    .policy-page-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 8px;
     }
-    @@media (max-width: 991px) {
-        .page-container {
-            grid-template-columns: 1fr;
-        }
-    }
-    .main-laws-panel {
-        background: var(--card-bg, #ffffff);
-        border: 1px solid var(--border-color, #e5e7eb);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    .sidebar-news-panel {
-        background: var(--card-bg, #ffffff);
-        border: 1px solid var(--border-color, #e5e7eb);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        align-self: start;
-    }
-    .panel-title {
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: var(--gray-800, #1f2937);
+
+    /* Hero Banner */
+    .policy-hero {
+        background: linear-gradient(135deg, #0f2d6b 0%, #1a56db 50%, #0ea5e9 100%);
+        border-radius: 20px;
+        padding: 36px 40px;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid #e5e7eb;
+        justify-content: space-between;
+        gap: 20px;
     }
-    .law-card {
-        border-bottom: 1px solid var(--border-color, #e5e7eb);
-        padding-bottom: 20px;
-        margin-bottom: 20px;
-        transition: all 0.2s ease;
-        display: block;
-        text-decoration: none;
+    .policy-hero::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 250px; height: 250px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
     }
-    .law-card:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-        margin-bottom: 0;
+    .policy-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -80px; left: 30%;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
     }
-    .law-card:hover {
-        transform: translateX(4px);
-    }
-    .law-card:hover .law-title {
-        color: #0d6efd;
-    }
-    .law-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: var(--gray-800, #1f2937);
+    .hero-text h1 {
+        font-size: 1.9rem;
+        font-weight: 900;
+        color: #fff;
         margin-bottom: 8px;
-        line-height: 1.4;
-        transition: color 0.15s ease;
+        line-height: 1.25;
     }
-    .law-excerpt {
-        font-size: 0.925rem;
-        color: var(--text-muted, #4b5563);
-        margin-bottom: 12px;
-        line-height: 1.5;
+    .hero-text p {
+        font-size: 0.97rem;
+        color: rgba(255,255,255,0.8);
+        margin: 0;
+        max-width: 520px;
     }
-    .law-meta {
+    .hero-stats {
         display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        font-size: 0.8rem;
-        color: #6b7280;
-        align-items: center;
+        gap: 20px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
     }
-    .law-meta span {
-        display: flex;
-        align-items: center;
-        gap: 4px;
+    .hero-stat-box {
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 14px;
+        padding: 16px 22px;
+        text-align: center;
+        min-width: 110px;
     }
-    .gov-badge {
-        background-color: #d1e7dd;
-        color: #0f5132;
-        font-size: 0.75rem;
+    .hero-stat-box .stat-num {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #fff;
+        display: block;
+    }
+    .hero-stat-box .stat-lbl {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.75);
         font-weight: 600;
-        padding: 4px 8px;
-        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    /* Source Badges */
+    .source-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+        align-items: center;
+    }
+    .source-chip {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        border: 1px solid #a3cfbb;
+        gap: 6px;
+        padding: 7px 16px;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border: 2px solid;
+        cursor: default;
+        transition: all 0.2s;
     }
-    .side-news-card {
-        padding: 16px 0;
-        border-bottom: 1px dashed var(--border-color, #e5e7eb);
+    .source-chip.gov {
+        background: #e8f5e9;
+        color: #1b5e20;
+        border-color: #66bb6a;
+    }
+    .source-chip.news {
+        background: #e3f2fd;
+        color: #0d47a1;
+        border-color: #64b5f6;
+    }
+    .source-chip.db {
+        background: #fce4ec;
+        color: #880e4f;
+        border-color: #f06292;
+    }
+
+    /* Main 3-column grid */
+    .policy-grid {
+        display: grid;
+        grid-template-columns: 1.6fr 1.2fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    @@media (max-width: 1100px) {
+        .policy-grid { grid-template-columns: 1fr 1fr; }
+        .policy-col-3 { grid-column: 1 / -1; }
+    }
+    @@media (max-width: 700px) {
+        .policy-grid { grid-template-columns: 1fr; }
+        .policy-col-3 { grid-column: auto; }
+        .policy-hero { flex-direction: column; }
+        .hero-stats { flex-wrap: wrap; justify-content: center; }
+    }
+
+    /* Panel card */
+    .panel-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        transition: box-shadow 0.2s;
+    }
+    .panel-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.09); }
+    .panel-header {
+        padding: 18px 22px 14px;
+        border-bottom: 2px solid #f0f2f5;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .panel-header-icon {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .panel-header-icon.blue { background: #dbeafe; color: #1d4ed8; }
+    .panel-header-icon.green { background: #dcfce7; color: #15803d; }
+    .panel-header-icon.red { background: #fee2e2; color: #b91c1c; }
+    .panel-title-text {
+        flex: 1;
+    }
+    .panel-title-text h3 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #111827;
+        margin: 0;
+        line-height: 1.25;
+    }
+    .panel-title-text small {
+        font-size: 0.73rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    .panel-count-badge {
+        background: #f3f4f6;
+        color: #374151;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 3px 9px;
+        border-radius: 50px;
+    }
+    .panel-body {
+        padding: 18px 22px;
+    }
+
+    /* ===== LAW CARDS ===== */
+    .law-item {
         display: block;
         text-decoration: none;
-        transition: all 0.15s ease;
+        padding: 16px 0;
+        border-bottom: 1px solid #f3f4f6;
+        transition: all 0.18s ease;
+        position: relative;
     }
-    .side-news-card:first-child {
-        padding-top: 0;
+    .law-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .law-item:first-child { padding-top: 0; }
+    .law-item:hover { padding-left: 6px; }
+    .law-item:hover .law-item-title { color: #1d4ed8; }
+    .law-item-badge-row {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 7px;
+        flex-wrap: wrap;
+        align-items: center;
     }
-    .side-news-card:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-    .side-news-card:hover {
-        padding-left: 4px;
-    }
-    .side-news-card:hover .side-news-title {
-        color: #dc3545;
-    }
-    .side-news-title {
-        font-size: 0.95rem;
+    .badge-official {
+        background: linear-gradient(90deg, #15803d, #16a34a);
+        color: #fff;
+        font-size: 0.65rem;
         font-weight: 700;
-        color: var(--gray-800, #1f2937);
-        line-height: 1.4;
-        margin-bottom: 8px;
-        transition: color 0.15s ease;
+        padding: 2px 8px;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
-    .side-news-excerpt {
-        font-size: 0.85rem;
-        color: #4b5563;
-        margin-bottom: 8px;
+    .badge-doc-num {
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-family: monospace;
+    }
+    .law-item-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 6px;
         line-height: 1.4;
+        transition: color 0.15s;
+    }
+    .law-item-excerpt {
+        font-size: 0.845rem;
+        color: #4b5563;
+        line-height: 1.5;
+        margin-bottom: 10px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    .side-news-meta {
-        font-size: 0.75rem;
-        color: #6b7280;
+    .law-item-meta {
         display: flex;
-        gap: 12px;
+        gap: 14px;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        flex-wrap: wrap;
         align-items: center;
     }
-    .tag-badge {
+    .law-item-meta span {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    /* ===== GOV NEWS CARDS ===== */
+    .gov-news-item {
+        display: block;
+        text-decoration: none;
+        padding: 14px 0;
+        border-bottom: 1px dashed #e5e7eb;
+        transition: all 0.18s ease;
+    }
+    .gov-news-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .gov-news-item:first-child { padding-top: 0; }
+    .gov-news-item:hover { padding-left: 6px; }
+    .gov-news-item:hover .gov-news-title { color: #15803d; }
+    .gov-news-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 5px;
+        line-height: 1.45;
+        transition: color 0.15s;
+    }
+    .gov-news-excerpt {
+        font-size: 0.82rem;
+        color: #6b7280;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 6px;
+    }
+    .gov-news-meta {
+        display: flex;
+        gap: 10px;
+        font-size: 0.72rem;
+        color: #9ca3af;
+        align-items: center;
+    }
+
+    /* ===== OTHER NEWS MINI CARDS ===== */
+    .news-mini-item {
+        display: block;
+        text-decoration: none;
+        padding: 12px 0;
+        border-bottom: 1px dashed #f3f4f6;
+        transition: all 0.18s ease;
+    }
+    .news-mini-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .news-mini-item:first-child { padding-top: 0; }
+    .news-mini-item:hover { padding-left: 4px; }
+    .news-mini-item:hover .news-mini-title { color: #dc2626; }
+    .news-mini-title {
+        font-size: 0.865rem;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.4;
+        margin-bottom: 4px;
+        transition: color 0.15s;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .news-mini-meta {
+        display: flex;
+        gap: 8px;
         font-size: 0.7rem;
+        color: #9ca3af;
+        align-items: center;
+    }
+
+    /* Tag chips */
+    .tag-chip {
+        font-size: 0.65rem;
         padding: 2px 6px;
         border-radius: 4px;
-        font-weight: bold;
+        font-weight: 700;
         text-transform: uppercase;
     }
-    .tag-badge.tag-notice {
-        background-color: #fff3cd;
-        color: #664d03;
-        border: 1px solid #ffecb5;
+    .tag-chip.gov-tag { background: #dcfce7; color: #15803d; }
+    .tag-chip.news-tag { background: #dbeafe; color: #1e40af; }
+    .tag-chip.notice-tag { background: #fef9c3; color: #854d0e; }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #9ca3af;
     }
-    .tag-badge.tag-news {
-        background-color: #cff4fc;
-        color: #087990;
-        border: 1px solid #b6effb;
+    .empty-state i { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+    .empty-state p { font-size: 0.875rem; margin: 0; }
+
+    /* "Xem thêm" link row */
+    .see-more-row {
+        padding: 12px 22px;
+        border-top: 1px solid #f3f4f6;
+        text-align: center;
     }
+    .see-more-link {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #4b5563;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        border-radius: 8px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        transition: all 0.18s;
+    }
+    .see-more-link:hover { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+
+    /* Quick Law Search */
+    .quick-search-card {
+        background: linear-gradient(135deg, #1e1b4b, #312e81);
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+    }
+    .quick-search-icon {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.15);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        color: #a5b4fc;
+        flex-shrink: 0;
+    }
+    .quick-search-text { color: #fff; flex: 1; }
+    .quick-search-text h4 { font-size: 0.92rem; font-weight: 800; margin: 0 0 2px; }
+    .quick-search-text p { font-size: 0.77rem; color: rgba(255,255,255,0.65); margin: 0; }
+    .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .quick-tag-btn {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #c7d2fe;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+    }
+    .quick-tag-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+    /* Hotline box */
+    .hotline-box {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-left: 4px solid #f97316;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+    }
+    .hotline-box h5 {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #c2410c;
+        margin-bottom: 8px;
+    }
+    .hotline-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 0.82rem;
+        color: #374151;
+    }
+    .hotline-item:last-child { margin-bottom: 0; }
+    .hotline-item strong { color: #1f2937; }
 </style>
 
-<div class="section-block fade-in-up">
-    <div class="section-header">
-        <div class="section-title-wrap">
-            <span class="section-icon bg-blue"><i class="bi bi-newspaper"></i></span>
-            <h2 class="section-title">Chính Sách Pháp Luật & Tin Tức Hàng Ngày</h2>
+<div class="section-block fade-in-up policy-page-wrapper">
+
+    <!-- Hero Banner -->
+    <div class="policy-hero mb-4">
+        <div class="hero-text">
+            <h1><i class="bi bi-shield-fill-check me-2"></i>Chính Sách & Pháp Luật</h1>
+            <p>Tra cứu văn bản pháp luật chính thống, tin tức từ Cổng Thông Tin Điện Tử Chính Phủ và cập nhật tin tức đô thị hàng ngày tại một nơi.</p>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat-box">
+                <span class="stat-num">@laws.Count</span>
+                <span class="stat-lbl">Văn bản Luật</span>
+            </div>
+            <div class="hero-stat-box">
+                <span class="stat-num">@govNews.Count</span>
+                <span class="stat-lbl">Tin Chính phủ</span>
+            </div>
+            <div class="hero-stat-box">
+                <span class="stat-num">@otherNews.Count</span>
+                <span class="stat-lbl">Tin Báo chí</span>
+            </div>
         </div>
     </div>
 
-    <div class="page-container">
-        <!-- Cột Trái: Văn bản Pháp luật & Chính sách -->
-        <div class="main-laws-panel">
-            <h3 class="panel-title text-primary">
-                <i class="bi bi-shield-check text-success"></i> Văn bản Pháp luật & Chính sách
-            </h3>
-            
-            @if (!laws.Any())
-            {
-                <div class="text-center py-5 text-secondary">
-                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                    <span>Chưa có văn bản pháp luật nào được đăng tải.</span>
+    <!-- Source Trust Row -->
+    <div class="source-row mb-4">
+        <strong class="text-secondary" style="font-size:0.8rem;">Nguồn dữ liệu:</strong>
+        <span class="source-chip db"><i class="bi bi-database-fill-check"></i> Cơ sở dữ liệu CivicConnect</span>
+        <span class="source-chip gov"><i class="bi bi-building-fill-check"></i> Cổng TTĐT Chính Phủ (chinhphu.vn)</span>
+        <span class="source-chip news"><i class="bi bi-newspaper"></i> Báo điện tử chính thống</span>
+    </div>
+
+    <!-- 3-Column Main Grid -->
+    <div class="policy-grid">
+
+        <!-- ===== CỘT 1: VĂN BẢN PHÁP LUẬT ===== -->
+        <div>
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-header-icon blue"><i class="bi bi-file-earmark-text-fill"></i></div>
+                    <div class="panel-title-text">
+                        <h3>Văn bản Pháp luật & Chính sách</h3>
+                        <small>Được xác thực · Từ cơ sở dữ liệu chính thống</small>
+                    </div>
+                    <span class="panel-count-badge">@laws.Count VB</span>
                 </div>
-            }
-            else
-            {
-                <div class="laws-list">
-                    @foreach (var law in laws)
+                <div class="panel-body">
+                    @if (!laws.Any())
                     {
-                        var detailUrl = law.Id == 0 
-                            ? Url.Action("Details", "Policy", new { id = 0, url = law.SourceUrl }) 
-                            : Url.Action("Details", "Policy", new { id = law.Id });
-                        <a href="@detailUrl" class="law-card">
-                            <div class="law-title">@law.Title</div>
-                            <p class="law-excerpt">@law.Excerpt</p>
-                            <div class="law-meta">
-                                <span class="gov-badge">
-                                    <i class="bi bi-check-circle-fill"></i> Minh bạch từ nhà nước
-                                </span>
-                                <span><i class="bi bi-building"></i> @law.IssuingUnit</span>
-                                <span><i class="bi bi-hash"></i> @(law.DocumentNumber ?? "Đang cập nhật")</span>
-                                <span><i class="bi bi-calendar3"></i> @law.PublishedDate.ToString("dd/MM/yyyy")</span>
-                            </div>
-                        </a>
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>Chưa có văn bản pháp luật nào được đăng tải.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var law in laws.Take(8))
+                        {
+                            var detailUrl = Url.Action("Details", "Policy", new { id = law.Id });
+                            <a href="@detailUrl" class="law-item">
+                                <div class="law-item-badge-row">
+                                    <span class="badge-official"><i class="bi bi-patch-check-fill"></i> Chứng thực</span>
+                                    @if (!string.IsNullOrEmpty(law.DocumentNumber))
+                                    {
+                                        <span class="badge-doc-num">@law.DocumentNumber</span>
+                                    }
+                                </div>
+                                <div class="law-item-title">@law.Title</div>
+                                <p class="law-item-excerpt">@law.Excerpt</p>
+                                <div class="law-item-meta">
+                                    <span><i class="bi bi-building"></i> @law.IssuingUnit</span>
+                                    <span><i class="bi bi-calendar3"></i> @law.PublishedDate.ToString("dd/MM/yyyy")</span>
+                                    @if (law.EffectiveDate.HasValue)
+                                    {
+                                        <span><i class="bi bi-check-circle text-success"></i> Còn hiệu lực</span>
+                                    }
+                                </div>
+                            </a>
+                        }
                     }
                 </div>
-            }
+                @if (laws.Count > 8)
+                {
+                    <div class="see-more-row">
+                        <a href="#" class="see-more-link"><i class="bi bi-arrow-down-circle"></i> Xem thêm @(laws.Count - 8) văn bản</a>
+                    </div>
+                }
+            </div>
         </div>
 
-        <!-- Cột Phải: Tin tức & Thông báo đô thị hàng ngày -->
-        <div class="sidebar-news-panel">
-            <h3 class="panel-title text-danger">
-                <i class="bi bi-lightning-fill text-warning"></i> Tin tức & Thông báo đô thị
-            </h3>
-
-            @if (!newsAndNotices.Any())
-            {
-                <div class="text-center py-5 text-secondary">
-                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                    <span>Chưa có tin tức hoạt động nào mới.</span>
+        <!-- ===== CỘT 2: TIN CHÍNH PHỦ CHÍNH THỐNG ===== -->
+        <div>
+            <!-- Quick Law Search Card -->
+            <div class="quick-search-card">
+                <div class="quick-search-icon"><i class="bi bi-search-heart-fill"></i></div>
+                <div class="quick-search-text">
+                    <h4>Tra cứu Luật nhanh bằng AI</h4>
+                    <p>Hỏi AI về bất kỳ quy định pháp luật nào</p>
+                    <div class="quick-tags">
+                        <a href="/Policy" class="quick-tag-btn">🚫 Lấn chiếm vỉa hè</a>
+                        <a href="/Policy" class="quick-tag-btn">🍺 Nồng độ cồn</a>
+                        <a href="/Policy" class="quick-tag-btn">🐕 Chó thả rông</a>
+                        <a href="/Policy" class="quick-tag-btn">🎆 Đốt pháo</a>
+                        <a href="/Policy" class="quick-tag-btn">🏗️ Xây không phép</a>
+                    </div>
                 </div>
-            }
-            else
-            {
-                <div class="news-list">
-                    @foreach (var item in newsAndNotices)
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-header-icon green"><i class="bi bi-flag-fill"></i></div>
+                    <div class="panel-title-text">
+                        <h3>Tin Tức Chính Phủ Chính Thống</h3>
+                        <small>Nguồn: chinhphu.vn · Cập nhật liên tục</small>
+                    </div>
+                    <span class="panel-count-badge">@govNews.Count</span>
+                </div>
+                <div class="panel-body">
+                    @if (!govNews.Any())
                     {
-                        var detailUrl = item.Id == 0 
-                            ? Url.Action("Details", "Policy", new { id = 0, url = item.SourceUrl }) 
-                            : Url.Action("Details", "Policy", new { id = item.Id });
-                        <a href="@detailUrl" class="side-news-card">
-                            <div class="side-news-title">@item.Title</div>
-                            <p class="side-news-excerpt">@item.Excerpt</p>
-                            <div class="side-news-meta">
-                                <span class="tag-badge @(item.Tag == "Thông báo" ? "tag-notice" : "tag-news")">
-                                    @item.Tag
-                                </span>
-                                <span><i class="bi bi-clock"></i> @item.PublishedDate.ToString("dd/MM/yyyy")</span>
-                                <span><i class="bi bi-eye"></i> Xem chi tiết</span>
-                            </div>
-                        </a>
+                        <div class="empty-state">
+                            <i class="bi bi-wifi-off" style="color:#9ca3af;"></i>
+                            <p>Không thể kết nối cổng chính phủ lúc này.<br/><small>Đang thử tải lại...</small></p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var item in govNews.Take(8))
+                        {
+                            var detailUrl = item.Id == 0
+                                ? Url.Action("Details", "Policy", new { id = 0, url = item.SourceUrl })
+                                : Url.Action("Details", "Policy", new { id = item.Id });
+                            <a href="@detailUrl" class="gov-news-item">
+                                <div style="display:flex; gap:6px; margin-bottom:5px; align-items:center;">
+                                    <span class="tag-chip gov-tag"><i class="bi bi-building"></i> Chính phủ</span>
+                                    <span style="font-size:0.7rem; color:#9ca3af;">@item.PublishedDate.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="gov-news-title">@item.Title</div>
+                                @if (!string.IsNullOrEmpty(item.Excerpt))
+                                {
+                                    <p class="gov-news-excerpt">@item.Excerpt</p>
+                                }
+                                <div class="gov-news-meta">
+                                    <span><i class="bi bi-link-45deg"></i> @(item.IssuingUnit ?? "Chính phủ VN")</span>
+                                    <span><i class="bi bi-eye"></i> Xem chi tiết</span>
+                                </div>
+                            </a>
+                        }
                     }
                 </div>
-            }
+
+                <!-- Hotline / Quick Contact -->
+                <div style="padding: 0 22px 18px;">
+                    <div class="hotline-box">
+                        <h5><i class="bi bi-telephone-fill me-1"></i> Đường dây nóng Chính phủ</h5>
+                        <div class="hotline-item"><i class="bi bi-telephone text-danger"></i> <strong>Đường dây phản ánh:</strong> 1800.6664 (miễn phí)</div>
+                        <div class="hotline-item"><i class="bi bi-globe text-primary"></i> <strong>Cổng dịch vụ công:</strong> dichvucong.gov.vn</div>
+                        <div class="hotline-item"><i class="bi bi-envelope text-success"></i> <strong>Kiến nghị trực tuyến:</strong> nguoidan.chinhphu.vn</div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- ===== CỘT 3: TIN TỨC KHÁC ===== -->
+        <div class="policy-col-3">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-header-icon red"><i class="bi bi-lightning-fill"></i></div>
+                    <div class="panel-title-text">
+                        <h3>Tin Tức & Thông Báo Đô Thị</h3>
+                        <small>Tổng hợp từ báo điện tử chính thống</small>
+                    </div>
+                    <span class="panel-count-badge">@otherNews.Count</span>
+                </div>
+                <div class="panel-body">
+                    @if (!otherNews.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>Chưa có tin tức mới.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var item in otherNews.Take(10))
+                        {
+                            var detailUrl = item.Id == 0
+                                ? Url.Action("Details", "Policy", new { id = 0, url = item.SourceUrl })
+                                : Url.Action("Details", "Policy", new { id = item.Id });
+                            <a href="@detailUrl" class="news-mini-item">
+                                <div class="news-mini-title">@item.Title</div>
+                                <div class="news-mini-meta">
+                                    <span class="tag-chip @(item.Tag == "Thông báo" ? "notice-tag" : "news-tag")">@item.Tag</span>
+                                    <span><i class="bi bi-clock"></i> @item.PublishedDate.ToString("dd/MM")</span>
+                                    <span><i class="bi bi-newspaper"></i> @(item.IssuingUnit ?? "Báo điện tử")</span>
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Official Gov Portal Links -->
+            <div class="panel-card mt-4">
+                <div class="panel-header">
+                    <div class="panel-header-icon green"><i class="bi bi-link-45deg"></i></div>
+                    <div class="panel-title-text">
+                        <h3>Cổng Thông Tin Chính Thống</h3>
+                        <small>Liên kết trực tiếp đến cơ quan nhà nước</small>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        @{
+                            var govLinks = new[]
+                            {
+                                new { Icon = "bi-building-fill", Name = "Cổng TTĐT Chính Phủ", Url = "https://chinhphu.vn", Color = "#1d4ed8" },
+                                new { Icon = "bi-file-earmark-ruled-fill", Name = "Văn phòng Chính phủ", Url = "https://vpcp.chinhphu.vn", Color = "#15803d" },
+                                new { Icon = "bi-shield-fill-check", Name = "Cổng VBPL Việt Nam", Url = "https://vbpl.vn/pages/portal.aspx", Color = "#7c3aed" },
+                                new { Icon = "bi-search-heart-fill", Name = "Tra cứu văn bản QPPL", Url = "https://vbpl.vn/pages/vbpq-timkiem.aspx", Color = "#b91c1c" },
+                                new { Icon = "bi-journal-text", Name = "Cổng dịch vụ công QG", Url = "https://dichvucong.gov.vn", Color = "#0891b2" },
+                                new { Icon = "bi-person-raised-hand", Name = "Tiếp nhận kiến nghị dân", Url = "https://nguoidan.chinhphu.vn", Color = "#c2410c" },
+                            };
+                        }
+                        @foreach (var link in govLinks)
+                        {
+                            <a href="@link.Url" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:10px; padding:10px 12px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; text-decoration:none; transition:all 0.18s; font-size:0.85rem; font-weight:600; color:#1f2937;" onmouseover="this.style.background='#eff6ff'; this.style.borderColor='#bfdbfe';" onmouseout="this.style.background='#f9fafb'; this.style.borderColor='#e5e7eb';">
+                                <span style="width:30px;height:30px; border-radius:8px; background:@(link.Color + "1a"); color:@link.Color; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0;">
+                                    <i class="bi @link.Icon"></i>
+                                </span>
+                                <span>@link.Name</span>
+                                <i class="bi bi-arrow-up-right-square ms-auto" style="color:#9ca3af; font-size:0.8rem;"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
+</div> <!-- Đóng policy-index-container-wrapper -->

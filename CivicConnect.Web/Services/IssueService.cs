@@ -257,8 +257,8 @@ namespace CivicConnect.Web.Services
             
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
-                "Pháº£n Ã¡nh Ä‘Ã£ Ä‘Æ°á»£c tiáº¿p nháº­n",
-                $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c cÃ¡n bá»™ tiáº¿p nháº­n Ä‘á»ƒ xá»­ lÃ½.",
+                "Phản ánh đã được tiếp nhận",
+                $"Phản ánh '{issue.Title}' của bạn đã được cán bộ tiếp nhận để xử lý.",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
@@ -280,8 +280,8 @@ namespace CivicConnect.Web.Services
 
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
-                "Pháº£n Ã¡nh Ä‘ang Ä‘Æ°á»£c xá»­ lÃ½",
-                $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n hiá»‡n Ä‘ang Ä‘Æ°á»£c tiáº¿n hÃ nh xá»­ lÃ½.",
+                "Phản ánh đang được xử lý",
+                $"Phản ánh '{issue.Title}' của bạn hiện đang được tiến hành xử lý.",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
@@ -308,12 +308,12 @@ namespace CivicConnect.Web.Services
             }
 
             await _context.SaveChangesAsync();
-            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Resolved, officialId, note ?? "Pháº£n Ã¡nh Ä‘Ã£ Ä‘Æ°á»£c giáº£i quyáº¿t thÃ nh cÃ´ng.", attachmentUrl);
+            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Resolved, officialId, note ?? "Phản ánh đã được giải quyết thành công.", attachmentUrl);
 
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
-                "Pháº£n Ã¡nh Ä‘Ã£ giáº£i quyáº¿t xong",
-                $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c Ä‘Ã¡nh dáº¥u lÃ  Ä Ã£ giáº£i quyáº¿t.",
+                "Phản ánh đã giải quyết xong",
+                $"Phản ánh '{issue.Title}' của bạn đã được đánh dấu là Đã giải quyết.",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
@@ -337,8 +337,8 @@ namespace CivicConnect.Web.Services
 
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
-                "Pháº£n Ã¡nh bá»‹ tá»« chá»‘i",
-                $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n Ä‘Ã£ bá»‹ tá»« chá»‘i. LÃ½ do: {reason}",
+                "Phản ánh bị từ chối",
+                $"Phản ánh '{issue.Title}' của bạn đã bị từ chối. Lý do: {reason}",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
@@ -362,13 +362,18 @@ namespace CivicConnect.Web.Services
             issue.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Assigned, officialId, $"Chuyá»ƒn lÃªn cáº¥p Quáº­n. LÃ½ do: {note}");
+            // 1. Chuyển trạng thái gốc sang Assigned (hoặc đóng lại ghi nhận bàn giao)
+            issue.Status = IssueStatus.Assigned;
+            issue.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
 
-            // 2. Táº¡o má»™t Issue má»›i á»Ÿ cáº¥p Quáº­n (DistrictLevel)
+            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Assigned, officialId, $"Chuyển lên cấp Quận. Lý do: {note}");
+
+            // 2. Tạo một Issue mới ở cấp Quận (DistrictLevel)
             var escalatedIssue = new Issue
             {
-                Title = $"[CHUYá»‚N Cáº¤P] {issue.Title}",
-                Description = $"[Pháº£n Ã¡nh gá»‘c #{issue.Id}] - NgÆ°á»i chuyá»ƒn cáº¥p: {official.FullName}\nGhi chÃº: {note}\n\nNá»™i dung gá»‘c:\n{issue.Description}",
+                Title = $"[CHUYỂN CẤP] {issue.Title}",
+                Description = $"[Phản ánh gốc #{issue.Id}] - Người chuyển cấp: {official.FullName}\nGhi chú: {note}\n\nNội dung gốc:\n{issue.Description}",
                 Category = issue.Category,
                 Status = IssueStatus.Pending,
                 Priority = issue.Priority,
@@ -419,8 +424,8 @@ namespace CivicConnect.Web.Services
             // Gá»­i thÃ´ng bÃ¡o cho cÃ´ng dÃ¢n
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
-                "Pháº£n Ã¡nh Ä‘Ã£ Ä‘Æ°á»£c chuyá»ƒn lÃªn cáº¥p xá»­ lÃ½ cao hÆ¡n",
-                $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c chuyá»ƒn lÃªn cÆ¡ quan cáº¥p Quáº­n Ä‘á»ƒ tiáº¿p tá»¥c xá»­ lÃ½.",
+                "Phản ánh đã được chuyển lên cấp xử lý cao hơn",
+                $"Phản ánh '{issue.Title}' của bạn đã được chuyển lên cơ quan cấp Quận để tiếp tục xử lý.",
                 NotificationType.IssueStatusChanged,
                 escalatedIssue.Id.ToString()
             );
@@ -488,22 +493,22 @@ namespace CivicConnect.Web.Services
                 issue.Status = IssueStatus.Closed;
                 issue.UpdatedAt = DateTime.UtcNow;
 
-                // LÆ°u lá»‹ch sá»­ quÃ¡ háº¡n
+                // Lưu lịch sử quá hạn
                 var history = new IssueStatusHistory
                 {
                     IssueId = issue.Id,
                     FromStatus = oldStatus,
                     ToStatus = IssueStatus.Closed,
-                    ChangedById = issue.AuthorId, // ÄÃ³ng tá»± Ä‘á»™ng bá»Ÿi há»‡ thá»‘ng nhÃ¢n danh tÃ¡c giáº£
-                    Note = "Há»‡ thá»‘ng tá»± Ä‘á»™ng Ä‘Ã³ng pháº£n Ã¡nh do quÃ¡ thá»i háº¡n xá»­ lÃ½ quy Ä‘á»‹nh.",
+                    ChangedById = issue.AuthorId, // Đóng tự động bởi hệ thống nhân danh tác giả
+                    Note = "Hệ thống tự động đóng phản ánh do quá thời hạn xử lý quy định.",
                     ChangedAt = DateTime.UtcNow
                 };
                 await _context.IssueStatusHistories.AddAsync(history);
 
                 await _notificationService.SendNotificationAsync(
                     issue.AuthorId,
-                    "Pháº£n Ã¡nh tá»± Ä‘á»™ng Ä‘Ã³ng",
-                    $"Pháº£n Ã¡nh '{issue.Title}' cá»§a báº¡n Ä‘Ã£ quÃ¡ háº¡n xá»­ lÃ½ vÃ  tá»± Ä‘á»™ng chuyá»ƒn sang tráº¡ng thÃ¡i ÄÃ³ng.",
+                    "Phản ánh tự động đóng",
+                    $"Phản ánh '{issue.Title}' của bạn đã quá hạn xử lý và tự động chuyển sang trạng thái Đóng.",
                     NotificationType.IssueStatusChanged,
                     issue.Id.ToString()
                 );

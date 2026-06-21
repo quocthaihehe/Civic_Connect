@@ -1,0 +1,156 @@
+@page
+@model Profile2FAModel
+@{
+    ViewData["Title"] = "Bảo mật hai lớp (2FA)";
+    var successMsg = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        @if (!string.IsNullOrEmpty(successMsg))
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4 py-2" role="alert" style="font-size: 0.9rem;">
+                <i class="bi bi-check-circle-fill me-2"></i> @successMsg
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="mb-4">
+            <a href="/Identity/Account/Profile" class="btn btn-sm btn-outline-secondary rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại hồ sơ cá nhân
+            </a>
+        </div>
+
+        <form asp-page="./Profile2FA" method="post">
+            <div class="glass-card p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; flex-shrink: 0;">
+                        <i class="bi bi-shield-lock-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-1">Xác thực hai lớp (2FA)</h4>
+                        <p class="text-muted small mb-0">Tăng cường an toàn tài khoản bằng cách yêu cầu nhập mã OTP khi đăng nhập.</p>
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-color: var(--gray-200);" />
+
+                <div class="mb-4 form-check form-switch p-0 d-flex justify-content-between align-items-center bg-light p-3 rounded-3">
+                    <div class="pe-3">
+                        <label asp-for="Input.Enable2FA" class="form-check-label fw-bold text-dark d-block" style="font-size: 0.95rem;">Kích hoạt xác thực 2FA</label>
+                        <span class="text-muted small">Khi được bật, hệ thống sẽ yêu cầu nhập mã xác thực ngẫu nhiên gửi qua kênh đã đăng ký.</span>
+                    </div>
+                    <input asp-for="Input.Enable2FA" class="form-check-input" type="checkbox" id="2fa-toggle" style="width: 3rem; height: 1.5rem; cursor: pointer; float: none; margin-left: 0;" />
+                </div>
+
+                <div id="2fa-config-section" class="@(Model.Input.Enable2FA ? "" : "d-none")">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Input.TwoFactorType" class="form-label fw-semibold" style="font-size: 0.85rem;"></label>
+                            <select asp-for="Input.TwoFactorType" id="2fa-type-select" class="form-select">
+                                <option value="Telegram">Telegram (Mã gửi qua Bot)</option>
+                                <option value="Discord">Discord (Mã gửi qua Bot)</option>
+                                <option value="Authenticator">Google Authenticator (App OTP)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" id="contact-input-wrapper">
+                            <label asp-for="Input.ContactInfo" id="contact-label" class="form-label fw-semibold" style="font-size: 0.85rem;">Số điện thoại / ID tài khoản:</label>
+                            <input asp-for="Input.ContactInfo" class="form-control" placeholder="Nhập ID tài khoản của bạn..." />
+                            <span asp-validation-for="Input.ContactInfo" class="text-danger" style="font-size: 0.75rem;"></span>
+                        </div>
+                    </div>
+
+                    <!-- Hướng dẫn cấu hình Telegram -->
+                    <div id="guide-Telegram" class="guide-box alert alert-info rounded-3 p-3 mb-4">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-telegram me-1 text-primary"></i> Hướng dẫn liên kết Telegram:</h6>
+                        <ol class="small mb-0 ps-3">
+                            <li class="mb-1">Tìm kiếm bot <strong>@@CivicConnectBot</strong> trên ứng dụng Telegram.</li>
+                            <li class="mb-1">Nhấn <strong>/start</strong> để bắt đầu trò chuyện và lấy mã ChatID cá nhân.</li>
+                            <li class="mb-1">Nhập mã ChatID nhận được từ Bot vào ô bên trên để liên kết và nhận OTP qua Telegram.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Hướng dẫn cấu hình Discord -->
+                    <div id="guide-Discord" class="guide-box alert alert-info rounded-3 p-3 mb-4 d-none">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-discord me-1 text-indigo"></i> Hướng dẫn liên kết Discord:</h6>
+                        <ol class="small mb-0 ps-3">
+                            <li class="mb-1">Tham gia máy chủ Discord <strong>CivicConnect</strong> qua đường link mời.</li>
+                            <li class="mb-1">Nhắn tin cho bot <strong>CivicConnect Notification</strong> bằng lệnh <code>!myid</code> để lấy ID của bạn.</li>
+                            <li class="mb-1">Nhập mã ID nhận được vào ô cấu hình phía trên để nhận tin nhắn riêng chứa mã OTP.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Hướng dẫn cấu hình Google Authenticator -->
+                    <div id="guide-Authenticator" class="guide-box alert alert-info rounded-3 p-3 mb-4 d-none">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-qr-code-scan me-1 text-success"></i> Hướng dẫn quét mã Google Authenticator:</h6>
+                        <div class="row align-items-center g-3">
+                            <div class="col-sm-8">
+                                <ol class="small mb-0 ps-3">
+                                    <li class="mb-1">Tải ứng dụng <strong>Google Authenticator</strong> hoặc <strong>Microsoft Authenticator</strong> trên điện thoại.</li>
+                                    <li class="mb-1">Quét mã QR bên cạnh hoặc nhập mã khóa bí mật này: <code class="fw-bold text-success text-break">@Model.AuthenticatorSecret</code></li>
+                                    <li class="mb-1">Điền 6 chữ số hiển thị trên điện thoại khi đăng nhập để xác thực.</li>
+                                </ol>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <div class="bg-white p-2 d-inline-block rounded border">
+                                    <!-- Mock QR code -->
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120&data=otpauth://totp/CivicConnect:@(User.Identity?.Name)?secret=@(Model.AuthenticatorSecret)%26issuer=CivicConnect" alt="QR Code" style="width: 110px; height: 110px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 d-flex justify-content-end gap-2" style="border-top: 1px solid var(--gray-200);">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold"><i class="bi bi-save me-1"></i> Lưu Cấu Hình 2FA</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Toggle config section on switch click
+            $('#2fa-toggle').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#2fa-config-section').removeClass('d-none').hide().fadeIn(300);
+                } else {
+                    $('#2fa-config-section').fadeOut(300, function() {
+                        $(this).addClass('d-none');
+                    });
+                }
+            });
+
+            // Show appropriate guide on type select change
+            $('#2fa-type-select').change(function() {
+                const type = $(this).val();
+                $('.guide-box').addClass('d-none');
+                $(`#guide-${type}`).removeClass('d-none');
+
+                if (type === 'Authenticator') {
+                    $('#contact-input-wrapper').addClass('d-none');
+                    $('#contact-input-wrapper input').removeAttr('required').val('App Authenticator');
+                } else {
+                    $('#contact-input-wrapper').removeClass('d-none');
+                    $('#contact-input-wrapper input').attr('required', 'required');
+                    if ($('#contact-input-wrapper input').val() === 'App Authenticator') {
+                        $('#contact-input-wrapper input').val('');
+                    }
+                    if (type === 'Telegram') {
+                        $('#contact-label').text('ID tài khoản Telegram (ChatID):');
+                        $('#contact-input-wrapper input').attr('placeholder', 'Ví dụ: 184758392');
+                    } else if (type === 'Discord') {
+                        $('#contact-label').text('ID tài khoản Discord:');
+                        $('#contact-input-wrapper input').attr('placeholder', 'Ví dụ: 785392019485739201');
+                    }
+                }
+            });
+
+            // Trigger change event to set correct initial labels and guides
+            $('#2fa-type-select').trigger('change');
+        });
+    </script>
+}
