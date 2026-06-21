@@ -83,7 +83,7 @@ $(document).ready(function () {
     }
 
     function createNotifHtml(n) {
-        const link = n.relatedIssueId ? `/Issues/${n.relatedIssueId}` : '#';
+        const link = n.relatedIssueId ? `/Issues/Details/${n.relatedIssueId}` : '#';
         return `
             <a href="${link}" class="dropdown-item p-3 border-bottom d-flex align-items-start gap-2 notif-item" data-id="${n.id}" style="white-space: normal; transition: background 0.2s;">
                 <div class="bg-primary-light text-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; flex-shrink: 0; background: rgba(37,99,235,0.08);">
