@@ -1,4 +1,4 @@
-using CivicConnect.Web.Models.Entities;
+﻿using CivicConnect.Web.Models.Entities;
 using CivicConnect.Web.Models.Enums;
 using CivicConnect.Web.Repositories;
 using CivicConnect.Web.Data;
@@ -253,12 +253,13 @@ namespace CivicConnect.Web.Services
             issue.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Assigned, officialId, "Tiáº¿p nháº­n pháº£n Ã¡nh.");
-            
+            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Assigned, officialId, "Tiếp nhận phản ánh.");
+
+            // F3: Thông báo bắt buộc mốc 1 — Tiếp nhận
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
                 "Phản ánh đã được tiếp nhận",
-                $"Phản ánh '{issue.Title}' của bạn đã được cán bộ tiếp nhận để xử lý.",
+                $"Phản ánh '{issue.Title}' của bạn đã được cán bộ tiếp nhận và đang được phân công xử lý.",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
@@ -271,17 +272,21 @@ namespace CivicConnect.Web.Services
             var issue = await _issueRepository.GetByIdAsync(issueId);
             if (issue == null || (issue.Status != IssueStatus.Assigned && issue.Status != IssueStatus.Pending)) return false;
 
+            // B5: Phải có assignee trước khi Processing
+            if (string.IsNullOrEmpty(issue.AssignedToUserId)) return false;
+
             var oldStatus = issue.Status;
             issue.Status = IssueStatus.Processing;
             issue.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Processing, officialId, "Báº¯t Ä‘áº§u xá»­ lÃ½ pháº£n Ã¡nh.");
+            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Processing, officialId, "Bắt đầu xử lý phản ánh.");
 
+            // F3: Thông báo bắt buộc mốc 2 — Cập nhật tiến độ
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
                 "Phản ánh đang được xử lý",
-                $"Phản ánh '{issue.Title}' của bạn hiện đang được tiến hành xử lý.",
+                $"Phản ánh '{issue.Title}' của bạn hiện đang được tiến hành xử lý bởi cán bộ phụ trách.",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
@@ -293,6 +298,12 @@ namespace CivicConnect.Web.Services
         {
             var issue = await _issueRepository.GetByIdAsync(issueId);
             if (issue == null || issue.Status != IssueStatus.Processing) return false;
+
+            // B3: Bắt buộc phải có minh chứng trước khi Resolve
+            bool hasProof = !string.IsNullOrEmpty(issue.ResolutionImageUrl)
+                || !string.IsNullOrEmpty(issue.ResolutionDocumentUrl)
+                || !string.IsNullOrEmpty(attachmentUrl);
+            if (!hasProof) return false;
 
             var oldStatus = issue.Status;
             issue.Status = IssueStatus.Resolved;
@@ -310,10 +321,11 @@ namespace CivicConnect.Web.Services
             await _context.SaveChangesAsync();
             await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Resolved, officialId, note ?? "Phản ánh đã được giải quyết thành công.", attachmentUrl);
 
+            // F3: Thông báo bắt buộc mốc 3 — Đóng phản ánh
             await _notificationService.SendNotificationAsync(
                 issue.AuthorId,
-                "Phản ánh đã giải quyết xong",
-                $"Phản ánh '{issue.Title}' của bạn đã được đánh dấu là Đã giải quyết.",
+                "Phản ánh đã được giải quyết",
+                $"Phản ánh '{issue.Title}' của bạn đã được đánh dấu là Đã giải quyết. Cảm ơn bạn đã phản ánh!",
                 NotificationType.IssueStatusChanged,
                 issue.Id.ToString()
             );
@@ -438,6 +450,16 @@ namespace CivicConnect.Web.Services
             var issue = await _issueRepository.GetByIdAsync(issueId);
             if (issue == null) return false;
 
+            // B7: Kiểm tra giới hạn tải công việc (tối đa 10 phản ánh InProgress/người)
+            var inProgressCount = await _context.Issues
+                .CountAsync(i => i.AssignedToUserId == assignedToUserId
+                    && (i.Status == IssueStatus.Processing || i.Status == IssueStatus.Assigned));
+            if (inProgressCount >= 10)
+            {
+                // Không chặn cứng, chỉ ghi nhận cảnh báo trong Note
+                note = (note ?? "") + " [CẢNH BÁO: Cán bộ đã có đủ 10 phản ánh đang xử lý]";
+            }
+
             var oldStatus = issue.Status;
             issue.Status = IssueStatus.Assigned;
             issue.AssignedToUserId = assignedToUserId;
@@ -445,7 +467,7 @@ namespace CivicConnect.Web.Services
             issue.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Assigned, officialId, note ?? $"PhÃ¢n cÃ´ng cho cÃ¡n bá»™ khÃ¡c xá»­ lÃ½.");
+            await SaveHistoryAsync(issueId, oldStatus, IssueStatus.Assigned, officialId, note ?? "Phân công xử lý.");
 
             await _notificationService.SendNotificationAsync(
                 assignedToUserId,
@@ -619,4 +641,5 @@ namespace CivicConnect.Web.Services
         }
     }
 }
+
 

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace CivicConnect.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,OfficialDistrict,OfficialWard")]
     public class IssueManagementController : Controller
     {
         private readonly AppDbContext _context;
@@ -152,12 +152,53 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [Route("Admin/Issues/UpdateKanbanStatus")]
-        public async Task<IActionResult> UpdateKanbanStatus(int issueId, IssueStatus newStatus)
+        public async Task<IActionResult> UpdateKanbanStatus(int issueId, IssueStatus newStatus, string? auditNote)
         {
             var issue = await _context.Issues.FindAsync(issueId);
             if (issue == null) return NotFound();
 
             var oldStatus = issue.Status;
+
+            // B1 — Kiểm tra quyền theo địa bàn
+            var currentUser = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            if (!roles.Contains("Admin"))
+            {
+                bool isAuthorized = false;
+                if (roles.Contains("OfficialDistrict") && issue.DistrictCode == currentUser.DistrictCode)
+                    isAuthorized = true;
+                if (roles.Contains("OfficialWard") && issue.WardCode == currentUser.WardCode)
+                    isAuthorized = true;
+                if (!isAuthorized)
+                    return Json(new { success = false, message = "Bạn không có quyền thao tác phản ánh ngoài địa bàn của mình." });
+            }
+
+            // B2 — Forward-only: chặn kéo lùi trạng thái (trừ Admin)
+            var statusOrder = new Dictionary<IssueStatus, int>
+            {
+                { IssueStatus.Pending, 0 },
+                { IssueStatus.Assigned, 1 },
+                { IssueStatus.Processing, 2 },
+                { IssueStatus.Resolved, 3 },
+                { IssueStatus.Closed, 4 },
+                { IssueStatus.Rejected, -1 }
+            };
+
+            bool isAdmin = roles.Contains("Admin");
+            if (!isAdmin)
+            {
+                bool isBackward = statusOrder.TryGetValue(oldStatus, out var oldOrder)
+                    && statusOrder.TryGetValue(newStatus, out var newOrder)
+                    && newOrder < oldOrder
+                    && newOrder >= 0;
+                if (isBackward)
+                    return Json(new { success = false, message = "Không thể kéo lùi trạng thái. Chỉ Admin mới có quyền này." });
+            }
+
+            // B5 — Yêu cầu phân công trước khi Processing
+            if (newStatus == IssueStatus.Processing && string.IsNullOrEmpty(issue.AssignedToUserId))
+                return Json(new { success = false, message = "Phải phân công cán bộ trước khi chuyển sang Đang xử lý." });
+
             issue.Status = newStatus;
 
             var adminId = _userManager.GetUserId(User) ?? "System";
@@ -167,7 +208,7 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
                 FromStatus = oldStatus,
                 ToStatus = newStatus,
                 ChangedById = adminId,
-                Note = "Đang phân công",
+                Note = !string.IsNullOrEmpty(auditNote) ? auditNote : "Đang phân công",
                 ChangedAt = DateTime.UtcNow
             });
 
@@ -202,6 +243,35 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
         {
             var issue = await _context.Issues.FindAsync(id);
             if (issue == null) return NotFound();
+
+            // B1 — Kiểm tra quyền theo địa bàn
+            var currentUser = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            if (!roles.Contains("Admin"))
+            {
+                bool isAuthorized = false;
+                if (roles.Contains("OfficialDistrict") && issue.DistrictCode == currentUser.DistrictCode)
+                    isAuthorized = true;
+                if (roles.Contains("OfficialWard") && issue.WardCode == currentUser.WardCode)
+                    isAuthorized = true;
+                if (!isAuthorized)
+                {
+                    TempData["ErrorMessage"] = "Bạn không có quyền thao tác phản ánh ngoài địa bàn của mình.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+            }
+
+            // B3 — Bắt buộc minh chứng khi chuyển sang Resolved
+            if (status == IssueStatus.Resolved)
+            {
+                bool hasProof = !string.IsNullOrEmpty(resolutionImageUrl) || !string.IsNullOrEmpty(resolutionDocumentUrl)
+                    || !string.IsNullOrEmpty(issue.ResolutionImageUrl) || !string.IsNullOrEmpty(issue.ResolutionDocumentUrl);
+                if (!hasProof)
+                {
+                    TempData["ErrorMessage"] = "Bắt buộc phải đính kèm Ảnh kết quả hoặc Văn bản minh chứng trước khi đóng phản ánh.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+            }
 
             var adminId = _userManager.GetUserId(User) ?? "System";
             var oldStatus = issue.Status;
