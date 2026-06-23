@@ -107,6 +107,13 @@ namespace CivicConnect.Web.Controllers
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId)) return Challenge();
 
+            var isOfficial = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+            if (isOfficial)
+            {
+                TempData["ErrorMessage"] = "Tài khoản cán bộ không thể gửi phản ánh công dân.";
+                return RedirectToAction("Index");
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null || !user.IsPhoneVerified)
             {
@@ -125,6 +132,12 @@ namespace CivicConnect.Web.Controllers
         [RequestFormLimits(MultipartBodyLengthLimit = 50 * 1024 * 1024)]
         public async Task<IActionResult> Create(IssueCreateViewModel model)
         {
+            var isOfficial = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+            if (isOfficial)
+            {
+                return Forbid();
+            }
+
             if (ModelState.IsValid)
             {
                 var userId = _userManager.GetUserId(User);
@@ -277,6 +290,12 @@ namespace CivicConnect.Web.Controllers
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
+            var isOfficial = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+            if (isOfficial)
+            {
+                return BadRequest("Tài khoản cán bộ không thể biểu quyết phản ánh.");
+            }
+
             var success = await _issueService.VoteIssueAsync(id, userId, type);
             if (!success) return BadRequest();
 
@@ -337,6 +356,12 @@ namespace CivicConnect.Web.Controllers
         {
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var isOfficial = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+            if (isOfficial)
+            {
+                return BadRequest("Tài khoản cán bộ không thể đánh giá kết quả xử lý.");
+            }
 
             if (rating < 1 || rating > 5) return BadRequest("Đánh giá không hợp lệ.");
 

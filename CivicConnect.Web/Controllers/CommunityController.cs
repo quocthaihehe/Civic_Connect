@@ -431,5 +431,97 @@ namespace CivicConnect.Web.Controllers
 
             return RedirectToAction(nameof(Events));
         }
+
+        [Authorize(Roles = "Admin,OfficialWard,OfficialDistrict,OfficialProvince,DepartmentStaff")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePoll(string question, string description, int durationDays, List<string> options)
+        {
+            if (string.IsNullOrWhiteSpace(question) || options == null || options.Count < 2)
+            {
+                TempData["ErrorMessage"] = "Thông tin thăm dò ý kiến không hợp lệ. Phải có ít nhất 2 phương án.";
+                return RedirectToAction(nameof(Polls));
+            }
+
+            var poll = new Poll
+            {
+                Question = question,
+                Description = description ?? "",
+                CreatedAt = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(durationDays > 0 ? durationDays : 7),
+                IsActive = true,
+                Options = options.Where(o => !string.IsNullOrWhiteSpace(o)).Select(o => new PollOption { Text = o.Trim(), VoteCount = 0 }).ToList()
+            };
+
+            _context.Polls.Add(poll);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã tạo cuộc thăm dò ý kiến mới thành công!";
+            return RedirectToAction(nameof(Polls));
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreatePetition(string title, string description, string targetAudience, int targetSignatures, int durationDays)
+        {
+            var isOfficial = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+            if (isOfficial)
+            {
+                TempData["ErrorMessage"] = "Tài khoản cán bộ không thể tạo kiến nghị công dân.";
+                return RedirectToAction(nameof(Petitions));
+            }
+
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(description) || targetSignatures <= 0)
+            {
+                TempData["ErrorMessage"] = "Thông tin kiến nghị không hợp lệ.";
+                return RedirectToAction(nameof(Petitions));
+            }
+
+            var petition = new Petition
+            {
+                Title = title,
+                Description = description,
+                TargetAudience = targetAudience ?? "Ủy ban Nhân dân",
+                TargetSignatures = targetSignatures,
+                CurrentSignatures = 0,
+                CreatedAt = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(durationDays > 0 ? durationDays : 30),
+                Status = "Active"
+            };
+
+            _context.Petitions.Add(petition);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã tạo kiến nghị mới thành công!";
+            return RedirectToAction(nameof(Petitions));
+        }
+
+        [Authorize(Roles = "Admin,OfficialWard,OfficialDistrict,OfficialProvince,DepartmentStaff")]
+        [HttpPost]
+        public async Task<IActionResult> CreateEvent(string title, string description, string location, DateTime startTime, DateTime endTime, string organizer, int maxParticipants)
+        {
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(description) || string.IsNullOrWhiteSpace(location) || startTime >= endTime || maxParticipants <= 0)
+            {
+                TempData["ErrorMessage"] = "Thông tin sự kiện không hợp lệ.";
+                return RedirectToAction(nameof(Events));
+            }
+
+            var ev = new CommunityEvent
+            {
+                Title = title,
+                Description = description,
+                Location = location,
+                StartTime = startTime,
+                EndTime = endTime,
+                Organizer = organizer ?? "Cổng thông tin Civic Connect",
+                ImageUrl = "/images/default-event.jpg",
+                MaxParticipants = maxParticipants
+            };
+
+            _context.CommunityEvents.Add(ev);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã tạo sự kiện mới thành công!";
+            return RedirectToAction(nameof(Events));
+        }
     }
 }

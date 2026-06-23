@@ -79,6 +79,12 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
                 TempData["2FA_OtpCode"] = otpCode;
                 TempData.Keep("2FA_OtpCode");
 
+                if (TwoFactorType == "Telegram")
+                {
+                    var chatId = user.TwoFactorContact ?? "7905261972";
+                    await SendTelegramOtpAsync(chatId, otpCode);
+                }
+
                 // Send notification through email as 3rd party (mocking Discord/Telegram OTP delivery)
                 string channelName = TwoFactorType switch
                 {
@@ -242,6 +248,34 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
             int hash = (secret + timeIndex.ToString()).GetHashCode();
             int code = Math.Abs(hash % 900000) + 100000;
             return code.ToString();
+        }
+
+        private async Task SendTelegramOtpAsync(string chatId, string otpCode)
+        {
+            try
+            {
+                using (var client = new System.Net.Http.HttpClient())
+                {
+                    var token = "8589963228:AAGOblMSNSW9ZXjGTR-D3BbIc6teIrnyNUY";
+                    var url = $"https://api.telegram.org/bot{token}/sendMessage";
+                    var payload = new
+                    {
+                        chat_id = chatId,
+                        text = $"[CivicConnect] Mã xác thực OTP đăng nhập 2FA của bạn là: {otpCode}. Mã này có hiệu lực trong vòng 5 phút. Vui lòng không chia sẻ mã này với bất kỳ ai."
+                    };
+
+                    var content = new System.Net.Http.StringContent(
+                        System.Text.Json.JsonSerializer.Serialize(payload),
+                        System.Text.Encoding.UTF8,
+                        "application/json");
+
+                    var response = await client.PostAsync(url, content);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi gửi Telegram OTP: " + ex.Message);
+            }
         }
     }
 }

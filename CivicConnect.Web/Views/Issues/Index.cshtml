@@ -80,7 +80,17 @@
                 <a asp-action="Index" asp-route-category="@((int?)currentCategory)" asp-route-status="@((int?)currentStatus)" asp-route-search="@currentSearch" asp-route-sort="priority" class="btn btn-sm @(currentSort == "priority" ? "btn-dark" : "btn-outline-secondary") rounded-pill px-3">Độ ưu tiên</a>
             </div>
         </div>
-        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold hover-scale"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh</a>
+        @{
+            var isOfficialList = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+        }
+        @if (isOfficialList)
+        {
+            <a asp-action="Dashboard" asp-controller="Official" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold hover-scale"><i class="bi bi-briefcase me-1"></i> Bàn làm việc</a>
+        }
+        else
+        {
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold hover-scale"><i class="bi bi-plus-lg me-1"></i> Gửi phản ánh</a>
+        }
     </div>
 
     @if (!Model.Any())

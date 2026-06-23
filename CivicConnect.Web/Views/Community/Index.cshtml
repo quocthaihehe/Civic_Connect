@@ -15,35 +15,35 @@
         <!-- Cột trái: Feed (Bài viết + Phản ánh) -->
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="page-title">
+                <h2 class="fw-bold text-dark mb-0" style="font-family: var(--font-display); font-size: 2rem;">
                     Bảng tin Cộng đồng
                 </h2>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#createPostModal">
                     <i class="bi bi-plus-lg me-2"></i> Tạo bài viết
                 </button>
             </div>
 
             <!-- Tabs -->
-            <ul class="nav nav-pills mb-4">
+            <ul class="nav nav-pills mb-4 gap-2">
                 <li class="nav-item">
-                    <a class="nav-link @(currentTab == "newest" ? "active" : "")" href="?tab=newest">
+                    <a class="nav-link rounded-pill px-3 py-2 fw-medium @(currentTab == "newest" ? "active" : "bg-white text-muted border")" href="?tab=newest">
                         <i class="bi bi-clock-history me-1"></i> Mới nhất
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(currentTab == "trending" ? "active text-danger bg-danger-lt" : "text-danger")" href="?tab=trending">
+                    <a class="nav-link rounded-pill px-3 py-2 fw-medium @(currentTab == "trending" ? "active bg-danger text-white" : "bg-white text-danger border")" href="?tab=trending">
                         <i class="bi bi-fire me-1"></i> Được quan tâm
                     </a>
                 </li>
             </ul>
 
             <!-- Feed List -->
-            <div class="feed-list space-y">
+            <div class="feed-list">
                 @if (!Model.Any())
                 {
-                    <div class="empty">
-                        <div class="empty-icon"><i class="bi bi-inbox text-muted"></i></div>
-                        <p class="empty-title">Chưa có bài viết nào</p>
+                    <div class="glass-card text-center py-5 shadow-sm rounded-4 bg-white border-0">
+                        <i class="bi bi-inbox text-muted opacity-50 display-3 d-block mb-3"></i>
+                        <p class="fw-bold text-dark mb-0">Chưa có bài viết nào</p>
                     </div>
                 }
                 else
@@ -53,93 +53,89 @@
                         if (item.Type == "Post")
                         {
                             <!-- Post Card -->
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="avatar bg-blue-lt me-3">
-                                            <i class="bi bi-person"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold">@item.AuthorName</div>
-                                            <div class="text-muted fs-sm">@(((DateTime)item.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</div>
-                                        </div>
-                                        <div class="ms-auto text-muted">
-                                            <i class="bi bi-chat-text"></i> Bài đăng
-                                        </div>
+                            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg); transition: all 0.3s ease;">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3" style="width: 44px; height: 44px; font-weight: bold; font-size: 1.1rem;">
+                                        @(string.IsNullOrEmpty(item.AuthorName) ? "U" : ((string)item.AuthorName).Substring(0, 1))
                                     </div>
-                                    <h3 class="card-title"><a href="/Community/PostDetail/@item.Id" class="text-reset">@item.Title</a></h3>
-                                    <p class="text-muted">
-                                        @if (((string)item.Content).Length > 150)
-                                        {
-                                            @(((string)item.Content).Substring(0, 150) + "...")
-                                        }
-                                        else
-                                        {
-                                            @item.Content
-                                        }
-                                    </p>
-                                    @if (!string.IsNullOrEmpty((string)item.Tags))
+                                    <div>
+                                        <div class="fw-bold text-dark">@item.AuthorName</div>
+                                        <div class="text-muted small">@(((DateTime)item.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</div>
+                                    </div>
+                                    <div class="ms-auto text-muted small bg-light rounded-pill px-3 py-1 border d-flex align-items-center gap-1" style="font-size: 0.8rem;">
+                                        <i class="bi bi-chat-text-fill text-primary"></i> Bài đăng
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold mb-2" style="font-family: var(--font-display); font-size: 1.25rem;"><a href="/Community/PostDetail/@item.Id" class="text-decoration-none text-dark hover-lift">@item.Title</a></h3>
+                                <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+                                    @if (((string)item.Content).Length > 150)
                                     {
-                                        <div class="mb-3">
-                                            @foreach (var tag in ((string)item.Tags).Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                            {
-                                                <span class="badge bg-secondary-lt me-1">#@tag.Trim()</span>
-                                            }
-                                        </div>
+                                        @(((string)item.Content).Substring(0, 150) + "...")
                                     }
-                                    <div class="d-flex align-items-center mt-3">
-                                        <button class="btn btn-action text-danger border-0 bg-transparent btn-like" data-post-id="@item.Id">
-                                            <i class="bi bi-heart me-1"></i> <span class="like-count">@item.LikeCount</span>
-                                        </button>
-                                        <a href="/Community/PostDetail/@item.Id" class="btn btn-action text-muted border-0 bg-transparent ms-3">
-                                            <i class="bi bi-chat me-1"></i> @item.CommentCount
-                                        </a>
-                                        @if (item.PopularityScore >= 20)
+                                    else
+                                    {
+                                        @item.Content
+                                    }
+                                </p>
+                                @if (!string.IsNullOrEmpty((string)item.Tags))
+                                {
+                                    <div class="mb-3 d-flex flex-wrap gap-1">
+                                        @foreach (var tag in ((string)item.Tags).Split(',', StringSplitOptions.RemoveEmptyEntries))
                                         {
-                                            <span class="badge bg-danger-lt ms-auto"><i class="bi bi-fire me-1"></i> Đang hot</span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1.5" style="font-size: 0.75rem;">#@tag.Trim()</span>
                                         }
                                     </div>
+                                }
+                                <div class="d-flex align-items-center pt-2 border-top">
+                                    <button class="btn btn-action text-danger border-0 bg-transparent btn-like d-flex align-items-center gap-1 py-1" data-post-id="@item.Id">
+                                        <i class="bi bi-heart"></i> <span class="like-count fw-bold">@item.LikeCount</span>
+                                    </button>
+                                    <a href="/Community/PostDetail/@item.Id" class="btn btn-action text-muted border-0 bg-transparent ms-3 d-flex align-items-center gap-1 py-1">
+                                        <i class="bi bi-chat-dots"></i> <span class="fw-bold">@item.CommentCount</span> bình luận
+                                    </a>
+                                    @if (item.PopularityScore >= 20)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 ms-auto"><i class="bi bi-fire me-1"></i> Đang hot</span>
+                                    }
                                 </div>
                             </div>
                         }
                         else if (item.Type == "Issue")
                         {
                             <!-- Issue Card -->
-                            <div class="card mb-3 border-start border-4 border-warning">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="avatar bg-warning-lt me-3">
-                                            <i class="bi bi-exclamation-triangle"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold">@item.AuthorName</div>
-                                            <div class="text-muted fs-sm">@(((DateTime)item.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</div>
-                                        </div>
-                                        <div class="ms-auto">
-                                            <span class="badge @(item.Status == IssueStatus.Resolved ? "bg-success" : "bg-warning")">
-                                                @(item.Status == IssueStatus.Resolved ? "Đã giải quyết" : "Đang xử lý")
-                                            </span>
-                                        </div>
+                            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg); border-left: 4px solid var(--warning-500) !important; transition: all 0.3s ease;">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center me-3" style="width: 44px; height: 44px; font-weight: bold; font-size: 1.1rem; color: #D97706 !important;">
+                                        @(string.IsNullOrEmpty(item.AuthorName) ? "C" : ((string)item.AuthorName).Substring(0, 1))
                                     </div>
-                                    <h3 class="card-title"><a href="/Issues/Details/@item.Id" class="text-reset">@item.Title</a></h3>
-                                    <p class="text-muted mb-2">
-                                        <i class="bi bi-geo-alt me-1"></i> @item.Address
-                                    </p>
-                                    <p class="text-muted">
-                                        @if (((string)item.Content).Length > 150)
-                                        {
-                                            @(((string)item.Content).Substring(0, 150) + "...")
-                                        }
-                                        else
-                                        {
-                                            @item.Content
-                                        }
-                                    </p>
-                                    <div class="d-flex align-items-center mt-3">
-                                        <a href="/Issues/Details/@item.Id" class="btn btn-action text-muted border-0 bg-transparent">
-                                            <i class="bi bi-chat me-1"></i> @item.CommentCount
-                                        </a>
+                                    <div>
+                                        <div class="fw-bold text-dark">@item.AuthorName</div>
+                                        <div class="text-muted small">@(((DateTime)item.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</div>
                                     </div>
+                                    <div class="ms-auto">
+                                        <span class="badge @(item.Status == IssueStatus.Resolved ? "bg-success text-white" : "bg-warning text-dark") rounded-pill px-3 py-1.5 shadow-sm" style="font-size: 0.8rem;">
+                                            @(item.Status == IssueStatus.Resolved ? "Đã giải quyết" : "Đang xử lý")
+                                        </span>
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold mb-2" style="font-family: var(--font-display); font-size: 1.25rem;"><a href="/Issues/Details/@item.Id" class="text-decoration-none text-dark hover-lift">@item.Title</a></h3>
+                                <p class="text-muted mb-2 small d-flex align-items-center gap-1">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i> @item.Address
+                                </p>
+                                <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+                                    @if (((string)item.Content).Length > 150)
+                                    {
+                                        @(((string)item.Content).Substring(0, 150) + "...")
+                                    }
+                                    else
+                                    {
+                                        @item.Content
+                                    }
+                                </p>
+                                <div class="d-flex align-items-center pt-2 border-top">
+                                    <a href="/Issues/Details/@item.Id" class="btn btn-action text-muted border-0 bg-transparent d-flex align-items-center gap-1 py-1">
+                                        <i class="bi bi-chat-dots"></i> <span class="fw-bold">@item.CommentCount</span> thảo luận
+                                    </a>
                                 </div>
                             </div>
                         }
@@ -150,85 +146,78 @@
 
         <!-- Cột phải: Widgets -->
         <div class="col-lg-4">
-            <!-- Đề xuất chức năng khác -->
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h3 class="card-title">Khám phá Cộng đồng</h3>
-                    <div class="list-group list-group-flush list-group-hoverable">
-                        <a href="@Url.Action("Polls")" class="list-group-item list-group-item-action d-flex align-items-center">
-                            <span class="avatar bg-info-lt me-3"><i class="bi bi-bar-chart"></i></span>
-                            <div>Thăm dò ý kiến</div>
-                        </a>
-                        <a href="@Url.Action("Petitions")" class="list-group-item list-group-item-action d-flex align-items-center">
-                            <span class="avatar bg-teal-lt me-3"><i class="bi bi-pen"></i></span>
-                            <div>Kiến nghị điện tử</div>
-                        </a>
-                        <a href="@Url.Action("Events")" class="list-group-item list-group-item-action d-flex align-items-center">
-                            <span class="avatar bg-purple-lt me-3"><i class="bi bi-calendar-event"></i></span>
-                            <div>Sự kiện sắp tới</div>
-                        </a>
-                    </div>
+            <!-- Khám phá Cộng đồng -->
+            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg);">
+                <h4 class="fw-bold mb-3 pb-2 border-bottom text-dark" style="font-family: var(--font-display);"><i class="bi bi-compass-fill text-primary me-2"></i>Khám phá Cộng đồng</h4>
+                <div class="list-group list-group-flush">
+                    <a href="@Url.Action("Polls")" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-0 border-bottom-0 transition-hover-item">
+                        <span class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;"><i class="bi bi-bar-chart-fill fs-5"></i></span>
+                        <div class="fw-semibold text-dark">Thăm dò ý kiến</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted small"></i>
+                    </a>
+                    <a href="@Url.Action("Petitions")" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-0 border-bottom-0 transition-hover-item">
+                        <span class="rounded-circle bg-teal bg-opacity-10 text-teal d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;"><i class="bi bi-pen-fill fs-5" style="color: #0D9488;"></i></span>
+                        <div class="fw-semibold text-dark">Kiến nghị điện tử</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted small"></i>
+                    </a>
+                    <a href="@Url.Action("Events")" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-0 border-bottom-0 transition-hover-item">
+                        <span class="rounded-circle bg-purple bg-opacity-10 text-purple d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;"><i class="bi bi-calendar-event-fill fs-5" style="color: #7C3AED;"></i></span>
+                        <div class="fw-semibold text-dark">Sự kiện sắp tới</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted small"></i>
+                    </a>
                 </div>
             </div>
 
             <!-- Trending Topics -->
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h3 class="card-title text-danger"><i class="bi bi-fire me-2"></i> Chủ đề nổi bật</h3>
+            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg);">
+                <h4 class="fw-bold mb-3 pb-2 border-bottom text-danger" style="font-family: var(--font-display);"><i class="bi bi-fire me-2"></i>Chủ đề nổi bật</h4>
+                <div class="d-flex flex-wrap gap-2 pt-1">
+                    @if (trendingTopics != null && trendingTopics.Any())
+                    {
+                        foreach (var topic in trendingTopics)
+                        {
+                            <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-muted" style="font-size: 0.8rem;">
+                                #@topic.Tag <span class="badge bg-secondary bg-opacity-25 text-secondary ms-1">@topic.PostCount</span>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted small">Chưa có chủ đề nổi bật</span>
+                    }
                 </div>
-                <div class="card-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        @if (trendingTopics != null && trendingTopics.Any())
-                        {
-                            foreach (var topic in trendingTopics)
-                            {
-                                <a href="#" class="btn btn-outline-secondary btn-sm">
-                                    #@topic.Tag <span class="badge bg-secondary-lt ms-2">@topic.PostCount</span>
-                                </a>
-                            }
-                        }
-                        else
-                        {
-                            <span class="text-muted">Chưa có chủ đề nổi bật</span>
-                        }
-                    </div>
-                }
             </div>
 
-            <!-- Bảng Vàng (Leaderboard) -->
-            <div class="card mb-3">
-                <div class="card-header border-0 pb-0">
-                    <h3 class="card-title text-warning"><i class="bi bi-trophy-fill me-2"></i> Bảng vàng danh dự</h3>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        @if (topCitizens != null && topCitizens.Any())
+            <!-- Bảng Vàng danh dự (Tóm tắt) -->
+            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg);">
+                <h4 class="fw-bold mb-3 pb-2 border-bottom text-warning" style="font-family: var(--font-display); color: #B45309 !important;"><i class="bi bi-trophy-fill me-2"></i>Bảng vàng danh dự</h4>
+                <div class="list-group list-group-flush">
+                    @if (topCitizens != null && topCitizens.Any())
+                    {
+                        int rank = 1;
+                        foreach (var citizen in topCitizens)
                         {
-                            int rank = 1;
-                            foreach (var citizen in topCitizens)
-                            {
-                                <div class="list-group-item d-flex align-items-center">
-                                    <div class="me-3 fw-bold @(rank <= 3 ? "text-warning" : "text-muted")">
-                                        #@rank
-                                    </div>
-                                    <div class="avatar bg-green-lt me-3">
-                                        <i class="bi bi-person"></i>
-                                    </div>
-                                    <div class="flex-fill">
-                                        <div class="fw-bold">@citizen.FullName</div>
-                                        <div class="text-muted fs-sm">@citizen.UserName</div>
-                                    </div>
-                                    <div class="fw-bold text-success">
-                                        @citizen.CitizenPoints <span class="fs-sm">điểm</span>
-                                    </div>
+                            <div class="list-group-item d-flex align-items-center py-2 px-0 border-bottom-0">
+                                <div class="me-3 fw-bold @(rank <= 3 ? "text-warning" : "text-muted")" style="width: 20px;">
+                                    #@rank
                                 </div>
-                                rank++;
-                            }
+                                <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; font-weight: bold; font-size: 0.85rem;">
+                                    @(string.IsNullOrEmpty(citizen.FullName) ? "C" : citizen.FullName.Substring(0, 1))
+                                </div>
+                                <div class="flex-fill">
+                                    <div class="fw-bold text-dark" style="font-size: 0.9rem;">@citizen.FullName</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">@citizen.UserName</div>
+                                </div>
+                                <div class="fw-bold text-success" style="font-size: 0.9rem;">
+                                    @citizen.CitizenPoints <span class="small font-normal text-muted" style="font-size: 0.75rem;">đ</span>
+                                </div>
+                            </div>
+                            rank++;
                         }
-                    </div>
+                    }
                 </div>
-                <div class="card-footer bg-transparent border-0 text-center">
-                    <a href="/Leaderboard" class="text-muted">Xem tất cả →</a>
+                <div class="text-center pt-3 border-top mt-2">
+                    <a href="/Leaderboard" class="text-decoration-none text-primary small fw-semibold">Xem tất cả bảng xếp hạng →</a>
                 </div>
             </div>
         </div>
@@ -238,32 +227,33 @@
 <!-- Modal Tạo bài viết -->
 <div class="modal modal-blur fade" id="createPostModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Tạo bài viết mới</h5>
+        <div class="modal-content" style="border-radius: var(--radius-lg); border: none;">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold" style="font-family: var(--font-display); font-size: 1.25rem;">Tạo bài viết mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form asp-action="CreatePost" method="post">
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label">Tiêu đề</label>
-                        <input type="text" class="form-control" name="title" required placeholder="Nhập tiêu đề...">
+                        <label class="form-label fw-semibold text-dark">Tiêu đề</label>
+                        <input type="text" class="form-control rounded-3" name="title" required placeholder="Nhập tiêu đề...">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Nội dung</label>
-                        <textarea class="form-control" name="content" rows="6" required placeholder="Bạn muốn chia sẻ điều gì?"></textarea>
+                        <label class="form-label fw-semibold text-dark">Nội dung</label>
+                        <textarea class="form-control rounded-3" name="content" rows="6" required placeholder="Bạn muốn chia sẻ điều gì?"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Hashtags</label>
-                        <input type="text" class="form-control" name="tags" placeholder="VD: giaothong, an_ninh (cách nhau bởi dấu phẩy)">
+                        <label class="form-label fw-semibold text-dark">Hashtags</label>
+                        <input type="text" class="form-control rounded-3" name="tags" placeholder="VD: giaothong, an_ninh (cách nhau bởi dấu phẩy)">
                     </div>
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i> Bài viết của bạn sẽ được gửi tới Ban Quản Trị để phê duyệt trước khi hiển thị trên Bảng tin. Nếu được duyệt, bạn sẽ nhận được <strong>+10 điểm thưởng</strong>.
+                    <div class="alert alert-info rounded-3 border-0 bg-primary bg-opacity-10 text-primary small d-flex align-items-center gap-2 mb-0">
+                        <i class="bi bi-info-circle-fill fs-5"></i>
+                        <div>Bài viết của bạn sẽ được gửi tới Ban Quản Trị để phê duyệt trước khi hiển thị trên Bảng tin. Nếu được duyệt, bạn sẽ nhận được <strong>+10 điểm thưởng</strong>.</div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-send me-2"></i> Gửi bài viết</button>
+                <div class="modal-footer border-top p-3">
+                    <button type="button" class="btn btn-link link-secondary me-auto text-decoration-none" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm"><i class="bi bi-send me-2"></i> Gửi bài viết</button>
                 </div>
             </form>
         </div>
@@ -302,6 +292,20 @@
             0% { transform: scale(1); }
             50% { transform: scale(1.4); }
             100% { transform: scale(1); }
+        }
+        .transition-hover-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .transition-hover-item:hover {
+            background-color: var(--gray-50) !important;
+            padding-left: 8px !important;
+            color: var(--primary-600) !important;
+        }
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            color: var(--primary-500) !important;
         }
     </style>
 }
