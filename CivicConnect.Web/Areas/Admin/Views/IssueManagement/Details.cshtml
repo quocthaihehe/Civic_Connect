@@ -11,7 +11,7 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title text-2xl font-bold">Chi tiết phản ánh #@Model.Id</h2>
-            <div class="text-muted small mt-1">Người gửi: @(Model.IsAnonymous ? "Ẩn danh" : Model.Author?.FullName) | Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+            <div class="text-muted small mt-1">Người gửi: @(Model.IsAnonymous ? "Ẩn danh" : Model.Author?.FullName) | Ngày tạo: @Model.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</div>
         </div>
         <div class="col-auto ms-auto d-print-none">
             <a href="/Admin/Issues" class="btn btn-white"><i class="bi bi-arrow-left me-2"></i>Quay lại danh sách</a>
@@ -52,7 +52,13 @@
                     </div>
                     <div class="col-md-3">
                         <div class="font-weight-bold text-muted text-xs uppercase">Danh mục</div>
-                        <div class="mt-1 font-weight-bold text-blue">@GetCategoryName(Model.Category)</div>
+                        <div class="mt-1 font-weight-bold text-blue">
+                            @GetCategoryName(Model.Category)
+                            @if (Model.Category == IssueCategory.Other && !string.IsNullOrEmpty(Model.CustomCategoryName))
+                            {
+                                <span class="d-block mt-1 text-muted small">Lĩnh vực: <strong class="text-dark">@Model.CustomCategoryName</strong></span>
+                            }
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <div class="font-weight-bold text-muted text-xs uppercase">Độ ưu tiên</div>
@@ -113,7 +119,7 @@
                             <span class="position-absolute bg-primary rounded-circle" style="width: 8px; height: 8px; left: -20px; top: 6px;"></span>
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="font-weight-bold text-sm">Chuyển trạng thái: @GetStatusName(history.FromStatus) &rarr; @GetStatusName(history.ToStatus)</span>
-                                <span class="text-xs text-muted">@history.ChangedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                <span class="text-xs text-muted">@history.ChangedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</span>
                             </div>
                             <div class="text-xs text-muted mb-2">Thực hiện bởi: <span class="text-dark font-weight-bold">@(history.ChangedBy?.FullName ?? "Hệ thống tự động")</span></div>
                             @if (!string.IsNullOrEmpty(history.Note))
@@ -139,6 +145,17 @@
                 <form action="/Admin/Issues/UpdateDetails" method="post" class="space-y-3">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id">
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Danh mục (Phân loại lại)</label>
+                        <select name="category" class="form-select font-weight-bold">
+                            @foreach (IssueCategory cat in Enum.GetValues(typeof(IssueCategory)))
+                            {
+                                var selectedAttr = Model.Category == cat ? "selected" : "";
+                                <option value="@cat" selectedAttr>@GetCategoryName(cat)</option>
+                            }
+                        </select>
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label font-weight-bold">Cập nhật trạng thái</label>

@@ -239,7 +239,7 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
         [HttpPost]
         [Route("Admin/Issues/UpdateDetails")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateDetails(int id, IssueStatus status, string? assignedToUserId, string? assignedUnitId, DateTime? dueDate, string? internalNotes, string? labels, string? resolutionDocumentUrl, string? resolutionImageUrl, string? note)
+        public async Task<IActionResult> UpdateDetails(int id, IssueCategory category, IssueStatus status, string? assignedToUserId, string? assignedUnitId, DateTime? dueDate, string? internalNotes, string? labels, string? resolutionDocumentUrl, string? resolutionImageUrl, string? note)
         {
             var issue = await _context.Issues.FindAsync(id);
             if (issue == null) return NotFound();
@@ -275,11 +275,27 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
 
             var adminId = _userManager.GetUserId(User) ?? "System";
             var oldStatus = issue.Status;
+            var oldCategory = issue.Category;
 
+            issue.Category = category;
             issue.Status = status;
             issue.AssignedToUserId = assignedToUserId;
             issue.AssignedUnitId = assignedUnitId;
-            if (dueDate.HasValue) issue.DueDate = dueDate.Value;
+            issue.DueDate = dueDate;
+
+            if (oldCategory != category)
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    UserId = issue.AuthorId,
+                    Title = "Danh mục phản ánh đã được cập nhật",
+                    Message = $"Phản ánh #{issue.Id} của bạn đã được cán bộ chuyển sang danh mục phù hợp hơn để xử lý nhanh chóng.",
+                    RelatedIssueId = issue.Id.ToString(),
+                    Type = NotificationType.General,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
             issue.InternalNotes = internalNotes;
             issue.Labels = labels;
             if (!string.IsNullOrEmpty(resolutionDocumentUrl)) issue.ResolutionDocumentUrl = resolutionDocumentUrl;

@@ -1,3 +1,4 @@
+using CivicConnect.Web.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,14 @@ namespace CivicConnect.Web.Models.Entities
         public string Tags { get; set; } // e.g. "giaothong, an_ninh"
         
         // Community Threads upgrades
-        public bool IsApproved { get; set; } = false;
+        public CivicConnect.Web.Models.Enums.PostStatus Status { get; set; } = CivicConnect.Web.Models.Enums.PostStatus.Pending;
+        public string? RejectionReason { get; set; }
+        
+        public int LikeCount { get; set; }
+        public int CommentCount { get; set; }
+        public float PopularityScore { get; set; }
+        public DateTime? EnteredTrendingAt { get; set; }
+        
         public string? ImageUrl { get; set; }
         public string? VideoUrl { get; set; }
         public string PostType { get; set; } = "Text"; // "Text", "Image", "Video", "Issue"
@@ -29,12 +37,25 @@ namespace CivicConnect.Web.Models.Entities
     public class ForumComment
     {
         public int Id { get; set; }
-        public int PostId { get; set; }
-        public ForumPost Post { get; set; }
+        
+        public int? PostId { get; set; }
+        public ForumPost? Post { get; set; }
+        
+        public int? IssueId { get; set; }
+        public Issue? Issue { get; set; }
+        
+        public int? ParentCommentId { get; set; }
+        public ForumComment? ParentComment { get; set; }
+        
+        public int Depth { get; set; } = 0;
+        public int LikeCount { get; set; }
+        
         [Required] public string Content { get; set; }
         public string AuthorId { get; set; }
         public ApplicationUser Author { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        public List<ForumComment> Replies { get; set; } = new List<ForumComment>();
     }
 
     public class Poll

@@ -150,7 +150,7 @@
                         </span>
                     </div>
                     <span class="text-muted" style="font-size: 0.85rem;">
-                        <i class="bi bi-clock me-1"></i> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        <i class="bi bi-clock me-1"></i> @Model.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")
                     </span>
                 </div>
 
@@ -352,7 +352,7 @@
                                                     <span class="badge bg-primary ms-2"><i class="bi bi-check-circle-fill me-1"></i> Cán bộ</span>
                                                 }
                                             </div>
-                                            <div class="text-muted" style="font-size: 0.75rem;">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">@comment.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</div>
                                         </div>
                                     </div>
                                 </div>
@@ -404,7 +404,7 @@
                                 <!-- Line and dot are handled by .timeline-step css -->
                                 <div class="d-flex justify-content-between align-items-start mb-1">
                                     <strong class="text-dark">@GetStatusName(hist.ToStatus)</strong>
-                                    <span class="badge bg-secondary bg-opacity-25 text-muted fw-normal">@hist.ChangedAt.ToString("dd/MM HH:mm")</span>
+                                    <span class="badge bg-secondary bg-opacity-25 text-muted fw-normal">@hist.ChangedAt.AddHours(7).ToString("dd/MM HH:mm")</span>
                                 </div>
                                 
                                 @if (!string.IsNullOrEmpty(hist.Note))

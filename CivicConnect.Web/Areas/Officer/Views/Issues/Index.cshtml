@@ -1,0 +1,144 @@
+@using CivicConnect.Web.Models.Entities
+@using CivicConnect.Web.Models.Enums
+@model IEnumerable<Issue>
+
+@{
+    ViewData["Title"] = "Quản lý phản ánh khu vực";
+    var categories = ViewBag.Categories as IEnumerable<string>;
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">
+                    Danh sách Phản ánh / Sự cố
+                </h2>
+                <div class="text-muted mt-1">@Model.Count() phản ánh trên địa bàn</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="d-flex">
+                    <a href="/Officer/Map" class="btn btn-primary">
+                        <i class="bi bi-map me-2"></i> Xem trên bản đồ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="card">
+            <div class="card-header">
+                <form method="get" class="d-flex gap-2 w-100">
+                    <div class="col-md-3">
+                        <select name="statusFilter" class="form-select" onchange="this.form.submit()">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            @foreach (var status in Enum.GetValues(typeof(IssueStatus)).Cast<IssueStatus>())
+                            {
+                                if (ViewBag.CurrentStatus != null && (IssueStatus)ViewBag.CurrentStatus == status)
+                                {
+                                    <option value="@status" selected>@status.ToString()</option>
+                                }
+                                else
+                                {
+                                    <option value="@status">@status.ToString()</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="categoryFilter" class="form-select" onchange="this.form.submit()">
+                            <option value="">-- Tất cả lĩnh vực --</option>
+                            @if(categories != null)
+                            {
+                                foreach (var cat in categories)
+                                {
+                                    if (ViewBag.CurrentCategory == cat)
+                                    {
+                                        <option value="@cat" selected>@cat</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@cat">@cat</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <a href="/Officer/Issues" class="btn btn-outline-secondary">Xóa bộ lọc</a>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
+                    <thead>
+                        <tr>
+                            <th>Mã SC</th>
+                            <th>Người phản ánh</th>
+                            <th>Nội dung</th>
+                            <th>Khu vực</th>
+                            <th>Trạng thái</th>
+                            <th>Thời gian</th>
+                            <th class="w-1">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center p-4 text-muted">Không tìm thấy phản ánh nào phù hợp.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var issue in Model)
+                            {
+                                <tr>
+                                    <td><span class="text-muted">#@issue.Id</span></td>
+                                    <td>
+                                        <div class="d-flex py-1 align-items-center">
+                                            <span class="avatar me-2"><i class="bi bi-person"></i></span>
+                                            <div class="flex-fill">
+                                                <div class="font-weight-medium">@(issue.IsAnonymous ? "Ẩn danh" : (issue.Author?.FullName ?? issue.Author?.UserName))</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold mb-1">@issue.Title</div>
+                                        <div class="text-muted text-truncate" style="max-width: 250px;">@issue.Description</div>
+                                        <div class="mt-1"><span class="badge bg-secondary-lt">@issue.Category</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 200px;" title="@issue.Address">
+                                            <i class="bi bi-geo-alt me-1 text-muted"></i> @issue.Address
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @switch(issue.Status)
+                                        {
+                                            case IssueStatus.Pending: <span class="badge bg-danger">Chờ tiếp nhận</span> break;
+                                            case IssueStatus.Assigned: <span class="badge bg-indigo">Đã phân công</span> break;
+                                            case IssueStatus.Processing: <span class="badge bg-warning">Đang xử lý</span> break;
+                                            case IssueStatus.Resolved: <span class="badge bg-success">Đã giải quyết</span> break;
+                                            case IssueStatus.Closed: <span class="badge bg-secondary">Đã đóng</span> break;
+                                            case IssueStatus.Rejected: <span class="badge bg-dark">Từ chối</span> break;
+                                            default: <span class="badge bg-secondary">@issue.Status</span> break;
+                                        }
+                                    </td>
+                                    <td class="text-muted">@issue.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <a href="/Officer/Issues/Details/@issue.Id" class="btn btn-primary btn-sm">Xem chi tiết</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

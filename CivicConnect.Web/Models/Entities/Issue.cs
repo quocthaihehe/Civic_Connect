@@ -10,6 +10,7 @@ namespace CivicConnect.Web.Models.Entities
         public string Title { get; set; }             // Tiêu đề (5–200 ký tự)
         public string Description { get; set; }       // Mô tả chi tiết (20–5000 ký tự)
         public IssueCategory Category { get; set; }   // Loại phản ánh
+        public string? CustomCategoryName { get; set; } // Lĩnh vực tự nhập khi Category == Khác
         public IssueStatus Status { get; set; }       // Trạng thái xử lý
         public IssuePriority Priority { get; set; }   // Mức độ ưu tiên
         public float PriorityScore { get; set; }      // Điểm ưu tiên tự động (votes*0.5 + severity*0.3 + density*0.2)

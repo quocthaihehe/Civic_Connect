@@ -169,6 +169,7 @@ namespace CivicConnect.Web.Controllers
                     Title = model.Title,
                     Description = model.Description,
                     Category = model.Category,
+                    CustomCategoryName = model.Category == IssueCategory.Other ? model.CustomCategoryName : null,
                     Priority = model.Priority,
                     Latitude = model.Latitude,
                     Longitude = model.Longitude,

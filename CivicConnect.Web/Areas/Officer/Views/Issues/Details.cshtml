@@ -1,0 +1,243 @@
+@using CivicConnect.Web.Models.Entities
+@using CivicConnect.Web.Models.Enums
+@model Issue
+
+@{
+    ViewData["Title"] = "Chi tiết Sự cố #" + Model.Id;
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="/Officer/Issues"><i class="bi bi-arrow-left me-1"></i> Trở về Danh sách</a>
+                </div>
+                <h2 class="page-title">
+                    Sự cố #@Model.Id: @Model.Title
+                </h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                        <i class="bi bi-pencil-square me-2"></i> Cập nhật trạng thái
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <div class="d-flex">
+                    <div><i class="bi bi-check-circle me-2"></i></div>
+                    <div>@TempData["SuccessMessage"]</div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <div class="d-flex">
+                    <div><i class="bi bi-exclamation-circle me-2"></i></div>
+                    <div>@TempData["ErrorMessage"]</div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div>
+        }
+
+        <div class="row row-cards">
+            <!-- Cột thông tin chi tiết -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin chi tiết</h3>
+                        <div class="card-actions">
+                            <span class="badge @(Model.Status == IssueStatus.Resolved || Model.Status == IssueStatus.Closed ? "bg-success" : (Model.Status == IssueStatus.Pending ? "bg-danger" : "bg-warning")) fs-4">
+                                @Model.Status.ToString()
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="datagrid">
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">Người phản ánh</div>
+                                <div class="datagrid-content">
+                                    @(Model.IsAnonymous ? "Người dân ẩn danh" : (Model.Author?.FullName ?? Model.Author?.UserName))
+                                </div>
+                            </div>
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">Thời gian gửi</div>
+                                <div class="datagrid-content">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">Lĩnh vực</div>
+                                <div class="datagrid-content"><span class="badge bg-secondary-lt">@Model.Category</span></div>
+                            </div>
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">Vị trí</div>
+                                <div class="datagrid-content">
+                                    <i class="bi bi-geo-alt text-muted"></i> @Model.Address
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="fw-bold">Nội dung phản ánh:</h4>
+                            <p class="text-muted fs-3">@Model.Description</p>
+                        </div>
+
+                        @if (Model.Images != null && Model.Images.Any())
+                        {
+                            <div class="mt-4">
+                                <h4 class="fw-bold">Hình ảnh minh chứng:</h4>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var img in Model.Images)
+                                    {
+                                        <a href="@img.Url" target="_blank">
+                                            <img src="@img.Url" alt="Hình ảnh sự cố" class="rounded border" style="height: 150px; object-fit: cover;" />
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Chat / Comments với người dân -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Trao đổi với người dân</h3>
+                    </div>
+                    <div class="card-body scrollable" style="max-height: 400px; overflow-y: auto;">
+                        <div class="chat-bubbles space-y">
+                            @if (Model.Comments != null && Model.Comments.Any())
+                            {
+                                foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+                                {
+                                    bool isOfficer = comment.Author != null && comment.Author.Id != Model.AuthorId;
+                                    <div class="d-flex mb-3 @(isOfficer ? "flex-row-reverse" : "")">
+                                        <div class="avatar bg-@(isOfficer ? "cyan" : "gray")-lt @(isOfficer ? "ms-3" : "me-3") mt-1">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <div class="flex-fill bg-@(isOfficer ? "cyan" : "light") bg-opacity-10 rounded p-3" style="max-width: 80%;">
+                                            <div class="fw-bold mb-1">
+                                                @(isOfficer ? "Cán bộ quản lý" : (Model.IsAnonymous ? "Ẩn danh" : comment.Author?.FullName))
+                                                <span class="text-muted fs-sm fw-normal ms-2">@comment.CreatedAt.ToString("dd/MM HH:mm")</span>
+                                            </div>
+                                            <div class="text-dark">@comment.Content</div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-4">Chưa có tin nhắn trao đổi nào.</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <form method="post" asp-action="AddComment" asp-controller="Community" asp-area="" class="d-flex">
+                            <input type="hidden" name="issueId" value="@Model.Id" />
+                            <input type="text" name="content" class="form-control me-2" placeholder="Nhập tin nhắn trao đổi với người dân..." required />
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột Sidebar chức năng -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Tiến trình xử lý</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="steps steps-vertical">
+                            <li class="step-item @(Model.Status >= IssueStatus.Pending ? "active" : "")">
+                                <div class="h4 m-0">Tiếp nhận</div>
+                                <div class="text-muted fs-sm">Hệ thống đã ghi nhận</div>
+                            </li>
+                            <li class="step-item @(Model.Status >= IssueStatus.Assigned ? "active" : "")">
+                                <div class="h4 m-0">Phân công</div>
+                                <div class="text-muted fs-sm">Đã chuyển cán bộ phụ trách</div>
+                            </li>
+                            <li class="step-item @(Model.Status >= IssueStatus.Processing ? "active" : "")">
+                                <div class="h4 m-0">Đang xử lý</div>
+                                <div class="text-muted fs-sm">Đang trong quá trình giải quyết</div>
+                            </li>
+                            <li class="step-item @(Model.Status >= IssueStatus.Resolved ? "active" : "")">
+                                <div class="h4 m-0">Đã giải quyết</div>
+                                <div class="text-muted fs-sm">Hoàn thành xử lý thực địa</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Bản đồ vị trí</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div style="height: 300px; background-color: #e9ecef; display:flex; align-items:center; justify-content:center;">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-map fs-1 d-block mb-2"></i>
+                                (Tích hợp Leaflet Map hiển thị Lat/Lng tại đây)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cập nhật trạng thái -->
+<div class="modal modal-blur fade" id="updateStatusModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật Trạng thái Phản ánh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-action="UpdateStatus" asp-area="Officer" asp-controller="Issues">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái mới</label>
+                        <select class="form-select" name="newStatus">
+                            @foreach (var status in Enum.GetValues(typeof(IssueStatus)).Cast<IssueStatus>())
+                            {
+                                if (status >= Model.Status || status == IssueStatus.Rejected)
+                                {
+                                    if (status == Model.Status)
+                                    {
+                                        <option value="@status" selected>@status.ToString()</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">@status.ToString()</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <small class="form-hint">Lưu ý: Không thể chuyển ngược trạng thái về bước trước đó.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú xử lý / Lý do (nếu từ chối)</label>
+                        <textarea class="form-control" name="processingNote" rows="3" placeholder="Nhập ghi chú chi tiết..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

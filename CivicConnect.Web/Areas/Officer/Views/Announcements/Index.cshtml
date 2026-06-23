@@ -1,0 +1,115 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.Policy>
+
+@{
+    ViewData["Title"] = "Cảnh báo & Thông báo";
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">
+                    Cảnh báo & Thông báo cộng đồng
+                </h2>
+                <div class="text-muted mt-1">Gửi thông tin khẩn cấp đến người dân trên địa bàn</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+                        <i class="bi bi-megaphone me-2"></i> Tạo thông báo mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <div class="d-flex">
+                    <div><i class="bi bi-check-circle me-2"></i></div>
+                    <div>@TempData["SuccessMessage"]</div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div>
+        }
+
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
+                    <thead>
+                        <tr>
+                            <th>Loại</th>
+                            <th>Tiêu đề / Nội dung</th>
+                            <th>Thời gian đăng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center p-4 text-muted">Chưa có thông báo nào được đăng tải.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge @(item.TagClass == "tag-danger" ? "bg-danger" : "bg-info")">@item.Tag</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold mb-1">@item.Title</div>
+                                        <div class="text-muted text-truncate" style="max-width: 400px;">@item.Excerpt</div>
+                                    </td>
+                                    <td class="text-muted">
+                                        @item.PublishedDate.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tạo thông báo -->
+<div class="modal modal-blur fade" id="createAnnouncementModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Soạn thông báo mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-action="Create" asp-area="Officer" asp-controller="Announcements">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Loại tin</label>
+                        <select class="form-select" name="type">
+                            <option value="Thông báo">Thông báo chung</option>
+                            <option value="Cảnh báo khẩn">Cảnh báo khẩn cấp</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tiêu đề</label>
+                        <input type="text" class="form-control" name="title" required placeholder="Ví dụ: Cảnh báo ngập lụt cục bộ..." />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nội dung chi tiết</label>
+                        <textarea class="form-control" name="content" rows="4" required placeholder="Nhập nội dung thông báo..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-send me-2"></i> Đăng tải</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

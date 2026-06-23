@@ -21,6 +21,10 @@ namespace CivicConnect.Web.Models.Issues
         [Display(Name = "Danh mục")]
         public IssueCategory Category { get; set; }
 
+        [StringLength(50, ErrorMessage = "Lĩnh vực khác tối đa 50 ký tự.")]
+        [Display(Name = "Mô tả lĩnh vực (Nếu chọn Khác)")]
+        public string? CustomCategoryName { get; set; }
+
         [Required(ErrorMessage = "Vui lòng chọn mức độ ưu tiên đề xuất.")]
         [Display(Name = "Mức độ ưu tiên đề xuất")]
         public IssuePriority Priority { get; set; }

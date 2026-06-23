@@ -94,7 +94,7 @@ namespace CivicConnect.Web.Data.Migrations
                             Id = 1,
                             Category = "Hộ tịch",
                             Code = "TTHC-01",
-                            CreatedAt = new DateTime(2026, 6, 21, 15, 59, 56, 642, DateTimeKind.Utc).AddTicks(5208),
+                            CreatedAt = new DateTime(2026, 6, 23, 9, 15, 8, 4, DateTimeKind.Utc).AddTicks(9081),
                             Description = "Cán bộ tư pháp xuống tận nhà dân để làm thủ tục đăng ký khai sinh đối với các trường hợp đặc biệt khó khăn, khuyết tật.",
                             Fee = "Miễn phí",
                             IsActive = true,
@@ -110,7 +110,7 @@ namespace CivicConnect.Web.Data.Migrations
                             Id = 2,
                             Category = "Hộ tịch",
                             Code = "TTHC-02",
-                            CreatedAt = new DateTime(2026, 6, 21, 15, 59, 56, 642, DateTimeKind.Utc).AddTicks(5216),
+                            CreatedAt = new DateTime(2026, 6, 23, 9, 15, 8, 4, DateTimeKind.Utc).AddTicks(9084),
                             Description = "Cấp giấy xác nhận tình trạng hôn nhân để làm thủ tục vay vốn, mua bán đất, hoặc đăng ký kết hôn.",
                             Fee = "15.000 VNĐ",
                             IsActive = true,
@@ -126,7 +126,7 @@ namespace CivicConnect.Web.Data.Migrations
                             Id = 3,
                             Category = "Hộ tịch",
                             Code = "TTHC-03",
-                            CreatedAt = new DateTime(2026, 6, 21, 15, 59, 56, 642, DateTimeKind.Utc).AddTicks(5218),
+                            CreatedAt = new DateTime(2026, 6, 23, 9, 15, 8, 4, DateTimeKind.Utc).AddTicks(9086),
                             Description = "Cấp bản sao trích lục từ sổ gốc hộ tịch (Khai sinh, Kết hôn, Khai tử).",
                             Fee = "8.000 VNĐ/bản",
                             IsActive = true,
@@ -704,12 +704,28 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PostId")
+                    b.Property<int>("Depth")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IssueId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ParentCommentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PostId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("IssueId");
+
+                    b.HasIndex("ParentCommentId");
 
                     b.HasIndex("PostId");
 
@@ -728,6 +744,9 @@ namespace CivicConnect.Web.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("CommentCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -735,17 +754,29 @@ namespace CivicConnect.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("EnteredTrendingAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
+
+                    b.Property<float>("PopularityScore")
+                        .HasColumnType("real");
 
                     b.Property<string>("PostType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("RelatedIssueId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Tags")
@@ -873,6 +904,9 @@ namespace CivicConnect.Web.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomCategoryName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -1165,6 +1199,38 @@ namespace CivicConnect.Web.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("PetitionSignatures");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PointTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PointsDelta")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TrustScoreDelta")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PointTransactions");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.Policy", b =>
@@ -1675,22 +1741,45 @@ namespace CivicConnect.Web.Data.Migrations
                             SettingKey = "MaintenanceMode",
                             Description = "Bật/Tắt chế độ bảo trì hệ thống",
                             SettingValue = "False",
-                            UpdatedAt = new DateTime(2026, 6, 21, 15, 59, 56, 642, DateTimeKind.Utc).AddTicks(4809)
+                            UpdatedAt = new DateTime(2026, 6, 23, 9, 15, 8, 4, DateTimeKind.Utc).AddTicks(9011)
                         },
                         new
                         {
                             SettingKey = "OrganizationName",
                             Description = "Tên tổ chức vận hành chính thức",
                             SettingValue = "CivicConnect",
-                            UpdatedAt = new DateTime(2026, 6, 21, 15, 59, 56, 642, DateTimeKind.Utc).AddTicks(4818)
+                            UpdatedAt = new DateTime(2026, 6, 23, 9, 15, 8, 4, DateTimeKind.Utc).AddTicks(9013)
                         },
                         new
                         {
                             SettingKey = "SystemLogoUrl",
                             Description = "Đường dẫn URL ảnh logo hệ thống",
                             SettingValue = "",
-                            UpdatedAt = new DateTime(2026, 6, 21, 15, 59, 56, 642, DateTimeKind.Utc).AddTicks(4872)
+                            UpdatedAt = new DateTime(2026, 6, 23, 9, 15, 8, 4, DateTimeKind.Utc).AddTicks(9013)
                         });
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.TrendingTopic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PostCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TrendingTopics");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.UnitCategory", b =>
@@ -2045,13 +2134,26 @@ namespace CivicConnect.Web.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CivicConnect.Web.Models.Entities.Issue", "Issue")
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CivicConnect.Web.Models.Entities.ForumComment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CivicConnect.Web.Models.Entities.ForumPost", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Author");
+
+                    b.Navigation("Issue");
+
+                    b.Navigation("ParentComment");
 
                     b.Navigation("Post");
                 });
@@ -2160,6 +2262,17 @@ namespace CivicConnect.Web.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Petition");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.PointTransaction", b =>
+                {
+                    b.HasOne("CivicConnect.Web.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -2334,6 +2447,11 @@ namespace CivicConnect.Web.Data.Migrations
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.DonationCategory", b =>
                 {
                     b.Navigation("Donations");
+                });
+
+            modelBuilder.Entity("CivicConnect.Web.Models.Entities.ForumComment", b =>
+                {
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("CivicConnect.Web.Models.Entities.ForumPost", b =>

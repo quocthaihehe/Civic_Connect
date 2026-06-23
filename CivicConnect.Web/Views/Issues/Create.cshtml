@@ -171,6 +171,13 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="customCategoryContainer" class="mt-4 d-none" style="animation: fadeInRight 0.3s ease;">
+                        <label asp-for="CustomCategoryName" class="form-label fw-bold"></label>
+                        <input asp-for="CustomCategoryName" id="customCategoryInput" class="form-control rounded-3" placeholder="Ví dụ: Tiếng ồn, chó thả rông, chiếm dụng vỉa hè, v.v..." maxlength="50" />
+                        <span asp-validation-for="CustomCategoryName" class="text-danger" style="font-size: 0.8rem;"></span>
+                    </div>
+
                     <div class="text-danger mt-2 text-center d-none" id="catError" style="font-size: 0.85rem;">Vui lòng chọn một lĩnh vực.</div>
                 </div>
 
@@ -178,7 +185,7 @@
                 <div class="step-content" id="step2">
                     <h5 class="fw-bold mb-2" style="font-size: 1.1rem;">Vị trí & Minh chứng</h5>
                     <div class="row g-3">
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 mb-3 mb-lg-0 d-flex flex-column">
                             <label class="form-label fw-semibold">Vị trí trên bản đồ <span class="text-danger">*</span></label>
                             <div class="input-group mb-1">
                                 <input asp-for="Address" id="address-input" class="form-control rounded-start-3" placeholder="Địa chỉ hiện trường..." required />
@@ -186,13 +193,13 @@
                                     <i class="bi bi-geo-alt"></i>
                                 </button>
                             </div>
-                            <div class="border rounded-3 position-relative" style="height: 200px; overflow: hidden;" id="map-container">
+                            <div class="border rounded-3 position-relative flex-grow-1" style="min-height: 200px; overflow: hidden;" id="map-container">
                                 <div id="map-selector"></div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 d-flex flex-column">
                             <label class="form-label fw-semibold">Hình ảnh minh chứng <span class="text-danger">*</span></label>
-                            <div class="upload-dropzone border border-dashed rounded-3 p-2 text-center bg-light d-flex flex-column align-items-center justify-content-center position-relative" style="cursor: pointer; height: 200px;">
+                            <div class="upload-dropzone border border-dashed rounded-3 p-2 text-center bg-light d-flex flex-column align-items-center justify-content-center position-relative flex-grow-1 w-100" style="cursor: pointer; min-height: 200px;">
                                 <!-- Empty State -->
                                 <div id="upload-empty-state" class="d-flex flex-column align-items-center justify-content-center w-100 h-100">
                                     <i class="bi bi-cloud-arrow-up text-primary fs-3 mb-1"></i>
@@ -320,8 +327,15 @@
             $('.category-card').click(function() {
                 $('.category-card').removeClass('selected');
                 $(this).addClass('selected');
-                $('#categoryInput').val($(this).data('val')).trigger('change');
+                const val = $(this).data('val');
+                $('#categoryInput').val(val).trigger('change');
                 $('#catError').addClass('d-none');
+                
+                if (val == 99) {
+                    $('#customCategoryContainer').removeClass('d-none');
+                } else {
+                    $('#customCategoryContainer').addClass('d-none');
+                }
             });
 
             function updateWizard() {
@@ -369,11 +383,35 @@
                         $('#catError').removeClass('d-none');
                         return false;
                     }
+                    if ($('#categoryInput').val() == 99 && !$('#customCategoryInput').val().trim()) {
+                        $('#customCategoryInput').addClass('is-invalid');
+                        return false;
+                    } else {
+                        $('#customCategoryInput').removeClass('is-invalid');
+                    }
                     return true;
                 }
                 if (currentStep === 2) {
                     if (!$('#address-input').val()) {
                         $('#address-input').addClass('is-invalid');
+                        return false;
+                    } 
+                    
+                    const lat = parseFloat($('#lat-input').val());
+                    const lng = parseFloat($('#lng-input').val());
+                    const hcmMinLat = 10.370;
+                    const hcmMaxLat = 11.160;
+                    const hcmMinLng = 106.350;
+                    const hcmMaxLng = 106.950;
+                    
+                    if (lat < hcmMinLat || lat > hcmMaxLat || lng < hcmMinLng || lng > hcmMaxLng) {
+                        $('#address-input').addClass('is-invalid');
+                        // Show modal again if they try to proceed
+                        if (typeof showBoundaryModal === 'function') {
+                            showBoundaryModal();
+                        } else {
+                            alert("Vui lòng chọn vị trí trong phạm vi TP. Hồ Chí Minh.");
+                        }
                         return false;
                     } else {
                         $('#address-input').removeClass('is-invalid');

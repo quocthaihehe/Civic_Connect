@@ -1,0 +1,129 @@
+@{
+    ViewData["Title"] = "Chỉ số KPI và Xếp hạng";
+    var peers = ViewBag.Peers as IEnumerable<dynamic>;
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">
+                    Hiệu suất công việc cá nhân
+                </h2>
+                <div class="text-muted mt-1">Đánh giá năng lực xử lý phản ánh của bạn</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-cards">
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="subheader">Tổng vụ việc được giao</div>
+                        </div>
+                        <div class="h1 mb-3">@ViewBag.TotalAssigned</div>
+                        <div class="d-flex mb-2">
+                            <div>Sự cố đang thụ lý</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="subheader text-success">Đã giải quyết</div>
+                        </div>
+                        <div class="h1 mb-3">@ViewBag.TotalResolved</div>
+                        <div class="d-flex mb-2">
+                            <div>Sự cố xử lý thành công</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="subheader text-info">Tỷ lệ hoàn thành</div>
+                        </div>
+                        <div class="h1 mb-3">@(((double)ViewBag.ResolutionRate).ToString("0.0"))%</div>
+                        <div class="d-flex mb-2">
+                            <div>Mục tiêu > 80%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card bg-primary-lt">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="subheader text-primary">Điểm KPI tổng</div>
+                        </div>
+                        <div class="h1 mb-3 text-primary">@ViewBag.PerformanceScore pts</div>
+                        <div class="d-flex mb-2">
+                            <div class="text-primary fw-bold">Hạng: #@ViewBag.MyRank</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="bi bi-trophy text-warning me-2"></i> Bảng xếp hạng cán bộ khu vực</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-1">Hạng</th>
+                                    <th>Cán bộ</th>
+                                    <th>Tài khoản</th>
+                                    <th>Điểm KPI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (peers != null)
+                                {
+                                    int rank = 1;
+                                    foreach (var peer in peers)
+                                    {
+                                        <tr class="@(rank == ViewBag.MyRank ? "bg-primary-lt fw-bold" : "")">
+                                            <td>
+                                                @if (rank == 1) { <span class="badge bg-warning"><i class="bi bi-star-fill"></i> 1</span> }
+                                                else if (rank == 2) { <span class="badge bg-secondary"><i class="bi bi-star-fill"></i> 2</span> }
+                                                else if (rank == 3) { <span class="badge bg-orange"><i class="bi bi-star-fill"></i> 3</span> }
+                                                else { <span>@rank</span> }
+                                            </td>
+                                            <td>
+                                                <div class="d-flex py-1 align-items-center">
+                                                    <span class="avatar me-2"><i class="bi bi-person"></i></span>
+                                                    <div class="flex-fill">
+                                                        <div class="font-weight-medium">@peer.FullName</div>
+                                                        @if (rank == ViewBag.MyRank) { <div class="text-primary fs-sm">Bạn</div> }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted">@peer.UserName</td>
+                                            <td class="text-success fw-bold">@peer.TrustScore</td>
+                                        </tr>
+                                        rank++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
