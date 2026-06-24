@@ -26,6 +26,7 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         public InputModel Input { get; set; } = new();
 
         public bool IsPhoneVerified { get; set; }
+        public CivicConnect.Web.Models.Enums.KYCLevel KYCLevel { get; set; }
         public int CitizenPoints { get; set; }
         public int TrustScore { get; set; }
         public List<PointTransaction> PointTransactions { get; set; } = new();
@@ -56,6 +57,10 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
 
             [Display(Name = "Ảnh đại diện")]
             public string? AvatarUrl { get; set; }
+            
+            public string? IdCardFrontUrl { get; set; }
+            public string? IdCardBackUrl { get; set; }
+            public string? SelfieUrl { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -64,6 +69,7 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
             if (user == null) return RedirectToPage("./Login");
 
             IsPhoneVerified = user.IsPhoneVerified;
+            KYCLevel = user.KYCLevel;
             CitizenPoints = user.CitizenPoints;
             TrustScore = user.TrustScore;
 
@@ -118,6 +124,35 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
             }
             ViewData["PageHeader"] = "Hồ Sơ Cá Nhân";
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostSubmitKycAsync([FromForm] string idCardFrontUrl, [FromForm] string idCardBackUrl, [FromForm] string selfieUrl)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToPage("./Login");
+
+            if (string.IsNullOrEmpty(idCardFrontUrl) || string.IsNullOrEmpty(idCardBackUrl) || string.IsNullOrEmpty(selfieUrl))
+            {
+                TempData["ErrorMessage"] = "Vui lòng tải lên đầy đủ 3 ảnh bắt buộc.";
+                return RedirectToPage();
+            }
+
+            user.IdCardFrontUrl = idCardFrontUrl;
+            user.IdCardBackUrl = idCardBackUrl;
+            user.SelfieUrl = selfieUrl;
+            user.KYCLevel = CivicConnect.Web.Models.Enums.KYCLevel.PendingReview;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Đã nộp hồ sơ xác thực danh tính. Vui lòng chờ Admin phê duyệt.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi nộp hồ sơ KYC.";
+            }
+
+            return RedirectToPage();
         }
     }
 }

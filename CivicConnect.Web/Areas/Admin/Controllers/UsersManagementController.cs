@@ -38,7 +38,7 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
             if (isRestricted.HasValue)
                 query = query.Where(u => u.IsRestricted == isRestricted.Value);
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(u => u.FullName.Contains(search) || u.Email.Contains(search) || u.PhoneNumber.Contains(search));
+                query = query.Where(u => (u.FullName != null && u.FullName.Contains(search)) || (u.Email != null && u.Email.Contains(search)) || (u.PhoneNumber != null && u.PhoneNumber.Contains(search)));
 
             var users = await query.OrderByDescending(u => u.CreatedAt).ToListAsync();
             return View("~/Areas/Admin/Views/Users/Index.cshtml", users);
@@ -53,7 +53,7 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
             if (user == null) return NotFound();
 
             user.KYCLevel = level;
-            if (level == KYCLevel.IdentityVerified)
+            if (level == KYCLevel.Verified)
             {
                 user.IsPhoneVerified = true;
                 user.IsEmailVerified = true;
@@ -110,14 +110,14 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
             var seedData = new List<ApplicationUser>
             {
                 new ApplicationUser { UserName = "congdan.quan1@gmail.com", Email = "congdan.quan1@gmail.com", FullName = "Trần Thanh Bình", PhoneNumber = "0912345678", KYCLevel = KYCLevel.PhoneVerified, CreatedAt = DateTime.UtcNow, IsActive = true },
-                new ApplicationUser { UserName = "hoangnam.q1@gmail.com", Email = "hoangnam.q1@gmail.com", FullName = "Lê Hoàng Nam", PhoneNumber = "0987654321", KYCLevel = KYCLevel.IdentityVerified, CreatedAt = DateTime.UtcNow, IsActive = true },
+                new ApplicationUser { UserName = "hoangnam.q1@gmail.com", Email = "hoangnam.q1@gmail.com", FullName = "Lê Hoàng Nam", PhoneNumber = "0987654321", KYCLevel = KYCLevel.Verified, CreatedAt = DateTime.UtcNow, IsActive = true },
                 new ApplicationUser { UserName = "myhuyen.bennghe@gmail.com", Email = "myhuyen.bennghe@gmail.com", FullName = "Đỗ Mỹ Huyền", PhoneNumber = "0901234567", KYCLevel = KYCLevel.Unverified, CreatedAt = DateTime.UtcNow, IsActive = true }
             };
 
             int importedCount = 0;
             foreach (var user in seedData)
             {
-                if (await _userManager.FindByEmailAsync(user.Email) == null)
+                if (user.Email != null && await _userManager.FindByEmailAsync(user.Email) == null)
                 {
                     var result = await _userManager.CreateAsync(user, "DefaultPassword123!");
                     if (result.Succeeded)
@@ -130,6 +130,75 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
 
             TempData["SuccessMessage"] = $"Đã nhập hàng loạt thành công {importedCount} tài khoản cư dân từ tệp dữ liệu Excel!";
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Route("Admin/Users/FptAiScanId")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FptAiScanId([FromForm] string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || string.IsNullOrEmpty(user.IdCardFrontUrl)) return BadRequest("User not found or missing image");
+
+            var apiKey = "JYeqysxCxLG1uIMcLgVU50r4nkz2hl89";
+            using var client = new System.Net.Http.HttpClient();
+            client.DefaultRequestHeaders.Add("api-key", apiKey);
+
+            try
+            {
+                // Download image to memory stream
+                var imageResponse = await client.GetAsync(user.IdCardFrontUrl);
+                var imageStream = await imageResponse.Content.ReadAsStreamAsync();
+
+                using var content = new System.Net.Http.MultipartFormDataContent();
+                content.Add(new System.Net.Http.StreamContent(imageStream), "image", "front.jpg");
+
+                var response = await client.PostAsync("https://api.fpt.ai/vision/idr/vnm", content);
+                var resultString = await response.Content.ReadAsStringAsync();
+                
+                return Content(resultString, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error calling FPT.AI: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        [Route("Admin/Users/FptAiFaceMatch")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FptAiFaceMatch([FromForm] string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || string.IsNullOrEmpty(user.IdCardFrontUrl) || string.IsNullOrEmpty(user.SelfieUrl)) 
+                return BadRequest("User not found or missing image");
+
+            var apiKey = "JYeqysxCxLG1uIMcLgVU50r4nkz2hl89";
+            using var client = new System.Net.Http.HttpClient();
+            client.DefaultRequestHeaders.Add("api-key", apiKey);
+
+            try
+            {
+                var idImageResponse = await client.GetAsync(user.IdCardFrontUrl);
+                var idImageStream = await idImageResponse.Content.ReadAsStreamAsync();
+
+                var selfieImageResponse = await client.GetAsync(user.SelfieUrl);
+                var selfieImageStream = await selfieImageResponse.Content.ReadAsStreamAsync();
+
+                using var content = new System.Net.Http.MultipartFormDataContent();
+                // FPT.AI requires "file[]"
+                content.Add(new System.Net.Http.StreamContent(idImageStream), "file[]", "front.jpg");
+                content.Add(new System.Net.Http.StreamContent(selfieImageStream), "file[]", "selfie.jpg");
+
+                var response = await client.PostAsync("https://api.fpt.ai/dmp/checkface/v1", content);
+                var resultString = await response.Content.ReadAsStringAsync();
+                
+                return Content(resultString, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error calling FPT.AI: {ex.Message}");
+            }
         }
     }
 }

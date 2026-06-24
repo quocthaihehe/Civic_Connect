@@ -5,6 +5,8 @@ namespace CivicConnect.Web.Models.Enums
         Unverified = 0,
         EmailVerified = 1,
         PhoneVerified = 2,
-        IdentityVerified = 3
+        PendingReview = 3,
+        Verified = 4,
+        Rejected = 5
     }
 }

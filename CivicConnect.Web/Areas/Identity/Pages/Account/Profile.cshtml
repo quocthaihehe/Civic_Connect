@@ -14,6 +14,14 @@
                 <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
+        
+        @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-3 py-2" role="alert" style="font-size: 0.9rem;">
+                <i class="bi bi-exclamation-octagon-fill me-2"></i> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
 
         @if (!Model.IsPhoneVerified)
         {
@@ -132,8 +140,11 @@
                     <div class="h2 fw-bold mb-1">@badge</div>
                     <span class="badge @color mb-4 fs-6 py-2 px-3 mx-auto">@Model.CitizenPoints pts</span>
                     
-                    <div class="d-flex justify-content-between text-muted fs-sm px-3">
-                        <span>Độ uy tín (TrustScore)</span>
+                    <div class="d-flex justify-content-between text-muted fs-sm px-3 align-items-center">
+                        <div>
+                            <span>Độ uy tín (TrustScore)</span>
+                            <i class="bi bi-info-circle ms-1 text-primary" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#pointsPolicyModal" title="Xem chính sách điểm"></i>
+                        </div>
                         <span class="fw-bold text-success">@Model.TrustScore</span>
                     </div>
                     <div class="progress progress-sm mt-2 mx-3">
@@ -181,6 +192,135 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- KYC Section -->
+        <div class="row g-3 mt-1">
+            <div class="col-md-12">
+                <div class="glass-card p-4" style="border-radius: var(--radius-lg);">
+                    <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-person-badge-fill me-1"></i> Xác thực danh tính (KYC)</h5>
+                    
+                    @if (Model.KYCLevel == CivicConnect.Web.Models.Enums.KYCLevel.Verified)
+                    {
+                        <div class="alert alert-success d-flex align-items-center m-0">
+                            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                            <div>Tài khoản của bạn đã được xác thực danh tính ở cấp độ cao nhất.</div>
+                        </div>
+                    }
+                    else if (Model.KYCLevel == CivicConnect.Web.Models.Enums.KYCLevel.PendingReview)
+                    {
+                        <div class="alert alert-info d-flex align-items-center m-0">
+                            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                            <div>Hồ sơ của bạn đang chờ Admin phê duyệt. Vui lòng quay lại sau.</div>
+                        </div>
+                    }
+                    else
+                    {
+                        if (Model.KYCLevel == CivicConnect.Web.Models.Enums.KYCLevel.Rejected)
+                        {
+                            <div class="alert alert-danger d-flex align-items-center mb-3">
+                                <i class="bi bi-x-circle-fill fs-4 me-3"></i>
+                                <div>Hồ sơ của bạn đã bị từ chối. Vui lòng tải lên lại thông tin.</div>
+                            </div>
+                        }
+
+                        <div class="row g-4">
+                            <div class="col-md-4 text-center">
+                                <label class="form-label fw-bold" style="font-size: 0.9rem;">Ảnh mặt trước CCCD</label>
+                                <div class="border rounded-3 p-2 bg-light position-relative" style="height: 160px;">
+                                    <img id="preview-front" src="" class="img-fluid h-100 w-100 d-none" style="object-fit: contain; border-radius: 8px;" />
+                                    <div id="placeholder-front" class="h-100 w-100 d-flex flex-column justify-content-center align-items-center text-muted" style="cursor: pointer;" onclick="$('#fileFront').click()">
+                                        <i class="bi bi-cloud-arrow-up fs-2"></i>
+                                        <span class="fs-sm mt-1">Tải ảnh lên</span>
+                                    </div>
+                                    <input type="file" id="fileFront" class="d-none kyc-file" accept="image/*" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <label class="form-label fw-bold" style="font-size: 0.9rem;">Ảnh mặt sau CCCD</label>
+                                <div class="border rounded-3 p-2 bg-light position-relative" style="height: 160px;">
+                                    <img id="preview-back" src="" class="img-fluid h-100 w-100 d-none" style="object-fit: contain; border-radius: 8px;" />
+                                    <div id="placeholder-back" class="h-100 w-100 d-flex flex-column justify-content-center align-items-center text-muted" style="cursor: pointer;" onclick="$('#fileBack').click()">
+                                        <i class="bi bi-cloud-arrow-up fs-2"></i>
+                                        <span class="fs-sm mt-1">Tải ảnh lên</span>
+                                    </div>
+                                    <input type="file" id="fileBack" class="d-none kyc-file" accept="image/*" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <label class="form-label fw-bold" style="font-size: 0.9rem;">Ảnh thẻ (Selfie)</label>
+                                <div class="border rounded-3 p-2 bg-light position-relative" style="height: 160px;">
+                                    <img id="preview-selfie" src="" class="img-fluid h-100 w-100 d-none" style="object-fit: contain; border-radius: 8px;" />
+                                    <div id="placeholder-selfie" class="h-100 w-100 d-flex flex-column justify-content-center align-items-center text-muted" style="cursor: pointer;" onclick="$('#fileSelfie').click()">
+                                        <i class="bi bi-cloud-arrow-up fs-2"></i>
+                                        <span class="fs-sm mt-1">Tải ảnh lên</span>
+                                    </div>
+                                    <input type="file" id="fileSelfie" class="d-none kyc-file" accept="image/*" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <form asp-page-handler="SubmitKyc" method="post" id="formKycUpload" class="mt-4 text-end">
+                            <input type="hidden" name="idCardFrontUrl" id="idCardFrontUrl" />
+                            <input type="hidden" name="idCardBackUrl" id="idCardBackUrl" />
+                            <input type="hidden" name="selfieUrl" id="selfieUrl" />
+                            
+                            <div id="kycError" class="text-danger mb-2 d-none text-start fw-bold fs-sm">Vui lòng tải lên đủ 3 ảnh.</div>
+                            
+                            <button type="button" id="btnSubmitKyc" class="btn btn-primary px-4 py-2" disabled>
+                                <span class="spinner-border spinner-border-sm d-none me-2" id="spinnerKyc" role="status"></span>
+                                <i class="bi bi-send me-1"></i> Nộp hồ sơ KYC
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Points Policy Modal -->
+<div class="modal fade" id="pointsPolicyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--radius-lg);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i>Chính sách Điểm Công Dân</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted fs-sm mb-4">Hệ thống điểm công dân và độ uy tín giúp đánh giá mức độ đóng góp và độ tin cậy của bạn trong hệ thống CivicConnect.</p>
+                
+                <h6 class="fw-bold mb-2">1. Điểm Công Dân (Citizen Points)</h6>
+                <ul class="fs-sm mb-3">
+                    <li>Dùng để xét thăng hạng Huy hiệu.</li>
+                    <li>Đăng phản ánh hợp lệ và được xử lý thành công: <strong class="text-success">+10 đến +50 điểm</strong> (tùy mức độ quan trọng).</li>
+                    <li>Tham gia khảo sát của chính quyền: <strong class="text-success">+5 điểm</strong>.</li>
+                    <li>Bị phạt do vi phạm: <strong class="text-danger">-20 điểm</strong>.</li>
+                </ul>
+
+                <h6 class="fw-bold mb-2">2. Độ Uy Tín (TrustScore)</h6>
+                <ul class="fs-sm mb-3">
+                    <li>Ảnh hưởng đến thứ tự ưu tiên xử lý phản ánh của bạn.</li>
+                    <li>Mặc định: <strong>50/100</strong>.</li>
+                    <li>Phản ánh chính xác, được duyệt: <strong class="text-success">+2 điểm/lần</strong>.</li>
+                    <li>Phản ánh sai sự thật, spam: <strong class="text-danger">-5 đến -10 điểm/lần</strong>.</li>
+                    <li>TrustScore dưới 30: Tài khoản có thể bị hạn chế gửi phản ánh.</li>
+                </ul>
+
+                <h6 class="fw-bold mb-2">3. Các Cấp Bậc Huy Hiệu</h6>
+                <div class="d-flex gap-2 mb-2">
+                    <span class="badge bg-cyan-lt">Tân Binh (0-49)</span>
+                    <span class="badge bg-orange text-white">Đồng (50-199)</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-secondary text-white">Bạc (200-499)</span>
+                    <span class="badge bg-warning text-white">Vàng (500-999)</span>
+                    <span class="badge bg-dark text-white">Bạch Kim (1000+)</span>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
             </div>
         </div>
     </div>
@@ -305,6 +445,91 @@
                     wards[distId].forEach(w => {
                         $('#ward-select').append(`<option value="${w.code}">${w.name}</option>`);
                     });
+                }
+            });
+
+            // === KYC UPLOAD LOGIC ===
+            let filesKyc = {
+                front: null,
+                back: null,
+                selfie: null
+            };
+
+            function handleKycPreview(inputId, previewId, placeholderId, key) {
+                $(`#${inputId}`).change(function() {
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Ảnh không được vượt quá 5MB');
+                        $(this).val('');
+                        return;
+                    }
+
+                    filesKyc[key] = file;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $(`#${previewId}`).attr('src', e.target.result).removeClass('d-none');
+                        $(`#${placeholderId}`).addClass('d-none');
+                    }
+                    reader.readAsDataURL(file);
+
+                    checkKycReady();
+                });
+            }
+
+            handleKycPreview('fileFront', 'preview-front', 'placeholder-front', 'front');
+            handleKycPreview('fileBack', 'preview-back', 'placeholder-back', 'back');
+            handleKycPreview('fileSelfie', 'preview-selfie', 'placeholder-selfie', 'selfie');
+
+            function checkKycReady() {
+                if (filesKyc.front && filesKyc.back && filesKyc.selfie) {
+                    $('#btnSubmitKyc').prop('disabled', false);
+                    $('#kycError').addClass('d-none');
+                } else {
+                    $('#btnSubmitKyc').prop('disabled', true);
+                }
+            }
+
+            $('#btnSubmitKyc').click(async function() {
+                $('#btnSubmitKyc').prop('disabled', true);
+                $('#spinnerKyc').removeClass('d-none');
+                
+                try {
+                    // Upload 3 files in parallel to Cloudinary
+                    const uploadPromises = ['front', 'back', 'selfie'].map(async (key) => {
+                        const formData = new FormData();
+                        formData.append('file', filesKyc[key]);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+
+                        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await response.json();
+                        if (data.secure_url) {
+                            return { key, url: data.secure_url };
+                        }
+                        throw new Error(`Upload ${key} failed`);
+                    });
+
+                    const results = await Promise.all(uploadPromises);
+                    
+                    results.forEach(r => {
+                        if (r.key === 'front') $('#idCardFrontUrl').val(r.url);
+                        if (r.key === 'back') $('#idCardBackUrl').val(r.url);
+                        if (r.key === 'selfie') $('#selfieUrl').val(r.url);
+                    });
+
+                    // Submit form to server
+                    $('#formKycUpload').submit();
+                    
+                } catch (err) {
+                    console.error(err);
+                    $('#kycError').text('Có lỗi khi upload ảnh lên Cloudinary. Vui lòng thử lại.').removeClass('d-none');
+                    $('#btnSubmitKyc').prop('disabled', false);
+                    $('#spinnerKyc').addClass('d-none');
                 }
             });
         });

@@ -36,7 +36,7 @@ namespace CivicConnect.Web.Hubs
                         await _context.SaveChangesAsync();
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Log or handle error silently to not break connection
                 }
@@ -80,7 +80,7 @@ namespace CivicConnect.Web.Hubs
                         await _context.SaveChangesAsync();
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Log or handle error silently
                 }

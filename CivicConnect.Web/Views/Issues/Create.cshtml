@@ -293,6 +293,27 @@
     </div>
 </div>
 
+<!-- KYC Required Modal -->
+<div class="modal fade" id="kycRequiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <div class="modal-body p-0 text-center">
+                <div class="bg-danger text-white py-4 d-flex justify-content-center align-items-center">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 3rem;"></i>
+                </div>
+                <div class="p-4">
+                    <h4 class="fw-bold mb-3 text-danger">Yêu cầu xác thực danh tính</h4>
+                    <p class="text-muted mb-4">Nội dung phản ánh thuộc lĩnh vực Hành chính hoặc An ninh trật tự. Yêu cầu tài khoản phải được xác minh danh tính (KYC) để tiếp tục gửi.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                        <a href="/Identity/Account/Profile" class="btn btn-primary rounded-pill px-4">Đến trang Hồ sơ KYC</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -325,9 +346,17 @@
 
             // Category Selection
             $('.category-card').click(function() {
+                const val = $(this).data('val');
+                const userKycLevel = parseInt('@(ViewBag.UserKYCLevel ?? 0)');
+                
+                // Check if category is 3 (An ninh trật tự) or 5 (Hành chính) and KYC is not Verified (4)
+                if ((val === 3 || val === 5) && userKycLevel !== 4) {
+                    $('#kycRequiredModal').modal('show');
+                    return;
+                }
+
                 $('.category-card').removeClass('selected');
                 $(this).addClass('selected');
-                const val = $(this).data('val');
                 $('#categoryInput').val(val).trigger('change');
                 $('#catError').addClass('d-none');
                 

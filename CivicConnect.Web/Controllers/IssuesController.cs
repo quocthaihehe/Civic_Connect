@@ -122,6 +122,7 @@ namespace CivicConnect.Web.Controllers
             }
 
             ViewData["PageHeader"] = "Gửi Phản Ánh Mới";
+            ViewBag.UserKYCLevel = (int)user.KYCLevel;
             return View();
         }
 
@@ -148,6 +149,15 @@ namespace CivicConnect.Web.Controllers
                 {
                     TempData["ErrorMessage"] = "Tài khoản của bạn cần được xác thực hoặc được Admin duyệt trước khi đăng phản ánh.";
                     return RedirectToAction("Index");
+                }
+
+                if (model.Category == IssueCategory.Administration || model.Category == IssueCategory.Security)
+                {
+                    if (user.KYCLevel != KYCLevel.Verified)
+                    {
+                        TempData["ErrorMessage"] = "Nội dung phản ánh thuộc lĩnh vực Hành chính/An ninh. Yêu cầu tài khoản phải được xác minh danh tính (KYC) để tiếp tục gửi.";
+                        return Redirect("/Identity/Account/Profile");
+                    }
                 }
 
                 // A5 — Validate MIME type tại Backend
