@@ -143,14 +143,23 @@
                 
                 <!-- Header Info -->
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
                         <h4 class="fw-bold mb-0 text-dark" style="line-height: 1.4;">@Model.Title</h4>
                         <span class="badge @GetStatusClass(Model.Status) rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.85rem;">
                             @GetStatusName(Model.Status)
                         </span>
+                        @{
+                            var isOfficialAction = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+                        }
+                        @if (isOfficialAction)
+                        {
+                            <a href="/Official/Details/@Model.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm ms-2" style="font-size: 0.8rem;">
+                                <i class="bi bi-shield-fill-check"></i> Xử lý phản ánh này
+                            </a>
+                        }
                     </div>
                     <span class="text-muted" style="font-size: 0.85rem;">
-                        <i class="bi bi-clock me-1"></i> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        <i class="bi bi-clock me-1"></i> @Model.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")
                     </span>
                 </div>
 
@@ -218,16 +227,33 @@
                 </div>
 
                 <!-- Action Bar (Vote & Share) -->
+                @{
+                    var isOfficialDetails = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+                }
                 <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top border-secondary border-opacity-25">
                     <div class="d-flex align-items-center gap-3">
-                        <button class="btn btn-sm rounded-pill vote-btn vote-btn-agree px-4 py-2 d-flex align-items-center gap-2 fw-medium" data-id="@Model.Id" data-type="1">
-                            <i class="bi bi-hand-thumbs-up-fill fs-6"></i>
-                            <span>Đồng tình (<strong id="upvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Up)</strong>)</span>
-                        </button>
-                        <button class="btn btn-sm rounded-pill vote-btn vote-btn-disagree px-4 py-2 d-flex align-items-center gap-2 fw-medium" data-id="@Model.Id" data-type="-1">
-                            <i class="bi bi-hand-thumbs-down-fill fs-6"></i>
-                            <span>Không đồng tình (<strong id="downvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Down)</strong>)</span>
-                        </button>
+                        @if (isOfficialDetails)
+                        {
+                            <button class="btn btn-sm rounded-pill vote-btn vote-btn-agree px-4 py-2 d-flex align-items-center gap-2 fw-medium" disabled style="opacity: 0.6; cursor: not-allowed;" title="Tài khoản cán bộ không thể biểu quyết" data-id="@Model.Id" data-type="1">
+                                <i class="bi bi-hand-thumbs-up-fill fs-6"></i>
+                                <span>Đồng tình (<strong>@Model.Votes.Count(v => v.Type == VoteType.Up)</strong>)</span>
+                            </button>
+                            <button class="btn btn-sm rounded-pill vote-btn vote-btn-disagree px-4 py-2 d-flex align-items-center gap-2 fw-medium" disabled style="opacity: 0.6; cursor: not-allowed;" title="Tài khoản cán bộ không thể biểu quyết" data-id="@Model.Id" data-type="-1">
+                                <i class="bi bi-hand-thumbs-down-fill fs-6"></i>
+                                <span>Không đồng tình (<strong>@Model.Votes.Count(v => v.Type == VoteType.Down)</strong>)</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm rounded-pill vote-btn vote-btn-agree px-4 py-2 d-flex align-items-center gap-2 fw-medium" data-id="@Model.Id" data-type="1">
+                                <i class="bi bi-hand-thumbs-up-fill fs-6"></i>
+                                <span>Đồng tình (<strong id="upvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Up)</strong>)</span>
+                            </button>
+                            <button class="btn btn-sm rounded-pill vote-btn vote-btn-disagree px-4 py-2 d-flex align-items-center gap-2 fw-medium" data-id="@Model.Id" data-type="-1">
+                                <i class="bi bi-hand-thumbs-down-fill fs-6"></i>
+                                <span>Không đồng tình (<strong id="downvotes-count">@Model.Votes.Count(v => v.Type == VoteType.Down)</strong>)</span>
+                            </button>
+                        }
                     </div>
                     <div class="d-flex align-items-center gap-3 mt-3 mt-md-0">
                         <div class="d-flex gap-2">
@@ -352,7 +378,7 @@
                                                     <span class="badge bg-primary ms-2"><i class="bi bi-check-circle-fill me-1"></i> Cán bộ</span>
                                                 }
                                             </div>
-                                            <div class="text-muted" style="font-size: 0.75rem;">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">@comment.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</div>
                                         </div>
                                     </div>
                                 </div>
@@ -404,7 +430,7 @@
                                 <!-- Line and dot are handled by .timeline-step css -->
                                 <div class="d-flex justify-content-between align-items-start mb-1">
                                     <strong class="text-dark">@GetStatusName(hist.ToStatus)</strong>
-                                    <span class="badge bg-secondary bg-opacity-25 text-muted fw-normal">@hist.ChangedAt.ToString("dd/MM HH:mm")</span>
+                                    <span class="badge bg-secondary bg-opacity-25 text-muted fw-normal">@hist.ChangedAt.AddHours(7).ToString("dd/MM HH:mm")</span>
                                 </div>
                                 
                                 @if (!string.IsNullOrEmpty(hist.Note))

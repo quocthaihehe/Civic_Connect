@@ -1,5 +1,6 @@
 using CivicConnect.Web.Models.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
@@ -116,6 +117,83 @@ namespace CivicConnect.Web.Data
                 existingCitizen.TwoFactorContact = "7905261972";
                 await userManager.UpdateAsync(existingCitizen);
             }
+        }
+
+        public static async Task SeedCommunityDataAsync(AppDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            var admin = await userManager.FindByEmailAsync("admin@gmail.com");
+            var citizen = await userManager.FindByEmailAsync("citizen@gmail.com");
+            if (admin == null || citizen == null) return;
+
+            // Seed Forum Posts
+            if (!await context.ForumPosts.AnyAsync())
+            {
+                var posts = new List<ForumPost>
+                {
+                    new ForumPost { Title = "Quy định mới về phân loại rác thải tại nguồn", Content = "Từ ngày 01/01/2027, hộ gia đình không phân loại rác sẽ bị phạt từ 500k - 1 triệu đồng.", Tags = "moitruong, quy_dinh", AuthorId = admin.Id, Status = CivicConnect.Web.Models.Enums.PostStatus.Approved, CreatedAt = DateTime.UtcNow.AddDays(-2), LikeCount = 15, CommentCount = 2, PopularityScore = 16f, EnteredTrendingAt = DateTime.UtcNow },
+                    new ForumPost { Title = "Khen ngợi đội ngũ xử lý đường ngập Quận 7", Content = "Hôm qua mưa lớn ngập đường Huỳnh Tấn Phát, nhưng sáng nay nước đã rút nhanh. Cảm ơn các anh cán bộ.", Tags = "giaothong, khen_ngoi", AuthorId = citizen.Id, Status = CivicConnect.Web.Models.Enums.PostStatus.Approved, CreatedAt = DateTime.UtcNow.AddHours(-5), LikeCount = 35, CommentCount = 5, PopularityScore = 37.5f, EnteredTrendingAt = DateTime.UtcNow },
+                    new ForumPost { Title = "Hỏi về thủ tục đăng ký tạm trú online", Content = "Mọi người cho em hỏi làm tạm trú trên app VNeID mất bao lâu thì được duyệt ạ?", Tags = "thu_tuc, hanh_chinh", AuthorId = citizen.Id, Status = CivicConnect.Web.Models.Enums.PostStatus.Approved, CreatedAt = DateTime.UtcNow.AddHours(-1) }
+                };
+                context.ForumPosts.AddRange(posts);
+                await context.SaveChangesAsync();
+
+                // Seed Comments
+                var comment1 = new ForumComment { PostId = posts[1].Id, Content = "Tuyệt vời quá bạn ơi!", AuthorId = admin.Id, CreatedAt = DateTime.UtcNow.AddHours(-4) };
+                context.ForumComments.Add(comment1);
+                await context.SaveChangesAsync();
+
+                var reply1 = new ForumComment { PostId = posts[1].Id, ParentCommentId = comment1.Id, Content = "Dạ cảm ơn admin", AuthorId = citizen.Id, CreatedAt = DateTime.UtcNow.AddHours(-3), Depth = 1 };
+                context.ForumComments.Add(reply1);
+                await context.SaveChangesAsync();
+            }
+
+            // Seed Polls
+            if (!await context.Polls.AnyAsync())
+            {
+                var poll = new Poll
+                {
+                    Question = "Bạn thấy tính năng nào cần thiết nhất cho phiên bản tới?",
+                    Description = "Giúp ban quản trị ưu tiên phát triển ứng dụng",
+                    IsActive = true,
+                    EndDate = DateTime.UtcNow.AddDays(7),
+                    Options = new List<PollOption>
+                    {
+                        new PollOption { Text = "Bản đồ nhiệt độ giao thông" },
+                        new PollOption { Text = "Cảnh báo ngập lụt realtime" },
+                        new PollOption { Text = "Tra cứu vi phạm giao thông" }
+                    }
+                };
+                context.Polls.Add(poll);
+            }
+
+            // Seed Petitions
+            if (!await context.Petitions.AnyAsync())
+            {
+                context.Petitions.Add(new Petition
+                {
+                    Title = "Kiến nghị mở rộng tuyến xe buýt số 150",
+                    Description = "Tuyến xe buýt 150 thường xuyên quá tải vào giờ cao điểm, cần tăng chuyến.",
+                    TargetSignatures = 1000,
+                    CurrentSignatures = 150,
+                    EndDate = DateTime.UtcNow.AddDays(30)
+                });
+            }
+
+            // Seed Events
+            if (!await context.CommunityEvents.AnyAsync())
+            {
+                context.CommunityEvents.Add(new CommunityEvent
+                {
+                    Title = "Ngày hội Trồng cây xanh Quận 7",
+                    Description = "Tham gia phủ xanh tuyến đường Nguyễn Hữu Thọ.",
+                    Location = "Đường Nguyễn Hữu Thọ, Quận 7",
+                    StartTime = DateTime.UtcNow.AddDays(5),
+                    EndTime = DateTime.UtcNow.AddDays(5).AddHours(4),
+                    MaxParticipants = 200
+                });
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }

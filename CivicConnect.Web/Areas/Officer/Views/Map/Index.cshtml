@@ -1,0 +1,100 @@
+@{
+    ViewData["Title"] = "Bản đồ Sự cố";
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">
+                    Bản đồ Sự cố / Phản ánh trên địa bàn
+                </h2>
+                <div class="text-muted mt-1">Cái nhìn tổng quan về các điểm nóng</div>
+            </div>
+            <div class="col-auto ms-auto">
+                <a href="/Officer/Issues" class="btn btn-secondary">Quay lại danh sách</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="card">
+            <div class="card-body p-0">
+                <div id="issues-map" style="height: 600px; width: 100%; border-radius: 4px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var issuesData = @Html.Raw(ViewBag.IssuesData);
+            
+            // Khởi tạo bản đồ, mặc định center ở toạ độ của sự cố đầu tiên (hoặc mặc định TP.HCM)
+            var startLat = 10.762622;
+            var startLng = 106.660172;
+            if (issuesData && issuesData.length > 0) {
+                startLat = issuesData[0].Latitude;
+                startLng = issuesData[0].Longitude;
+            }
+
+            var map = L.map('issues-map').setView([startLat, startLng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Hàm trả về màu sắc tùy theo trạng thái
+            function getStatusColor(status) {
+                switch(status) {
+                    case 0: return 'red'; // Pending
+                    case 1: return 'blue'; // Assigned
+                    case 2: return 'orange'; // Processing
+                    case 3: return 'green'; // Resolved
+                    case 4: return 'gray'; // Closed
+                    default: return 'gray';
+                }
+            }
+
+            // Custom Icon maker
+            function createCustomIcon(color) {
+                return L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style="background-color:${color}; width:20px; height:20px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>`,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+            }
+
+            var markers = [];
+            issuesData.forEach(function(issue) {
+                var color = getStatusColor(issue.Status);
+                var marker = L.marker([issue.Latitude, issue.Longitude], {icon: createCustomIcon(color)}).addTo(map);
+                
+                var popupContent = `
+                    <div style="font-family: Arial, sans-serif;">
+                        <h4 style="margin: 0 0 5px 0;">#${issue.Id} - ${issue.Title}</h4>
+                        <p style="margin: 0 0 5px 0;"><strong>Lĩnh vực:</strong> ${issue.Category}</p>
+                        <p style="margin: 0 0 10px 0; font-size: 0.9em; color: #666;">${issue.Address}</p>
+                        <a href="/Officer/Issues/Details/${issue.Id}" class="btn btn-sm btn-primary text-white" style="text-decoration:none; display:inline-block; padding: 3px 8px; border-radius:3px;">Xem chi tiết</a>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+                markers.push(marker);
+            });
+
+            // Tự động zoom cho vừa vặn tất cả các marker nếu có > 1
+            if (markers.length > 1) {
+                var group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        });
+    </script>
+}

@@ -241,9 +241,21 @@
                 <div class="position-relative z-index-1">
                     <h4 class="fw-bold mb-3" style="color: #133B2F; line-height: 1.3;">Cùng nhau tạo nên <br><span style="font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.3rem;">những thay đổi tích cực!</span></h4>
                     <p class="text-muted mb-4 px-1" style="font-size: 0.75rem; line-height: 1.5;">Mỗi ý kiến đóng góp của bạn là một viên gạch xây nên thành phố tốt đẹp hơn mỗi ngày.</p>
-                    <a href="/Issues/Create" class="btn rounded-pill px-3 py-2 w-100 shadow-sm transition-hover" style="background-color: #1E5C4A; color: white; font-weight: 500; font-size: 0.9rem;">
-                        <i class="bi bi-send-fill me-1"></i> Gửi phản ánh ngay
-                    </a>
+                    @{
+                        var isOfficialAbout = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+                    }
+                    @if (isOfficialAbout)
+                    {
+                        <a href="/Official/Dashboard" class="btn rounded-pill px-3 py-2 w-100 shadow-sm transition-hover" style="background-color: #1E5C4A; color: white; font-weight: 500; font-size: 0.9rem;">
+                            <i class="bi bi-briefcase me-1"></i> Bàn làm việc cán bộ
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Issues/Create" class="btn rounded-pill px-3 py-2 w-100 shadow-sm transition-hover" style="background-color: #1E5C4A; color: white; font-weight: 500; font-size: 0.9rem;">
+                            <i class="bi bi-send-fill me-1"></i> Gửi phản ánh ngay
+                        </a>
+                    }
                 </div>
             </div>
         </div>

@@ -1,0 +1,128 @@
+@model IEnumerable<CivicConnect.Web.Models.Entities.ForumPost>
+
+@{
+    ViewData["Title"] = "Duyệt bài viết cộng đồng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">
+                    Quản lý nội dung cộng đồng
+                </h2>
+                <div class="text-muted mt-1">@Model.Count() bài viết đang chờ duyệt</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <div class="d-flex">
+                    <div>
+                        <i class="bi bi-check-circle me-2"></i>
+                    </div>
+                    <div>
+                        @TempData["SuccessMessage"]
+                    </div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div>
+        }
+
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
+                    <thead>
+                        <tr>
+                            <th>Người đăng</th>
+                            <th>Tiêu đề / Nội dung</th>
+                            <th>Thời gian</th>
+                            <th class="w-1">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted p-4">Không có bài viết nào đang chờ duyệt.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var post in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex py-1 align-items-center">
+                                            <span class="avatar me-2"><i class="bi bi-person"></i></span>
+                                            <div class="flex-fill">
+                                                <div class="font-weight-medium">@(post.Author?.FullName ?? post.Author?.UserName)</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold mb-1">@post.Title</div>
+                                        <div class="text-muted text-truncate" style="max-width: 400px;">
+                                            @post.Content
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(post.Tags))
+                                        {
+                                            <div class="mt-1">
+                                                <span class="badge bg-secondary-lt">@post.Tags</span>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="text-muted">
+                                        @post.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <form method="post" asp-action="ApprovePost" asp-area="Admin" asp-controller="Content">
+                                                <input type="hidden" name="id" value="@post.Id" />
+                                                <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check-lg me-1"></i> Duyệt</button>
+                                            </form>
+                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal-@post.Id">
+                                                <i class="bi bi-x-lg me-1"></i> Từ chối
+                                            </button>
+                                        </div>
+
+                                        <!-- Reject Modal -->
+                                        <div class="modal fade" id="rejectModal-@post.Id" tabindex="-1">
+                                            <div class="modal-dialog modal-sm" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Từ chối bài viết</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form method="post" asp-action="RejectPost" asp-area="Admin" asp-controller="Content">
+                                                        <input type="hidden" name="id" value="@post.Id" />
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Lý do từ chối</label>
+                                                                <textarea class="form-control" name="reason" rows="3" required placeholder="Nội dung vi phạm, spam..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-danger">Từ chối</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

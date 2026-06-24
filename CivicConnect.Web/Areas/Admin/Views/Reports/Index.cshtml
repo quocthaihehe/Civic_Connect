@@ -1,65 +1,66 @@
 @using CivicConnect.Web.Models.Enums
 @{
-    Layout = "_AdminLayout";
+    Layout = "_AdminTablerLayout";
     ViewData["Title"] = "Báo cáo thống kê";
 }
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0">
-                    <h6>Xuất dữ liệu báo cáo PDF/CSV</h6>
-                </div>
-                <div class="card-body px-4 pt-4 pb-2">
-                    <form method="get" action="/Admin/Reports/ExportCsv">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Từ ngày</label>
-                                    <input type="date" name="fromDate" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Đến ngày</label>
-                                    <input type="date" name="toDate" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Danh mục</label>
-                                    <select name="category" class="form-control">
-                                        <option value="">-- Tất cả --</option>
-                                        @foreach (IssueCategory cat in Enum.GetValues(typeof(IssueCategory)))
-                                        {
-                                            <option value="@cat">@cat</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Trạng thái</label>
-                                    <select name="status" class="form-control">
-                                        <option value="">-- Tất cả --</option>
-                                        @foreach (IssueStatus stat in Enum.GetValues(typeof(IssueStatus)))
-                                        {
-                                            <option value="@stat">@stat</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-12 text-end">
-                                <button type="submit" class="btn btn-primary">Xuất CSV</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<!-- Page Header -->
+<div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title text-2xl font-bold">Xuất báo cáo dữ liệu</h2>
+            <div class="text-muted small mt-1">Lọc và trích xuất dữ liệu phản ánh kiến nghị của người dân ra định dạng CSV</div>
         </div>
     </div>
 </div>
 
+<div class="row row-cards">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="card-title font-weight-bold"><i class="bi bi-file-earmark-arrow-down text-primary me-2"></i>Bộ lọc xuất dữ liệu</h3>
+            </div>
+            <div class="card-body">
+                <form method="get" action="/Admin/Reports/ExportCsv">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label font-weight-bold">Từ ngày</label>
+                            <input type="date" name="fromDate" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label font-weight-bold">Đến ngày</label>
+                            <input type="date" name="toDate" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label font-weight-bold">Danh mục</label>
+                            <select name="category" class="form-select">
+                                <option value="">-- Tất cả danh mục --</option>
+                                @foreach (IssueCategory cat in Enum.GetValues(typeof(IssueCategory)))
+                                {
+                                    <option value="@cat">@cat</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label font-weight-bold">Trạng thái</label>
+                            <select name="status" class="form-select">
+                                <option value="">-- Tất cả trạng thái --</option>
+                                @foreach (IssueStatus stat in Enum.GetValues(typeof(IssueStatus)))
+                                {
+                                    <option value="@stat">@stat</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-download me-2"></i> Xuất file CSV
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

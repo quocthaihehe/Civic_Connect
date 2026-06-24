@@ -42,6 +42,8 @@ namespace CivicConnect.Web.Data
         public DbSet<CommunityEvent> CommunityEvents { get; set; }
         public DbSet<EventRegistration> EventRegistrations { get; set; }
         public DbSet<ProvinceBoundary> ProvinceBoundaries { get; set; }
+        public DbSet<PointTransaction> PointTransactions { get; set; }
+        public DbSet<TrendingTopic> TrendingTopics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +52,12 @@ namespace CivicConnect.Web.Data
             // Cấu hình Community Entities
             modelBuilder.Entity<ForumPost>().HasOne(p => p.Author).WithMany().HasForeignKey(p => p.AuthorId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<ForumComment>().HasOne(c => c.Author).WithMany().HasForeignKey(c => c.AuthorId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ForumComment>().HasOne(c => c.ParentComment).WithMany(c => c.Replies).HasForeignKey(c => c.ParentCommentId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ForumComment>().HasOne(c => c.Post).WithMany(p => p.Comments).HasForeignKey(c => c.PostId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ForumComment>().HasOne(c => c.Issue).WithMany().HasForeignKey(c => c.IssueId).OnDelete(DeleteBehavior.Cascade);
+            
+            // Cấu hình PointTransaction
+            modelBuilder.Entity<PointTransaction>().HasOne(p => p.User).WithMany().HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<PollVote>().HasIndex(v => new { v.UserId, v.PollId }).IsUnique();
             modelBuilder.Entity<PollVote>().HasOne(v => v.User).WithMany().HasForeignKey(v => v.UserId).OnDelete(DeleteBehavior.Restrict);

@@ -1,0 +1,198 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Bảng Vàng Danh Dự";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Helper tính toán huy hiệu dựa trên CitizenPoints
+    string GetBadgeLevel(int points)
+    {
+        if (points >= 1000) return "Bạch Kim";
+        if (points >= 500) return "Vàng";
+        if (points >= 200) return "Bạc";
+        if (points >= 50) return "Đồng";
+        return "Tân Binh";
+    }
+
+    string GetBadgeColorClass(int points)
+    {
+        if (points >= 1000) return "badge-platinum"; 
+        if (points >= 500) return "badge-gold"; 
+        if (points >= 200) return "badge-silver"; 
+        if (points >= 50) return "badge-bronze"; 
+        return "badge-rookie"; 
+    }
+
+    string GetBadgeInlineStyle(int points)
+    {
+        if (points >= 1000) return "background-color: #1E293B !important; color: #FFFFFF !important;"; 
+        if (points >= 500) return "background-color: #EAB308 !important; color: #000000 !important; font-weight: 600;"; 
+        if (points >= 200) return "background-color: #94A3B8 !important; color: #FFFFFF !important;"; 
+        if (points >= 50) return "background-color: #EA580C !important; color: #FFFFFF !important;"; 
+        return "background-color: #06B6D4 !important; color: #FFFFFF !important;"; 
+    }
+}
+
+<div class="container-xl mt-4">
+    <!-- Header Hero Section -->
+    <div class="glass-card mb-4 overflow-hidden border-0 shadow-sm" style="background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%); color: white; position: relative; border-radius: var(--radius-lg);">
+        <div class="position-absolute top-0 end-0 opacity-10 pointer-events-none" style="font-size: 10rem; transform: translate(10%, -20%);">
+            <i class="bi bi-trophy-fill text-white"></i>
+        </div>
+        <div class="card-body p-4 p-md-5 position-relative z-index-1">
+            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold mb-3 shadow-sm"><i class="bi bi-award-fill me-1"></i> BẢNG XẾP HẠNG</span>
+            <h2 class="fw-bold mb-2 text-white" style="font-family: var(--font-display); font-size: 2.5rem; letter-spacing: -0.5px;">Bảng Vàng Danh Dự</h2>
+            <p class="text-white text-opacity-80 mb-0 max-w-xl" style="font-size: 1.05rem; line-height: 1.6;">
+                Tôn vinh những cá nhân đóng góp xuất sắc nhất cho cộng đồng thông qua việc gửi phản ánh hiện trường, tham gia thảo luận và các hoạt động tích cực trên Civic Connect.
+            </p>
+        </div>
+    </div>
+
+    <div class="row row-cards">
+        <!-- Top 3 Podium -->
+        @if (Model != null && Model.Count() >= 3)
+        {
+            var top1 = Model.ElementAt(0);
+            var top2 = Model.ElementAt(1);
+            var top3 = Model.ElementAt(2);
+
+            <div class="col-12 mb-5 d-none d-md-block">
+                <div class="row align-items-end justify-content-center text-center g-4">
+                    
+                    <!-- Top 2 (Silver) -->
+                    <div class="col-md-3">
+                        <div class="glass-card border-0 shadow-sm p-4 text-center position-relative transition-hover" style="border-radius: var(--radius-lg); background: white; border-top: 5px solid #A8A29E !important; transform: translateY(15px);">
+                            <div class="position-absolute top-0 start-50 translate-middle badge bg-secondary text-white rounded-circle shadow d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 1rem; font-weight: bold;">2</div>
+                            
+                            <div class="avatar-wrapper mb-3 mt-2 d-inline-block">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 70px; height: 70px; background: linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 100%); border: 3px solid #E2E8F0;">
+                                    <span class="fw-bold text-secondary" style="font-size: 1.5rem;">@(string.IsNullOrEmpty(top2.FullName) ? "C" : top2.FullName.Substring(0, 1))</span>
+                                </div>
+                            </div>
+                            
+                            <h4 class="fw-bold mb-1 text-dark" style="font-family: var(--font-display);">@top2.FullName</h4>
+                            <div class="text-muted small mb-2">@top2.UserName</div>
+                            <div class="fs-4 text-secondary fw-bold mb-2">@top2.CitizenPoints <span class="small text-muted font-normal" style="font-size: 0.85rem;">điểm</span></div>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">@GetBadgeLevel(top2.CitizenPoints)</span>
+                        </div>
+                    </div>
+
+                    <!-- Top 1 (Gold) -->
+                    <div class="col-md-4 mx-lg-3">
+                        <div class="glass-card border-0 shadow-lg p-5 text-center position-relative transition-hover" style="border-radius: var(--radius-lg); background: white; border-top: 6px solid var(--warning-500) !important; box-shadow: 0 15px 35px rgba(230,194,0,0.15) !important;">
+                            <div class="position-absolute top-0 start-50 translate-middle badge bg-warning text-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.4rem; font-weight: bold; border: 3px solid white;">
+                                <i class="bi bi-trophy-fill" style="font-size: 1.1rem;"></i>
+                            </div>
+                            
+                            <div class="avatar-wrapper mb-3 mt-2 d-inline-block">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-lg position-relative" style="width: 90px; height: 90px; background: linear-gradient(135deg, #FDE047 0%, #CA8A04 100%); border: 4px solid white;">
+                                    <span class="fw-bold text-white" style="font-size: 2.2rem; font-family: var(--font-display);">@(string.IsNullOrEmpty(top1.FullName) ? "C" : top1.FullName.Substring(0, 1))</span>
+                                </div>
+                            </div>
+                            
+                            <h3 class="fw-bold mb-1 text-dark" style="font-family: var(--font-display); font-size: 1.5rem;">@top1.FullName</h3>
+                            <div class="text-muted small mb-2">@top1.UserName</div>
+                            <div class="h2 text-warning fw-bolder mb-3" style="letter-spacing: -0.5px;">@top1.CitizenPoints <span class="fs-6 text-muted font-normal">điểm</span></div>
+                            <span class="badge bg-warning bg-opacity-25 text-warning-700 rounded-pill px-4 py-2 fw-bold" style="font-size: 0.85rem; color: #854D0E !important;">@GetBadgeLevel(top1.CitizenPoints)</span>
+                        </div>
+                    </div>
+
+                    <!-- Top 3 (Bronze) -->
+                    <div class="col-md-3">
+                        <div class="glass-card border-0 shadow-sm p-4 text-center position-relative transition-hover" style="border-radius: var(--radius-lg); background: white; border-top: 5px solid #D97706 !important; transform: translateY(30px);">
+                            <div class="position-absolute top-0 start-50 translate-middle badge text-white rounded-circle shadow d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 1rem; font-weight: bold; background: #D97706;">3</div>
+                            
+                            <div class="avatar-wrapper mb-3 mt-2 d-inline-block">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 70px; height: 70px; background: linear-gradient(135deg, #FED7AA 0%, #EA580C 100%); border: 3px solid #FED7AA;">
+                                    <span class="fw-bold text-dark" style="font-size: 1.5rem; color: #7C2D12 !important;">@(string.IsNullOrEmpty(top3.FullName) ? "C" : top3.FullName.Substring(0, 1))</span>
+                                </div>
+                            </div>
+                            
+                            <h4 class="fw-bold mb-1 text-dark" style="font-family: var(--font-display);">@top3.FullName</h4>
+                            <div class="text-muted small mb-2">@top3.UserName</div>
+                            <div class="fs-4 text-orange fw-bold mb-2" style="color: #EA580C !important;">@top3.CitizenPoints <span class="small text-muted font-normal" style="font-size: 0.85rem;">điểm</span></div>
+                            <span class="badge bg-orange bg-opacity-10 text-orange rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem; color: #EA580C !important; background-color: rgba(249,115,22,0.1) !important;">@GetBadgeLevel(top3.CitizenPoints)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Bảng xếp hạng chi tiết -->
+        <div class="col-12" style="margin-top: 40px;">
+            <div class="glass-card border-0 shadow-sm p-4 p-md-5 bg-white mb-4" style="border-radius: var(--radius-lg);">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-display);"><i class="bi bi-list-stars text-primary me-2"></i> Bảng Xếp Hạng Đóng Góp Công Dân</h3>
+                    <span class="text-muted small">Cập nhật thời gian thực</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-vcenter align-middle table-hover mb-0">
+                        <thead class="table-light">
+                            <tr style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <th class="w-1 text-center py-3">Thứ hạng</th>
+                                <th class="py-3">Công dân</th>
+                                <th class="py-3">Huy hiệu</th>
+                                <th class="py-3">Điểm cống hiến</th>
+                                <th class="py-3">Độ uy tín</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 0.95rem;">
+                            @if (Model != null)
+                            {
+                                int rank = 1;
+                                foreach (var citizen in Model)
+                                {
+                                    <tr class="@(rank <= 3 ? "fw-semibold bg-light bg-opacity-25" : "")">
+                                        <td class="text-center py-3">
+                                            @if (rank == 1) { <span class="text-warning fs-3" title="Hạng 1"><i class="bi bi-trophy-fill"></i></span> }
+                                            else if (rank == 2) { <span class="text-secondary fs-4" title="Hạng 2"><i class="bi bi-award-fill"></i></span> }
+                                            else if (rank == 3) { <span class="text-orange fs-4" style="color: #EA580C;" title="Hạng 3"><i class="bi bi-award-fill"></i></span> }
+                                            else { <span class="text-muted fw-bold">#@rank</span> }
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3" style="width: 38px; height: 38px; font-weight: bold;">
+                                                    @(string.IsNullOrEmpty(citizen.FullName) ? "C" : citizen.FullName.Substring(0, 1))
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">@citizen.FullName</div>
+                                                    <div class="text-muted small" style="font-size: 0.8rem;">@citizen.UserName</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge @GetBadgeColorClass(citizen.CitizenPoints) rounded-pill px-3 py-2" style="font-size: 0.75rem; @GetBadgeInlineStyle(citizen.CitizenPoints)">@GetBadgeLevel(citizen.CitizenPoints)</span>
+                                        </td>
+                                        <td class="py-3 text-success fw-bold">
+                                            +@citizen.CitizenPoints <span class="text-muted small font-normal">pts</span>
+                                        </td>
+                                        <td class="py-3 text-primary fw-bold">
+                                            @citizen.TrustScore <span class="text-muted small font-normal">pts</span>
+                                        </td>
+                                    </tr>
+                                    rank++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-platinum { background-color: #1E293B !important; color: #FFFFFF !important; }
+    .badge-gold { background-color: #EAB308 !important; color: #000000 !important; font-weight: 600; }
+    .badge-silver { background-color: #94A3B8 !important; color: #FFFFFF !important; }
+    .badge-bronze { background-color: #EA580C !important; color: #FFFFFF !important; }
+    .badge-rookie { background-color: #06B6D4 !important; color: #FFFFFF !important; }
+
+    .transition-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .transition-hover:hover {
+        transform: translateY(-5px) !important;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+    }
+</style>

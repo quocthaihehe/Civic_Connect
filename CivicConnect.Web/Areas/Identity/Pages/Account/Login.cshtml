@@ -112,6 +112,84 @@
         </div>
     </div>
 
+    @if (Model.Requires2FAChoice)
+    {
+        <div class="modal-backdrop-custom" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
+            <div class="soft-login-card position-relative" style="max-width: 400px; width: 90%; margin: 0; padding: 2.5rem 2rem !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: slideUp 0.4s ease;">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-3 rounded-circle" style="width: 70px; height: 70px; background: var(--primary-500); box-shadow: 0 4px 12px rgba(27, 77, 62, 0.15);">
+                        <i class="bi bi-shield-lock-fill text-white" style="font-size: 2.2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold">Chọn phương thức 2FA</h4>
+                    <p class="text-muted" style="font-size: 0.85rem;">Vui lòng chọn kênh nhận mã xác thực để tiếp tục đăng nhập.</p>
+                </div>
+                
+                <div class="d-grid gap-3">
+                    <a href="/Identity/Account/Verify2FA?returnUrl=@Model.TempReturnUrl&method=Telegram" class="btn auth-method-btn btn-telegram d-flex align-items-center p-3 rounded-3 text-start">
+                        <i class="bi bi-telegram fs-3 me-3 text-primary icon-color"></i>
+                        <div>
+                            <div class="fw-bold title-text">Qua Telegram</div>
+                            <div class="subtitle-text">Nhận mã OTP qua Bot Telegram</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/Identity/Account/Verify2FA?returnUrl=@Model.TempReturnUrl&method=Authenticator" class="btn auth-method-btn btn-authenticator d-flex align-items-center p-3 rounded-3 text-start">
+                        <i class="bi bi-qr-code-scan fs-3 me-3 text-success icon-color"></i>
+                        <div>
+                            <div class="fw-bold title-text">Google Authenticator</div>
+                            <div class="subtitle-text">Sử dụng mã hiển thị trên App</div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/Identity/Account/Login" class="text-muted text-decoration-none" style="font-size: 0.8rem;"><i class="bi bi-arrow-left"></i> Quay lại</a>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .auth-method-btn {
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                transition: all 0.2s ease-in-out;
+                color: var(--gray-800) !important;
+            }
+            .auth-method-btn .subtitle-text {
+                font-size: 0.75rem;
+                color: var(--gray-500);
+                transition: color 0.2s;
+            }
+            
+            /* Telegram Hover */
+            .auth-method-btn.btn-telegram:hover {
+                border-color: #0d6efd;
+                background: rgba(13, 110, 253, 0.05);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
+            }
+            .auth-method-btn.btn-telegram:hover .title-text { color: #0d6efd; }
+            
+            /* Authenticator Hover */
+            .auth-method-btn.btn-authenticator:hover {
+                border-color: #198754;
+                background: rgba(25, 135, 84, 0.05);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(25, 135, 84, 0.1);
+            }
+            .auth-method-btn.btn-authenticator:hover .title-text { color: #198754; }
+
+            @@keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @@keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+    }
+
     <!-- JQuery and Bootstrap Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

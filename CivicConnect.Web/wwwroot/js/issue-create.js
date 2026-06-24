@@ -62,7 +62,7 @@ $(document).ready(function() {
             img.src = imgUrl;
 
             var badge = document.createElement('span');
-            badge.className = 'position-absolute badge rounded-circle bg-danger remove-preview-btn';
+            badge.className = 'position-absolute badge rounded-circle bg-danger remove-preview-btn shadow-sm';
             badge.style.cssText = 'top: 8px; right: 8px; padding: 0.3em 0.5em; font-size: 0.8rem; cursor: pointer; z-index: 10; line-height: 1;';
             badge.textContent = 'x';
 
@@ -70,28 +70,50 @@ $(document).ready(function() {
             wrapper.appendChild(badge);
             fragment.appendChild(wrapper);
         } else {
-            // Trường hợp có nhiều ảnh: hiển thị lưới thumbnail lớn hơn
+            // Gallery layout (1 ảnh lớn trên, nhiều ảnh nhỏ dưới)
             for (let i = 0; i < files.length; i++) {
-                var imgUrl = URL.createObjectURL(files[i]);
-                blobUrls.push(imgUrl);
-
-                var wrapper = document.createElement('div');
-                wrapper.className = 'position-relative preview-item-thumb';
-
-                var img = document.createElement('img');
-                img.className = 'rounded border w-100 h-100';
-                img.style.cssText = 'object-fit: cover;';
-                img.src = imgUrl;
-
-                var badge = document.createElement('span');
-                badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger remove-preview-btn';
-                badge.style.cssText = 'padding: 0.2em 0.4em; font-size: 0.6rem; cursor: pointer; z-index: 10;';
-                badge.textContent = 'x';
-
-                wrapper.appendChild(img);
-                wrapper.appendChild(badge);
-                fragment.appendChild(wrapper);
+                blobUrls.push(URL.createObjectURL(files[i]));
             }
+
+            // Main viewer container (Chiếm không gian còn lại ở trên)
+            var mainViewerWrapper = document.createElement('div');
+            mainViewerWrapper.className = 'position-relative w-100 mb-2 flex-grow-1';
+            
+            var mainImg = document.createElement('img');
+            mainImg.id = 'gallery-main-img';
+            mainImg.className = 'rounded border w-100 h-100';
+            mainImg.style.cssText = 'object-fit: cover; position: absolute; top: 0; left: 0;';
+            mainImg.src = blobUrls[0];
+            
+            var badge = document.createElement('span');
+            badge.className = 'position-absolute badge rounded-circle bg-danger remove-preview-btn shadow-sm';
+            badge.style.cssText = 'top: 8px; right: 8px; padding: 0.3em 0.5em; font-size: 0.8rem; cursor: pointer; z-index: 10; line-height: 1;';
+            badge.textContent = 'x';
+            
+            mainViewerWrapper.appendChild(mainImg);
+            mainViewerWrapper.appendChild(badge);
+            
+            // Thumbnails container (Nằm dưới cùng, cố định chiều cao)
+            var thumbnailsContainer = document.createElement('div');
+            thumbnailsContainer.className = 'd-flex gap-2 w-100 overflow-x-auto pb-1';
+            thumbnailsContainer.style.height = '60px';
+            thumbnailsContainer.style.flexShrink = '0';
+            
+            for (let i = 0; i < blobUrls.length; i++) {
+                var thumb = document.createElement('img');
+                thumb.className = 'rounded border gallery-thumbnail cursor-pointer';
+                if (i === 0) thumb.classList.add('border-primary', 'border-2', 'opacity-100');
+                else thumb.classList.add('opacity-50');
+                
+                thumb.style.cssText = 'width: 60px; height: 100%; object-fit: cover; transition: all 0.2s;';
+                thumb.src = blobUrls[i];
+                thumb.dataset.url = blobUrls[i];
+                
+                thumbnailsContainer.appendChild(thumb);
+            }
+            
+            fragment.appendChild(mainViewerWrapper);
+            fragment.appendChild(thumbnailsContainer);
         }
 
         // Dùng setTimeout(0) để insert DOM sau khi call stack hiện tại hoàn tất,
@@ -99,7 +121,7 @@ $(document).ready(function() {
         setTimeout(function() {
             previewsContainer[0].appendChild(fragment);
             $('#upload-empty-state').addClass('d-none');
-            previewsContainer.removeClass('d-none').addClass('d-flex');
+            previewsContainer.removeClass('d-none flex-wrap justify-content-center gap-2 p-1').addClass('d-flex flex-column');
         }, 0);
     });
 
@@ -108,8 +130,19 @@ $(document).ready(function() {
         e.stopPropagation(); // Ngăn mở hộp thoại chọn file
         revokeAllBlobUrls();
         fileInput.val('');
-        previewsContainer.empty().addClass('d-none').removeClass('d-flex');
+        previewsContainer.empty().addClass('d-none').removeClass('d-flex flex-column');
         $('#upload-empty-state').removeClass('d-none');
+    });
+
+    // Thumbnail click to swap Main Viewer
+    previewsContainer.on('click', '.gallery-thumbnail', function(e) {
+        e.stopPropagation();
+        const url = $(this).data('url');
+        $('#gallery-main-img').attr('src', url);
+        
+        // Update active styling
+        $('.gallery-thumbnail').removeClass('border-primary border-2 opacity-100').addClass('opacity-50');
+        $(this).removeClass('opacity-50').addClass('border-primary border-2 opacity-100');
     });
 
     // Mở hộp thoại chọn file khi click vào dropzone (trừ nút remove-preview-btn)
@@ -301,6 +334,7 @@ $(document).ready(function() {
             
             marker.setLatLng([lat, lng]);
             updateCoordinates(lat, lng);
+            checkBoundary(lat, lng);
             updateAddressFromCoords(lat, lng);
         });
 
@@ -311,6 +345,7 @@ $(document).ready(function() {
             const lng = position.lng;
             
             updateCoordinates(lat, lng);
+            checkBoundary(lat, lng);
             updateAddressFromCoords(lat, lng);
         });
 
@@ -318,6 +353,62 @@ $(document).ready(function() {
         function updateCoordinates(lat, lng) {
             $('#lat-input').val(lat.toFixed(6));
             $('#lng-input').val(lng.toFixed(6));
+        }
+
+        // Kiểm tra phạm vi hành chính (TP.HCM)
+        function checkBoundary(lat, lng) {
+            const hcmMinLat = 10.370;
+            const hcmMaxLat = 11.160;
+            const hcmMinLng = 106.350;
+            const hcmMaxLng = 106.950;
+            
+            // Remove old inline warning just in case it exists from previous state
+            $('#boundary-warning').remove();
+            
+            if (lat < hcmMinLat || lat > hcmMaxLat || lng < hcmMinLng || lng > hcmMaxLng) {
+                showBoundaryModal();
+                $('#address-input').addClass('is-invalid');
+            } else {
+                $('#address-input').removeClass('is-invalid');
+            }
+        }
+
+        function showBoundaryModal() {
+            // Remove existing modal if any
+            $('#boundaryModal').remove();
+            
+            const modalHtml = `
+            <div class="modal fade" id="boundaryModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(8px); background-color: rgba(15, 23, 42, 0.4);">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+                  <div class="modal-header border-0 pb-0 pt-3 pe-3 justify-content-end">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="opacity: 0.6; transition: opacity 0.2s;"></button>
+                  </div>
+                  <div class="modal-body text-center pt-0 pb-5 px-4 px-md-5">
+                    <div class="d-inline-flex justify-content-center align-items-center rounded-circle mb-4" style="width: 90px; height: 90px; background: rgba(32, 107, 196, 0.1);">
+                        <i class="bi bi-geo-alt-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-3" style="letter-spacing: -0.5px;">Vị trí ngoài phạm vi</h3>
+                    <p class="text-muted mb-4" style="font-size: 1rem; line-height: 1.6;">
+                        Hệ thống Civic Connect hiện tại chỉ tiếp nhận và xử lý phản ánh nằm trong ranh giới hành chính của <strong>TP. Hồ Chí Minh</strong>.<br>Vui lòng kéo ghim lại vào vị trí hợp lệ.
+                    </p>
+                    <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold" data-bs-dismiss="modal" style="font-size: 1rem; box-shadow: 0 8px 20px rgba(32, 107, 196, 0.25); transition: all 0.3s ease;">
+                        Đã hiểu & Chọn lại
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+            
+            $('body').append(modalHtml);
+            const modalEl = document.getElementById('boundaryModal');
+            // Mặc định bootstrap modal tạo backdrop, ta set backdrop-filter trên modal nên tắt backdrop mặc định
+            const modal = new bootstrap.Modal(modalEl, { backdrop: false });
+            modal.show();
+            
+            modalEl.addEventListener('hidden.bs.modal', function () {
+                $(this).remove();
+            });
         }
 
         // Gọi API reverse geocoding Nominatim của OpenStreetMap để phân tích địa chỉ tiếng Việt

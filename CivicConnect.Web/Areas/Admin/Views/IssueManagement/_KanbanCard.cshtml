@@ -43,7 +43,7 @@
     }
 }
 
-<div class="card mb-2 @borderClass kanban-card cursor-grab" draggable="true" data-id="@Model.Id" style="background: var(--tblr-bg-surface) !important; color: var(--tblr-body-color);">
+<div class="card mb-2 @borderClass kanban-card cursor-grab" data-id="@Model.Id" data-status="@((int)Model.Status)" style="background: var(--tblr-bg-surface) !important; color: var(--tblr-body-color);">
     <div class="card-body p-2.5">
         <div class="d-flex justify-content-between align-items-start mb-1.5">
             <span class="text-xs text-muted font-weight-bold">#@Model.Id</span>

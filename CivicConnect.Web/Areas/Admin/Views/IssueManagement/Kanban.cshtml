@@ -18,10 +18,10 @@
     </div>
 </div>
 
-<div class="row g-3" style="overflow-x: auto; min-height: calc(100vh - 220px); align-items: start;">
+<div class="row g-3 flex-nowrap" style="overflow-x: auto; min-height: calc(100vh - 220px); align-items: start; padding-bottom: 20px;">
     
     <!-- Column 1: Mới nhận (Pending) -->
-    <div class="col" style="min-width: 250px; max-width: 320px;">
+    <div class="col" style="min-width: 240px; flex: 1 1 0;">
         <div class="card kanban-column-card">
             <div class="card-header py-2 bg-blue-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">MỚI NHẬN (@Model.Count(i => i.Status == IssueStatus.Pending))</h3>
@@ -36,7 +36,7 @@
     </div>
 
     <!-- Column 2: Đã phân công (Assigned) -->
-    <div class="col" style="min-width: 250px; max-width: 320px;">
+    <div class="col" style="min-width: 240px; flex: 1 1 0;">
         <div class="card kanban-column-card">
             <div class="card-header py-2 bg-cyan-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">ĐÃ PHÂN CÔNG (@Model.Count(i => i.Status == IssueStatus.Assigned))</h3>
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Column 3: Đang xử lý (Processing) -->
-    <div class="col" style="min-width: 250px; max-width: 320px;">
+    <div class="col" style="min-width: 240px; flex: 1 1 0;">
         <div class="card kanban-column-card">
             <div class="card-header py-2 bg-yellow-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">ĐANG XỬ LÝ (@Model.Count(i => i.Status == IssueStatus.Processing))</h3>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Column 4: Từ chối (Rejected) -->
-    <div class="col" style="min-width: 250px; max-width: 320px;">
+    <div class="col" style="min-width: 240px; flex: 1 1 0;">
         <div class="card kanban-column-card">
             <div class="card-header py-2 bg-red-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">TỪ CHỐI (@Model.Count(i => i.Status == IssueStatus.Rejected))</h3>
@@ -81,7 +81,7 @@
     </div>
 
     <!-- Column 5: Hoàn tất (Resolved / Closed) -->
-    <div class="col" style="min-width: 250px; max-width: 320px;">
+    <div class="col" style="min-width: 240px; flex: 1 1 0;">
         <div class="card kanban-column-card">
             <div class="card-header py-2 bg-green-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold text-xs">HOÀN TẤT (@Model.Count(i => i.Status == IssueStatus.Resolved || i.Status == IssueStatus.Closed))</h3>
@@ -98,55 +98,100 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Drag Start
-            $('.kanban-card').on('dragstart', function (e) {
-                e.originalEvent.dataTransfer.setData('text/plain', $(this).data('id'));
-                $(this).addClass('opacity-50');
-            });
+            // Cấu hình Toastr
+            if (typeof toastr !== 'undefined') {
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "timeOut": "3000"
+                };
+            } else {
+                // Fallback nếu không có toastr
+                window.toastr = {
+                    success: function(msg) { alert('Thành công: ' + msg); },
+                    error: function(msg) { alert('Lỗi: ' + msg); },
+                    warning: function(msg) { alert('Cảnh báo: ' + msg); }
+                };
+            }
 
-            // Drag End
-            $('.kanban-card').on('dragend', function () {
-                $(this).removeClass('opacity-50');
-            });
+            const columns = document.querySelectorAll('.kanban-column');
+            columns.forEach(column => {
+                new Sortable(column, {
+                    group: 'shared', // set both lists to same group
+                    animation: 150,
+                    ghostClass: 'bg-light', // Class for the drop placeholder
+                    dragClass: 'opacity-50', // Class for the dragging item
+                    scroll: true, // Enable auto-scrolling
+                    forceFallback: true, // Force fallback for better auto-scroll on all browsers
+                    onEnd: function (evt) {
+                        const itemEl = evt.item;  // dragged HTMLElement
+                        const toColumn = evt.to;    // target list
+                        const fromColumn = evt.from;  // previous list
+                        
+                        // Nếu không đổi cột, bỏ qua
+                        if (toColumn === fromColumn) return;
 
-            // Drag Over column
-            $('.kanban-column').on('dragover', function (e) {
-                e.preventDefault();
-                $(this).addClass('bg-white-lt');
-            });
+                        const issueId = itemEl.getAttribute('data-id');
+                        const newStatusEnum = parseInt(toColumn.getAttribute('data-status'));
+                        const oldStatusEnum = parseInt(itemEl.getAttribute('data-status'));
 
-            // Drag Leave column
-            $('.kanban-column').on('dragleave', function () {
-                $(this).removeClass('bg-white-lt');
-            });
-
-            // Drop card into column
-            $('.kanban-column').on('drop', function (e) {
-                e.preventDefault();
-                $(this).removeClass('bg-white-lt');
-                
-                const issueId = e.originalEvent.dataTransfer.getData('text/plain');
-                const newStatus = $(this).data('status');
-                const $card = $(`.kanban-card[data-id="${issueId}"]`);
-
-                if ($card.length > 0) {
-                    // Update layout
-                    $(this).append($card);
-
-                    // Call AJAX to update CSDL
-                    $.post('/Admin/Issues/UpdateKanbanStatus', { issueId: issueId, newStatus: newStatus }, function (res) {
-                        if (res.success) {
-                            console.log(`Updated issue ${issueId} to status ${newStatus}`);
-                            // Reload page or dynamically update badge numbers to make it seamless
-                            location.reload();
-                        } else {
-                            alert('Cập nhật trạng thái thất bại!');
+                        // Status ordering
+                        let isBackward = false;
+                        if (oldStatusEnum >= 0 && oldStatusEnum <= 4 && newStatusEnum >= 0 && newStatusEnum <= 4) {
+                            if (newStatusEnum < oldStatusEnum) isBackward = true;
                         }
-                    });
-                }
+
+                        let auditNote = "";
+                        if (isBackward) {
+                            auditNote = prompt("Bạn đang kéo lùi trạng thái phản ánh. Hệ thống yêu cầu phải nhập lý do (Audit Note):");
+                            if (auditNote === null || auditNote.trim() === "") {
+                                toastr.warning("Bắt buộc phải nhập lý do khi kéo lùi trạng thái.");
+                                // Revert item back to original column
+                                fromColumn.insertBefore(itemEl, evt.item.nextSibling || fromColumn.children[evt.oldIndex]);
+                                return;
+                            }
+                        }
+
+                        // Hiển thị loading nhẹ hoặc disable card
+                        $(itemEl).css('opacity', '0.5');
+
+                        $.post('/Admin/Issues/UpdateKanbanStatus', { issueId: issueId, newStatus: newStatusEnum, auditNote: auditNote }, function (res) {
+                            $(itemEl).css('opacity', '1');
+                            if (res.success) {
+                                toastr.success(`Đã cập nhật trạng thái thành công!`);
+                                // Cập nhật data-status cho thẻ
+                                itemEl.setAttribute('data-status', newStatusEnum);
+                                
+                                // Cập nhật số lượng trên header
+                                updateColumnCount(fromColumn);
+                                updateColumnCount(toColumn);
+                            } else {
+                                toastr.error(res.message || 'Cập nhật trạng thái thất bại!');
+                                // Hoàn trả lại vị trí ban đầu
+                                fromColumn.insertBefore(itemEl, evt.item.nextSibling || fromColumn.children[evt.oldIndex]);
+                            }
+                        }).fail(function() {
+                            $(itemEl).css('opacity', '1');
+                            toastr.error('Lỗi kết nối. Vui lòng thử lại sau!');
+                            // Hoàn trả lại vị trí ban đầu
+                            fromColumn.insertBefore(itemEl, evt.item.nextSibling || fromColumn.children[evt.oldIndex]);
+                        });
+                    }
+                });
             });
+
+            function updateColumnCount(columnEl) {
+                const count = $(columnEl).children('.kanban-card').length;
+                // Cập nhật text trong h3 header
+                const headerTextEl = $(columnEl).closest('.kanban-column-card').find('.card-header h3');
+                const text = headerTextEl.text();
+                // Replace everything between ()
+                headerTextEl.text(text.replace(/\(.*\)/, `(${count})`));
+            }
         });
     </script>
 }

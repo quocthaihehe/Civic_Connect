@@ -4,6 +4,7 @@ using CivicConnect.Web.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,6 +94,91 @@ namespace CivicConnect.Web.Areas.Admin.Controllers
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = $"Đã gửi hàng loạt thông báo qua kênh {channel.ToUpper()} tới {users.Count} công dân phân khúc {targetSegment} thành công!";
             return RedirectToAction(nameof(Notifications));
+        }
+
+        // --- B.5.5 Duyệt bài viết Cộng đồng ---
+        [HttpGet]
+        [Route("Admin/Content/PendingPosts")]
+        public async Task<IActionResult> PendingPosts()
+        {
+            var posts = await _context.ForumPosts
+                .Include(p => p.Author)
+                .Where(p => p.Status == PostStatus.Pending)
+                .OrderBy(p => p.CreatedAt)
+                .ToListAsync();
+            return View(posts);
+        }
+
+        [HttpPost]
+        [Route("Admin/Content/ApprovePost")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApprovePost(int id)
+        {
+            var post = await _context.ForumPosts.FindAsync(id);
+            if (post != null && post.Status == PostStatus.Pending)
+            {
+                post.Status = PostStatus.Approved;
+                
+                // Thưởng điểm
+                var pointsService = HttpContext.RequestServices.GetService(typeof(CivicConnect.Web.Services.ICitizenPointsService)) as CivicConnect.Web.Services.ICitizenPointsService;
+                if (pointsService != null)
+                {
+                    await pointsService.AwardPointsAsync(post.AuthorId, 10, 0, $"Bài viết '{post.Title}' được duyệt");
+                }
+                
+                // Gửi thông báo cho User (SignalR)
+                var hubContext = HttpContext.RequestServices.GetService(typeof(Microsoft.AspNetCore.SignalR.IHubContext<CivicConnect.Web.Hubs.NotificationHub>)) as Microsoft.AspNetCore.SignalR.IHubContext<CivicConnect.Web.Hubs.NotificationHub>;
+                if (hubContext != null)
+                {
+                    var notif = new Notification
+                    {
+                        UserId = post.AuthorId,
+                        Title = "Bài viết được duyệt",
+                        Message = $"✅ Bài viết '{post.Title}' của bạn đã được phê duyệt và xuất hiện trên bảng tin!",
+                        Type = NotificationType.General,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.Notifications.Add(notif);
+                    await hubContext.Clients.User(post.AuthorId).SendAsync("ReceiveNotification", notif);
+                }
+                
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã duyệt bài viết thành công.";
+            }
+            return RedirectToAction(nameof(PendingPosts));
+        }
+
+        [HttpPost]
+        [Route("Admin/Content/RejectPost")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectPost(int id, string reason)
+        {
+            var post = await _context.ForumPosts.FindAsync(id);
+            if (post != null && post.Status == PostStatus.Pending)
+            {
+                post.Status = PostStatus.Rejected;
+                post.RejectionReason = reason;
+                
+                // Gửi thông báo cho User (SignalR)
+                var hubContext = HttpContext.RequestServices.GetService(typeof(Microsoft.AspNetCore.SignalR.IHubContext<CivicConnect.Web.Hubs.NotificationHub>)) as Microsoft.AspNetCore.SignalR.IHubContext<CivicConnect.Web.Hubs.NotificationHub>;
+                if (hubContext != null)
+                {
+                    var notif = new Notification
+                    {
+                        UserId = post.AuthorId,
+                        Title = "Bài viết bị từ chối",
+                        Message = $"❌ Bài viết '{post.Title}' bị từ chối. Lý do: {reason}",
+                        Type = NotificationType.General,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.Notifications.Add(notif);
+                    await hubContext.Clients.User(post.AuthorId).SendAsync("ReceiveNotification", notif);
+                }
+                
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã từ chối bài viết.";
+            }
+            return RedirectToAction(nameof(PendingPosts));
         }
 
         // --- B.5.4 Quản lý Danh mục & SLA & Từ khóa cấm ---

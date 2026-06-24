@@ -72,7 +72,12 @@
       <nav class="topbar-nav d-none d-xl-flex align-items-center gap-xl-2 gap-xxl-3 pe-xl-2 pe-xxl-3" style="font-family: var(--font-display, 'EB Garamond', serif);">
         <a href="/" class="nav-link @(currentPath == "/" ? "active fw-bold" : "")">Trang chủ</a>
         @if (SignInManager.IsSignedIn(User)) {
-            <a href="/Issues/MyIssues" class="nav-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Phản ánh của tôi</a>
+            var isOfficialNav = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+            if (isOfficialNav) {
+                <a href="/Official/Dashboard" class="nav-link @(currentPath.StartsWith("/Official/Dashboard", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Bàn làm việc</a>
+            } else {
+                <a href="/Issues/MyIssues" class="nav-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Phản ánh của tôi</a>
+            }
         }
         <a href="/Map" class="nav-link @(currentPath.StartsWith("/Map", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Bản đồ</a>
         <a href="/Community" class="nav-link @(currentPath.StartsWith("/Community", StringComparison.OrdinalIgnoreCase) ? "active fw-bold" : "")">Cộng đồng</a>
@@ -96,7 +101,7 @@
               <div class="dropdown-menu dropdown-menu-end shadow border-0 p-0" aria-labelledby="notif-dropdown-trigger" style="width: 320px; max-height: 400px; border-radius: 10px; overflow-y: auto;">
                 <div class="p-3 border-bottom d-flex justify-content-between align-items-center position-sticky top-0 bg-white" style="z-index: 201;">
                   <h6 class="mb-0 fw-bold">Thông báo</h6>
-                  <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read" style="font-size: 0.8rem;">Đánh dấu đã đọc</button>
+                  <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read" style="font-size: 0.8rem; color: var(--primary-color) !important;">Đánh dấu đã đọc</button>
                 </div>
                 <div id="notif-container" class="p-0">
                   <div class="text-center p-4 text-muted small" id="notif-empty-state"><i class="bi bi-inbox fs-4 d-block mb-1"></i> Không có thông báo mới</div>
@@ -116,7 +121,14 @@
                     <div class="small text-muted" style="font-size: 0.75rem;">@user?.TrustScore điểm uy tín</div>
                 </li>
                 <li><a href="/Identity/Account/Profile" class="dropdown-item px-3 py-2"><i class="bi bi-person me-2"></i> Hồ sơ cá nhân</a></li>
-                <li><a href="/Issues/MyIssues" class="dropdown-item px-3 py-2"><i class="bi bi-collection me-2"></i> Phản ánh của tôi</a></li>
+                @{
+                    var isOfficialDropdown = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+                }
+                @if (isOfficialDropdown) {
+                    <li><a href="/Official/Dashboard" class="dropdown-item px-3 py-2"><i class="bi bi-briefcase me-2"></i> Bàn làm việc cán bộ</a></li>
+                } else {
+                    <li><a href="/Issues/MyIssues" class="dropdown-item px-3 py-2"><i class="bi bi-collection me-2"></i> Phản ánh của tôi</a></li>
+                }
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" class="m-0">
@@ -180,10 +192,18 @@
             <span class="fw-medium">Phản ánh hiện trường</span>
         </a>
         @if (SignInManager.IsSignedIn(User)) {
-            <a href="/Issues/MyIssues" class="mobile-menu-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-                <div class="mobile-menu-icon"><i class="bi bi-collection"></i></div>
-                <span class="fw-medium">Phản ánh của tôi</span>
-            </a>
+            var isOfficialMobile = User.IsInRole("OfficialWard") || User.IsInRole("OfficialDistrict") || User.IsInRole("OfficialProvince") || User.IsInRole("DepartmentStaff");
+            if (isOfficialMobile) {
+                <a href="/Official/Dashboard" class="mobile-menu-link @(currentPath.StartsWith("/Official/Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                    <div class="mobile-menu-icon"><i class="bi bi-briefcase"></i></div>
+                    <span class="fw-medium">Bàn làm việc cán bộ</span>
+                </a>
+            } else {
+                <a href="/Issues/MyIssues" class="mobile-menu-link @(currentPath.StartsWith("/Issues/MyIssues", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                    <div class="mobile-menu-icon"><i class="bi bi-collection"></i></div>
+                    <span class="fw-medium">Phản ánh của tôi</span>
+                </a>
+            }
         }
         <a href="/Map" class="mobile-menu-link @(currentPath.StartsWith("/Map", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
             <div class="mobile-menu-icon"><i class="bi bi-map"></i></div>

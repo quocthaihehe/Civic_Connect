@@ -29,6 +29,8 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         public string? ReturnUrl { get; set; }
         public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
+        public bool Requires2FAChoice { get; set; }
+        public string? TempReturnUrl { get; set; }
 
         public class InputModel
         {
@@ -83,7 +85,10 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
                     {
                         TempData["2FA_UserId"] = user.Id;
                         TempData["2FA_ReturnUrl"] = returnUrl;
-                        return RedirectToPage("./Verify2FA", new { returnUrl = returnUrl });
+                        
+                        Requires2FAChoice = true;
+                        TempReturnUrl = returnUrl;
+                        return Page();
                     }
                 }
 

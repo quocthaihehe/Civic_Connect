@@ -1,0 +1,224 @@
+@using CivicConnect.Web.Models.Entities
+@model ForumPost
+
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var comments = ViewBag.Comments as IEnumerable<ForumComment>;
+}
+
+<div class="container-xl mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="/Community" class="btn btn-link link-secondary mb-3"><i class="bi bi-arrow-left me-2"></i> Quay lại Bảng tin</a>
+            
+            <div class="card mb-4">
+                <div class="card-header border-0">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-blue-lt me-3">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold fs-3">@(Model.Author?.FullName ?? Model.Author?.UserName)</div>
+                            <div class="text-muted fs-sm">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                        <div class="ms-auto">
+                            @if (Model.PopularityScore >= 20)
+                            {
+                                <span class="badge bg-danger-lt"><i class="bi bi-fire me-1"></i> Đang hot</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title fs-2 mb-3">@Model.Title</h1>
+                    <div class="markdown text-muted fs-3 mb-4">
+                        @Html.Raw(Model.Content.Replace("\n", "<br/>"))
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Tags))
+                    {
+                        <div class="mb-4">
+                            @foreach (var tag in Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <span class="badge bg-secondary-lt fs-5 me-2 p-2">#@tag.Trim()</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="d-flex align-items-center border-top pt-3 mt-3">
+                        <button class="btn btn-outline-danger btn-like" data-post-id="@Model.Id">
+                            <i class="bi bi-heart me-2"></i> <span class="like-count">@Model.LikeCount</span> Thích
+                        </button>
+                        <div class="text-muted ms-4 fs-3">
+                            <i class="bi bi-chat me-2"></i> <span id="total-comments">@Model.CommentCount</span> Bình luận
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Bình luận</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Form bình luận chính -->
+                    <div class="d-flex mb-4">
+                        <div class="avatar bg-gray-lt me-3"><i class="bi bi-person"></i></div>
+                        <div class="flex-fill">
+                            <textarea id="main-comment-input" class="form-control mb-2" rows="2" placeholder="Viết bình luận..."></textarea>
+                            <button id="btn-submit-main-comment" class="btn btn-primary" data-post-id="@Model.Id">Gửi bình luận</button>
+                        </div>
+                    </div>
+
+                    <div id="comments-container" class="space-y">
+                        @if (comments != null && comments.Any())
+                        {
+                            foreach (var comment in comments)
+                            {
+                                <!-- Comment gốc -->
+                                <div class="comment-item mb-3">
+                                    <div class="d-flex">
+                                        <div class="avatar bg-gray-lt me-3 mt-1"><i class="bi bi-person"></i></div>
+                                        <div class="flex-fill bg-light rounded p-3">
+                                            <div class="fw-bold mb-1">@(comment.Author?.FullName ?? comment.Author?.UserName) <span class="text-muted fs-sm fw-normal ms-2">@comment.CreatedAt.ToString("dd/MM HH:mm")</span></div>
+                                            <div class="text-muted">@comment.Content</div>
+                                            <div class="mt-2">
+                                                <button class="btn btn-link p-0 text-muted fs-sm btn-reply-toggle" data-comment-id="@comment.Id">Trả lời</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form Reply (ẩn) -->
+                                    <div class="ms-5 mt-2 reply-form d-none" id="reply-form-@comment.Id">
+                                        <div class="d-flex">
+                                            <div class="flex-fill">
+                                                <input type="text" class="form-control form-control-sm mb-2 reply-input" placeholder="Viết câu trả lời...">
+                                                <button class="btn btn-sm btn-primary btn-submit-reply" data-parent-id="@comment.Id">Gửi</button>
+                                                <button class="btn btn-sm btn-link text-muted btn-cancel-reply" data-comment-id="@comment.Id">Hủy</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Danh sách replies -->
+                                    <div class="ms-5 mt-2 replies-container" id="replies-@comment.Id">
+                                        @if (comment.Replies != null && comment.Replies.Any())
+                                        {
+                                            foreach (var reply in comment.Replies.OrderBy(r => r.CreatedAt))
+                                            {
+                                                <div class="d-flex mb-2">
+                                                    <div class="avatar avatar-sm bg-gray-lt me-2 mt-1"><i class="bi bi-person"></i></div>
+                                                    <div class="flex-fill bg-light rounded p-2">
+                                                        <div class="fw-bold fs-sm mb-1">@(reply.Author?.FullName ?? reply.Author?.UserName) <span class="text-muted fs-sm fw-normal ms-2">@reply.CreatedAt.ToString("dd/MM HH:mm")</span></div>
+                                                        <div class="text-muted fs-sm">@reply.Content</div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div id="no-comments-msg" class="text-center text-muted p-4">Chưa có bình luận nào. Hãy là người đầu tiên!</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Like
+            $('.btn-like').click(function () {
+                var btn = $(this);
+                var postId = btn.data('post-id');
+                $.post('/Community/LikePost', { postId: postId }, function (res) {
+                    if (res.success) {
+                        btn.find('.like-count').text(res.likes);
+                        btn.removeClass('btn-outline-danger').addClass('btn-danger');
+                    }
+                });
+            });
+
+            // Comment chính
+            $('#btn-submit-main-comment').click(function () {
+                var postId = $(this).data('post-id');
+                var content = $('#main-comment-input').val();
+                if (!content.trim()) return;
+
+                $.post('/Community/AddComment', { postId: postId, content: content }, function (res) {
+                    if (res.success) {
+                        $('#main-comment-input').val('');
+                        $('#no-comments-msg').hide();
+                        
+                        // Cập nhật số đếm
+                        var tc = parseInt($('#total-comments').text()) + 1;
+                        $('#total-comments').text(tc);
+
+                        // Render DOM (tạm thời dạng đơn giản)
+                        var html = `
+                            <div class="comment-item mb-3">
+                                <div class="d-flex">
+                                    <div class="avatar bg-gray-lt me-3 mt-1"><i class="bi bi-person"></i></div>
+                                    <div class="flex-fill bg-light rounded p-3 border border-success border-opacity-50">
+                                        <div class="fw-bold mb-1">${res.authorName} <span class="text-muted fs-sm fw-normal ms-2">Vừa xong</span></div>
+                                        <div class="text-muted">${res.content}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $('#comments-container').prepend(html);
+                    }
+                });
+            });
+
+            // Hiện/ẩn form reply
+            $(document).on('click', '.btn-reply-toggle', function() {
+                var id = $(this).data('comment-id');
+                $('#reply-form-' + id).removeClass('d-none');
+            });
+            $(document).on('click', '.btn-cancel-reply', function() {
+                var id = $(this).data('comment-id');
+                $('#reply-form-' + id).addClass('d-none');
+            });
+
+            // Submit reply
+            $(document).on('click', '.btn-submit-reply', function() {
+                var btn = $(this);
+                var parentId = btn.data('parent-id');
+                var input = btn.siblings('.reply-input');
+                var content = input.val();
+                if (!content.trim()) return;
+
+                $.post('/Community/ReplyComment', { parentCommentId: parentId, content: content }, function (res) {
+                    if (res.success) {
+                        input.val('');
+                        $('#reply-form-' + parentId).addClass('d-none');
+
+                        // Cập nhật số đếm post comment (không hiện thực time-real ở view này cho reply count, nhưng cập nhật DB)
+                        var tc = parseInt($('#total-comments').text()) + 1;
+                        $('#total-comments').text(tc);
+
+                        var html = `
+                            <div class="d-flex mb-2">
+                                <div class="avatar avatar-sm bg-gray-lt me-2 mt-1"><i class="bi bi-person"></i></div>
+                                <div class="flex-fill bg-light rounded p-2 border border-success border-opacity-50">
+                                    <div class="fw-bold fs-sm mb-1">${res.authorName} <span class="text-muted fs-sm fw-normal ms-2">Vừa xong</span></div>
+                                    <div class="text-muted fs-sm">${res.content}</div>
+                                </div>
+                            </div>
+                        `;
+                        $('#replies-' + parentId).append(html);
+                    } else {
+                        alert(res.message || "Có lỗi xảy ra");
+                    }
+                });
+            });
+        });
+    </script>
+}

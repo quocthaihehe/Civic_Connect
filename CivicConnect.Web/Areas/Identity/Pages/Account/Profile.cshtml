@@ -15,6 +15,13 @@
             </div>
         }
 
+        @if (!Model.IsPhoneVerified)
+        {
+            <div class="alert alert-warning fade show rounded-3 mb-3 py-2" role="alert" style="font-size: 0.95rem; background-color: #fff3cd; border: 1px solid #ffecb5; color: #d9534f;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong style="color: #d35400;">Tài khoản của bạn chưa được xác thực KYC.</strong> Vui lòng cập nhật số điện thoại và xác thực để gửi phản ánh.
+            </div>
+        }
+
         <form asp-page="./Profile" method="post">
             <input type="hidden" asp-for="Input.AvatarUrl" id="avatarUrlInput" />
             <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 rounded-3 mb-3" style="font-size: 0.85rem;" role="alert"></div>
@@ -106,6 +113,76 @@
                 </div>
             </div>
         </form>
+
+        <!-- Gamification Section -->
+        <div class="row g-3 mt-1">
+            <!-- Điểm số và Huy hiệu -->
+            <div class="col-md-5">
+                <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center" style="border-radius: var(--radius-lg);">
+                    <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-award-fill me-1"></i> Huy hiệu Công Dân</h5>
+                    @{
+                        string badge = "Tân Binh";
+                        string color = "bg-cyan-lt";
+                        if (Model.CitizenPoints >= 1000) { badge = "Bạch Kim"; color = "bg-dark text-white"; }
+                        else if (Model.CitizenPoints >= 500) { badge = "Vàng"; color = "bg-warning text-white"; }
+                        else if (Model.CitizenPoints >= 200) { badge = "Bạc"; color = "bg-secondary text-white"; }
+                        else if (Model.CitizenPoints >= 50) { badge = "Đồng"; color = "bg-orange text-white"; }
+                    }
+                    <div class="display-1 mb-2"><i class="bi bi-shield-check text-primary"></i></div>
+                    <div class="h2 fw-bold mb-1">@badge</div>
+                    <span class="badge @color mb-4 fs-6 py-2 px-3 mx-auto">@Model.CitizenPoints pts</span>
+                    
+                    <div class="d-flex justify-content-between text-muted fs-sm px-3">
+                        <span>Độ uy tín (TrustScore)</span>
+                        <span class="fw-bold text-success">@Model.TrustScore</span>
+                    </div>
+                    <div class="progress progress-sm mt-2 mx-3">
+                        <div class="progress-bar bg-success" style="width: @(Model.TrustScore > 100 ? 100 : Model.TrustScore)%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lịch sử nhận điểm -->
+            <div class="col-md-7">
+                <div class="glass-card p-4 h-100" style="border-radius: var(--radius-lg);">
+                    <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-clock-history me-1"></i> Lịch sử Điểm thưởng</h5>
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-vcenter table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Lý do</th>
+                                    <th class="text-end">Cộng hiến</th>
+                                    <th class="text-end">Uy tín</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!Model.PointTransactions.Any())
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted p-3">Chưa có lịch sử nhận điểm. Tích cực hoạt động để nhận điểm nhé!</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var trans in Model.PointTransactions)
+                                    {
+                                        <tr>
+                                            <td class="text-muted fs-sm">@trans.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@trans.Reason</td>
+                                            <td class="text-end text-success fw-bold">+@trans.PointsDelta</td>
+                                            <td class="text-end @(trans.TrustScoreDelta >= 0 ? "text-primary" : "text-danger") fw-bold">
+                                                @(trans.TrustScoreDelta > 0 ? "+" : "")@(trans.TrustScoreDelta)
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

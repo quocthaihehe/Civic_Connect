@@ -108,6 +108,10 @@ builder.Services.AddSignalR(options =>
     options.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10 MB
 });
 
+// Custom services
+builder.Services.AddScoped<CivicConnect.Web.Services.ICitizenPointsService, CivicConnect.Web.Services.CitizenPointsService>();
+builder.Services.AddHostedService<CivicConnect.Web.Services.BackgroundJobs.TrendingUpdaterJob>();
+
 var app = builder.Build();
 
 // Tự động chạy Seed Data cho các tài khoản thử nghiệm khi khởi động
@@ -119,8 +123,10 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         await DbInitializer.SeedUsersAsync(userManager);
         
-        // Reset online status of all users to offline at startup
         var dbContext = services.GetRequiredService<AppDbContext>();
+        await DbInitializer.SeedCommunityDataAsync(dbContext, userManager);
+        
+        // Reset online status of all users to offline at startup
         var onlineUsers = await dbContext.Users.Where(u => u.IsOnline).ToListAsync();
         if (onlineUsers.Any())
         {

@@ -1,8 +1,12 @@
+using CivicConnect.Web.Data;
 using CivicConnect.Web.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CivicConnect.Web.Areas.Identity.Pages.Account
@@ -10,15 +14,21 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
     public class ProfileModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AppDbContext _context;
 
-        public ProfileModel(UserManager<ApplicationUser> userManager)
+        public ProfileModel(UserManager<ApplicationUser> userManager, AppDbContext context)
         {
             _userManager = userManager;
+            _context = context;
         }
 
         [BindProperty]
         public InputModel Input { get; set; } = new();
 
+        public bool IsPhoneVerified { get; set; }
+        public int CitizenPoints { get; set; }
+        public int TrustScore { get; set; }
+        public List<PointTransaction> PointTransactions { get; set; } = new();
 
         public class InputModel
         {
@@ -48,11 +58,20 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
             public string? AvatarUrl { get; set; }
         }
 
-
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToPage("./Login");
+
+            IsPhoneVerified = user.IsPhoneVerified;
+            CitizenPoints = user.CitizenPoints;
+            TrustScore = user.TrustScore;
+
+            PointTransactions = await _context.PointTransactions
+                .Where(t => t.UserId == user.Id)
+                .OrderByDescending(t => t.CreatedAt)
+                .Take(20)
+                .ToListAsync();
 
             Input = new InputModel
             {
@@ -72,6 +91,8 @@ namespace CivicConnect.Web.Areas.Identity.Pages.Account
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToPage("./Login");
+
+            IsPhoneVerified = user.IsPhoneVerified;
 
             if (ModelState.IsValid)
             {

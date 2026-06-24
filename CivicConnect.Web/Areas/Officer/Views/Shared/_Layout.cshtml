@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>@ViewData["Title"] - Cổng Cán Bộ CivicConnect</title>
+    <!-- Tabler Core -->
+    <link href="https://cdn.jsdelivr.net/npm/@@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet" />
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .navbar-brand-image { height: 2rem; }
+        .theme-cyan .navbar { border-top: 4px solid #0dcaf0; }
+        .nav-link.active { font-weight: 600; color: #0dcaf0 !important; }
+    </style>
+</head>
+<body class="theme-cyan border-top-wide border-primary d-flex flex-column">
+    <div class="page">
+        <!-- Navbar -->
+        <header class="navbar navbar-expand-md navbar-light d-print-none">
+            <div class="container-xl">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+                    <a href="/Officer/Dashboard" class="text-decoration-none d-flex align-items-center">
+                        <i class="bi bi-shield-check text-cyan fs-2 me-2"></i>
+                        <span>Cổng Cán Bộ</span>
+                    </a>
+                </h1>
+                <div class="navbar-nav flex-row order-md-last">
+                    <div class="nav-item dropdown d-none d-md-flex me-3">
+                        <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
+                            <i class="bi bi-bell fs-2"></i>
+                            <span class="badge bg-red"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Thông báo</h3>
+                                </div>
+                                <div class="list-group list-group-flush list-group-hoverable">
+                                    <div class="list-group-item">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto"><span class="status-dot status-dot-animated bg-red d-block"></span></div>
+                                            <div class="col text-truncate">
+                                                <a href="#" class="text-body d-block">Sự cố mới trên địa bàn</a>
+                                                <div class="d-block text-muted text-truncate mt-n1">
+                                                    Ngập rác tại ngõ 123...
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+                            <span class="avatar avatar-sm bg-cyan-lt"><i class="bi bi-person"></i></span>
+                            <div class="d-none d-xl-block ps-2">
+                                <div>@User.Identity?.Name</div>
+                                <div class="mt-1 small text-muted">Cán bộ địa bàn</div>
+                            </div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            <a href="/Identity/Account/Profile" class="dropdown-item">Hồ sơ cá nhân</a>
+                            <a href="/Officer/Performance" class="dropdown-item">Điểm KPI</a>
+                            <div class="dropdown-divider"></div>
+                            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                                <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <div class="navbar-expand-md">
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <div class="navbar navbar-light">
+                    <div class="container-xl">
+                        <ul class="navbar-nav">
+                            <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                                <a class="nav-link" href="/Officer/Dashboard">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-speedometer2"></i></span>
+                                    <span class="nav-link-title">Tổng quan</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Issues" ? "active" : "")">
+                                <a class="nav-link" href="/Officer/Issues">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-exclamation-triangle"></i></span>
+                                    <span class="nav-link-title">Quản lý Phản ánh</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Announcements" ? "active" : "")">
+                                <a class="nav-link" href="/Officer/Announcements">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-megaphone"></i></span>
+                                    <span class="nav-link-title">Cảnh báo & Thông báo</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Map" ? "active" : "")">
+                                <a class="nav-link" href="/Officer/Map">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-map"></i></span>
+                                    <span class="nav-link-title">Bản đồ Sự cố</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Performance" ? "active" : "")">
+                                <a class="nav-link" href="/Officer/Performance">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-graph-up-arrow"></i></span>
+                                    <span class="nav-link-title">Chỉ số KPI</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-wrapper">
+            @RenderBody()
+            <footer class="footer footer-transparent d-print-none">
+                <div class="container-xl">
+                    <div class="row text-center align-items-center flex-row-reverse">
+                        <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                            <ul class="list-inline list-inline-dots mb-0">
+                                <li class="list-inline-item">
+                                    Bản quyền &copy; 2026
+                                    <a href="." class="link-secondary">CivicConnect</a>.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Core plugins -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+    <!-- SignalR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

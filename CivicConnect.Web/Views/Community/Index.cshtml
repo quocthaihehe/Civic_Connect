@@ -1,415 +1,311 @@
+@using CivicConnect.Web.Models.Entities
+@using CivicConnect.Web.Models.Enums
+@model IEnumerable<dynamic>
+
 @{
-    ViewData["Title"] = "Cộng đồng Dân sinh";
+    ViewData["Title"] = "Mạng Xã Hội Cộng Đồng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var trendingTopics = ViewBag.TrendingTopics as IEnumerable<TrendingTopic>;
+    var topCitizens = ViewBag.TopCitizens as IEnumerable<dynamic>;
+    var currentTab = ViewBag.CurrentTab as string ?? "newest";
 }
 
-<style>
-    /* Compact layout styling */
-    .community-header {
-        background-color: #FDFBF7;
-        border: 1px solid rgba(19, 59, 47, 0.08);
-        border-radius: 12px;
-        padding: 1.2rem 1.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-image: url('/images/nền kem.jpg');
-        background-size: cover;
-    }
-    
-    .community-title {
-        color: #133B2F;
-        font-family: 'EB Garamond', serif;
-        font-weight: bold;
-        margin-bottom: 0.25rem;
-    }
-    
-    .search-box {
-        position: relative;
-        width: 300px;
-    }
-    .search-box input {
-        width: 100%;
-        padding: 0.4rem 1rem 0.4rem 2.2rem;
-        border-radius: 20px;
-        border: 1px solid rgba(19, 59, 47, 0.2);
-        background-color: white;
-        font-size: 0.85rem;
-    }
-    .search-box i {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6b7280;
-        font-size: 0.85rem;
-    }
+<div class="container-xl mt-4">
+    <div class="row">
+        <!-- Cột trái: Feed (Bài viết + Phản ánh) -->
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark mb-0" style="font-family: var(--font-display); font-size: 2rem;">
+                    Bảng tin Cộng đồng
+                </h2>
+                <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                    <i class="bi bi-plus-lg me-2"></i> Tạo bài viết
+                </button>
+            </div>
 
-    .feed-card {
-        background-color: white;
-        border: 1px solid rgba(19, 59, 47, 0.08);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 0.75rem; /* very tight margin */
-    }
-    
-    .feed-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
-    .feed-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background-color: #133B2F;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        margin-right: 10px;
-        font-size: 0.9rem;
-    }
-    .feed-meta h6 {
-        margin: 0;
-        font-weight: bold;
-        font-size: 0.9rem;
-        color: #133B2F;
-    }
-    .feed-meta small {
-        color: #6b7280;
-        font-size: 0.75rem;
-    }
-    
-    .feed-title {
-        font-weight: bold;
-        color: #1f2937;
-        margin-bottom: 0.25rem;
-        font-size: 1rem;
-    }
-    .feed-content {
-        font-size: 0.85rem;
-        color: #4b5563;
-        margin-bottom: 0.75rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    .feed-actions {
-        display: flex;
-        gap: 0.5rem;
-        border-top: 1px solid rgba(0,0,0,0.05);
-        padding-top: 0.5rem;
-    }
-    .action-btn {
-        background: none;
-        border: none;
-        color: #6b7280;
-        font-size: 0.8rem;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 0.2rem 0.5rem;
-        border-radius: 6px;
-        transition: background-color 0.2s;
-    }
-    .action-btn:hover {
-        background-color: #FDFBF7;
-        color: #133B2F;
-    }
-    
-    /* Widget specific */
-    .widget-card {
-        background-color: #FDFBF7;
-        border: 1px solid rgba(19, 59, 47, 0.08);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-    }
-    .widget-title {
-        color: #133B2F;
-        font-family: 'EB Garamond', serif;
-        font-weight: bold;
-        font-size: 1.05rem;
-        margin-bottom: 0.75rem;
-        border-bottom: 1px solid rgba(19, 59, 47, 0.1);
-        padding-bottom: 0.5rem;
-    }
-    
-    .leaderboard-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.4rem;
-        padding: 0.4rem 0.5rem;
-        border-radius: 8px;
-        background-color: white;
-        border: 1px solid rgba(19, 59, 47, 0.05);
-    }
-    .rank-badge {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        font-weight: bold;
-        margin-right: 8px;
-    }
-    .rank-1 { background-color: #FFD700; color: #856404; }
-    .rank-2 { background-color: #E0E0E0; color: #383d41; }
-    .rank-3 { background-color: #CD7F32; color: #721c24; }
-    
-    .trend-tag {
-        display: inline-block;
-        padding: 2px 6px;
-        background-color: white;
-        border: 1px solid rgba(19, 59, 47, 0.1);
-        border-radius: 12px;
-        font-size: 0.7rem;
-        color: #133B2F;
-        margin: 0 3px 4px 0;
-    }
+            <!-- Tabs -->
+            <ul class="nav nav-pills mb-4 gap-2">
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-3 py-2 fw-medium @(currentTab == "newest" ? "active" : "bg-white text-muted border")" href="?tab=newest">
+                        <i class="bi bi-clock-history me-1"></i> Mới nhất
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-3 py-2 fw-medium @(currentTab == "trending" ? "active bg-danger text-white" : "bg-white text-danger border")" href="?tab=trending">
+                        <i class="bi bi-fire me-1"></i> Được quan tâm
+                    </a>
+                </li>
+            </ul>
 
-    .fab {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        background-color: #1E5C4A;
-        color: white;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        box-shadow: 0 4px 15px rgba(30, 92, 74, 0.4);
-        z-index: 1000;
-        transition: transform 0.2s;
-    }
-    .fab:hover {
-        transform: scale(1.05);
-        color: white;
-    }
-</style>
+            <!-- Feed List -->
+            <div class="feed-list">
+                @if (!Model.Any())
+                {
+                    <div class="glass-card text-center py-5 shadow-sm rounded-4 bg-white border-0">
+                        <i class="bi bi-inbox text-muted opacity-50 display-3 d-block mb-3"></i>
+                        <p class="fw-bold text-dark mb-0">Chưa có bài viết nào</p>
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        if (item.Type == "Post")
+                        {
+                            <!-- Post Card -->
+                            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg); transition: all 0.3s ease;">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3" style="width: 44px; height: 44px; font-weight: bold; font-size: 1.1rem;">
+                                        @(string.IsNullOrEmpty(item.AuthorName) ? "U" : ((string)item.AuthorName).Substring(0, 1))
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@item.AuthorName</div>
+                                        <div class="text-muted small">@(((DateTime)item.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</div>
+                                    </div>
+                                    <div class="ms-auto text-muted small bg-light rounded-pill px-3 py-1 border d-flex align-items-center gap-1" style="font-size: 0.8rem;">
+                                        <i class="bi bi-chat-text-fill text-primary"></i> Bài đăng
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold mb-2" style="font-family: var(--font-display); font-size: 1.25rem;"><a href="/Community/PostDetail/@item.Id" class="text-decoration-none text-dark hover-lift">@item.Title</a></h3>
+                                <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+                                    @if (((string)item.Content).Length > 150)
+                                    {
+                                        @(((string)item.Content).Substring(0, 150) + "...")
+                                    }
+                                    else
+                                    {
+                                        @item.Content
+                                    }
+                                </p>
+                                @if (!string.IsNullOrEmpty((string)item.Tags))
+                                {
+                                    <div class="mb-3 d-flex flex-wrap gap-1">
+                                        @foreach (var tag in ((string)item.Tags).Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1.5" style="font-size: 0.75rem;">#@tag.Trim()</span>
+                                        }
+                                    </div>
+                                }
+                                <div class="d-flex align-items-center pt-2 border-top">
+                                    <button class="btn btn-action text-danger border-0 bg-transparent btn-like d-flex align-items-center gap-1 py-1" data-post-id="@item.Id">
+                                        <i class="bi bi-heart"></i> <span class="like-count fw-bold">@item.LikeCount</span>
+                                    </button>
+                                    <a href="/Community/PostDetail/@item.Id" class="btn btn-action text-muted border-0 bg-transparent ms-3 d-flex align-items-center gap-1 py-1">
+                                        <i class="bi bi-chat-dots"></i> <span class="fw-bold">@item.CommentCount</span> bình luận
+                                    </a>
+                                    @if (item.PopularityScore >= 20)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 ms-auto"><i class="bi bi-fire me-1"></i> Đang hot</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else if (item.Type == "Issue")
+                        {
+                            <!-- Issue Card -->
+                            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg); border-left: 4px solid var(--warning-500) !important; transition: all 0.3s ease;">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center me-3" style="width: 44px; height: 44px; font-weight: bold; font-size: 1.1rem; color: #D97706 !important;">
+                                        @(string.IsNullOrEmpty(item.AuthorName) ? "C" : ((string)item.AuthorName).Substring(0, 1))
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@item.AuthorName</div>
+                                        <div class="text-muted small">@(((DateTime)item.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</div>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <span class="badge @(item.Status == IssueStatus.Resolved ? "bg-success text-white" : "bg-warning text-dark") rounded-pill px-3 py-1.5 shadow-sm" style="font-size: 0.8rem;">
+                                            @(item.Status == IssueStatus.Resolved ? "Đã giải quyết" : "Đang xử lý")
+                                        </span>
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold mb-2" style="font-family: var(--font-display); font-size: 1.25rem;"><a href="/Issues/Details/@item.Id" class="text-decoration-none text-dark hover-lift">@item.Title</a></h3>
+                                <p class="text-muted mb-2 small d-flex align-items-center gap-1">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i> @item.Address
+                                </p>
+                                <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+                                    @if (((string)item.Content).Length > 150)
+                                    {
+                                        @(((string)item.Content).Substring(0, 150) + "...")
+                                    }
+                                    else
+                                    {
+                                        @item.Content
+                                    }
+                                </p>
+                                <div class="d-flex align-items-center pt-2 border-top">
+                                    <a href="/Issues/Details/@item.Id" class="btn btn-action text-muted border-0 bg-transparent d-flex align-items-center gap-1 py-1">
+                                        <i class="bi bi-chat-dots"></i> <span class="fw-bold">@item.CommentCount</span> thảo luận
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+        </div>
 
-<div class="community-header">
-    <div>
-        <h2 class="community-title">Cộng đồng Civic Connect</h2>
-        <p class="text-muted mb-0" style="font-size: 0.8rem;">Nơi tiếng nói của bạn tạo nên sự thay đổi</p>
-    </div>
-    <div class="search-box d-none d-md-block">
-        <i class="bi bi-search"></i>
-        <input type="text" id="communitySearchBox" placeholder="Tìm kiếm phản ánh, sự kiện...">
+        <!-- Cột phải: Widgets -->
+        <div class="col-lg-4">
+            <!-- Khám phá Cộng đồng -->
+            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg);">
+                <h4 class="fw-bold mb-3 pb-2 border-bottom text-dark" style="font-family: var(--font-display);"><i class="bi bi-compass-fill text-primary me-2"></i>Khám phá Cộng đồng</h4>
+                <div class="list-group list-group-flush">
+                    <a href="@Url.Action("Polls")" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-0 border-bottom-0 transition-hover-item">
+                        <span class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;"><i class="bi bi-bar-chart-fill fs-5"></i></span>
+                        <div class="fw-semibold text-dark">Thăm dò ý kiến</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted small"></i>
+                    </a>
+                    <a href="@Url.Action("Petitions")" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-0 border-bottom-0 transition-hover-item">
+                        <span class="rounded-circle bg-teal bg-opacity-10 text-teal d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;"><i class="bi bi-pen-fill fs-5" style="color: #0D9488;"></i></span>
+                        <div class="fw-semibold text-dark">Kiến nghị điện tử</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted small"></i>
+                    </a>
+                    <a href="@Url.Action("Events")" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-0 border-bottom-0 transition-hover-item">
+                        <span class="rounded-circle bg-purple bg-opacity-10 text-purple d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;"><i class="bi bi-calendar-event-fill fs-5" style="color: #7C3AED;"></i></span>
+                        <div class="fw-semibold text-dark">Sự kiện sắp tới</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted small"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Trending Topics -->
+            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg);">
+                <h4 class="fw-bold mb-3 pb-2 border-bottom text-danger" style="font-family: var(--font-display);"><i class="bi bi-fire me-2"></i>Chủ đề nổi bật</h4>
+                <div class="d-flex flex-wrap gap-2 pt-1">
+                    @if (trendingTopics != null && trendingTopics.Any())
+                    {
+                        foreach (var topic in trendingTopics)
+                        {
+                            <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-muted" style="font-size: 0.8rem;">
+                                #@topic.Tag <span class="badge bg-secondary bg-opacity-25 text-secondary ms-1">@topic.PostCount</span>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted small">Chưa có chủ đề nổi bật</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Bảng Vàng danh dự (Tóm tắt) -->
+            <div class="glass-card mb-4 border-0 shadow-sm p-4 bg-white" style="border-radius: var(--radius-lg);">
+                <h4 class="fw-bold mb-3 pb-2 border-bottom text-warning" style="font-family: var(--font-display); color: #B45309 !important;"><i class="bi bi-trophy-fill me-2"></i>Bảng vàng danh dự</h4>
+                <div class="list-group list-group-flush">
+                    @if (topCitizens != null && topCitizens.Any())
+                    {
+                        int rank = 1;
+                        foreach (var citizen in topCitizens)
+                        {
+                            <div class="list-group-item d-flex align-items-center py-2 px-0 border-bottom-0">
+                                <div class="me-3 fw-bold @(rank <= 3 ? "text-warning" : "text-muted")" style="width: 20px;">
+                                    #@rank
+                                </div>
+                                <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; font-weight: bold; font-size: 0.85rem;">
+                                    @(string.IsNullOrEmpty(citizen.FullName) ? "C" : citizen.FullName.Substring(0, 1))
+                                </div>
+                                <div class="flex-fill">
+                                    <div class="fw-bold text-dark" style="font-size: 0.9rem;">@citizen.FullName</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">@citizen.UserName</div>
+                                </div>
+                                <div class="fw-bold text-success" style="font-size: 0.9rem;">
+                                    @citizen.CitizenPoints <span class="small font-normal text-muted" style="font-size: 0.75rem;">đ</span>
+                                </div>
+                            </div>
+                            rank++;
+                        }
+                    }
+                </div>
+                <div class="text-center pt-3 border-top mt-2">
+                    <a href="/Leaderboard" class="text-decoration-none text-primary small fw-semibold">Xem tất cả bảng xếp hạng →</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="row g-2"> <!-- Very compact gutter -->
-    <!-- Feed Column (Left) -->
-    <div class="col-lg-8">
-        
-        <!-- Filter Tabs -->
-        <div class="d-flex gap-2 mb-2 overflow-auto pb-1" id="filterTabs">
-            <button class="btn btn-sm filter-tab" style="background-color: #133B2F; color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Mới nhất</button>
-            <button class="btn btn-sm filter-tab" style="border: 1px solid rgba(19,59,47,0.2); color: #133B2F; background-color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Được quan tâm</button>
-            <button class="btn btn-sm filter-tab" style="border: 1px solid rgba(19,59,47,0.2); color: #133B2F; background-color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Giao thông</button>
-            <button class="btn btn-sm filter-tab" style="border: 1px solid rgba(19,59,47,0.2); color: #133B2F; background-color: white; border-radius: 16px; padding: 2px 12px; font-size: 0.8rem;">Môi trường</button>
-        </div>
-
-        <!-- Sample Post 1 -->
-        <div class="feed-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div class="feed-header">
-                    <div class="feed-avatar">H</div>
-                    <div class="feed-meta">
-                        <h6>Hoàng Trần</h6>
-                        <small>2 giờ trước • Quận 1</small>
+<!-- Modal Tạo bài viết -->
+<div class="modal modal-blur fade" id="createPostModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: var(--radius-lg); border: none;">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold" style="font-family: var(--font-display); font-size: 1.25rem;">Tạo bài viết mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CreatePost" method="post">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Tiêu đề</label>
+                        <input type="text" class="form-control rounded-3" name="title" required placeholder="Nhập tiêu đề...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Nội dung</label>
+                        <textarea class="form-control rounded-3" name="content" rows="6" required placeholder="Bạn muốn chia sẻ điều gì?"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Hashtags</label>
+                        <input type="text" class="form-control rounded-3" name="tags" placeholder="VD: giaothong, an_ninh (cách nhau bởi dấu phẩy)">
+                    </div>
+                    <div class="alert alert-info rounded-3 border-0 bg-primary bg-opacity-10 text-primary small d-flex align-items-center gap-2 mb-0">
+                        <i class="bi bi-info-circle-fill fs-5"></i>
+                        <div>Bài viết của bạn sẽ được gửi tới Ban Quản Trị để phê duyệt trước khi hiển thị trên Bảng tin. Nếu được duyệt, bạn sẽ nhận được <strong>+10 điểm thưởng</strong>.</div>
                     </div>
                 </div>
-                <span class="badge bg-warning text-dark" style="font-size: 0.65rem; border-radius: 12px; padding: 0.35em 0.65em;">Đang xử lý</span>
-            </div>
-            <div class="feed-title">Hố tử thần trên đường Lê Lợi</div>
-            <p class="feed-content">Xin báo cáo có một ổ gà rất to và nguy hiểm vừa xuất hiện sau đợt mưa lớn hôm qua trên đường Lê Lợi, đoạn gần phố đi bộ. Đã có 2 vụ ngã xe do không quan sát kịp. Kính mong cơ quan chức năng sớm rào chắn và khắc phục.</p>
-            <div class="feed-actions">
-                <button class="action-btn upvote-btn"><i class="bi bi-hand-thumbs-up"></i> <span>142</span></button>
-                <button class="action-btn comment-btn"><i class="bi bi-chat"></i> 15 bình luận</button>
-                <button class="action-btn share-btn"><i class="bi bi-share"></i> Chia sẻ</button>
-            </div>
-        </div>
-
-        <!-- Sample Post 2 -->
-        <div class="feed-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div class="feed-header">
-                    <div class="feed-avatar" style="background-color: #4b5563;">L</div>
-                    <div class="feed-meta">
-                        <h6>Lê Minh</h6>
-                        <small>5 giờ trước • Bình Thạnh</small>
-                    </div>
+                <div class="modal-footer border-top p-3">
+                    <button type="button" class="btn btn-link link-secondary me-auto text-decoration-none" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm"><i class="bi bi-send me-2"></i> Gửi bài viết</button>
                 </div>
-                <span class="badge bg-success text-white" style="font-size: 0.65rem; border-radius: 12px; padding: 0.35em 0.65em;">Đã giải quyết</span>
-            </div>
-            <div class="feed-title">Tình trạng xả rác bừa bãi tại Công viên Thanh Đa</div>
-            <p class="feed-content">Cảm ơn đội ngũ vệ sinh môi trường đã xử lý dứt điểm đống rác tự phát tại công viên. Không gian đã trở lại xanh sạch đẹp cho người dân tập thể dục buổi sáng.</p>
-            <div class="feed-actions">
-                <button class="action-btn upvote-btn"><i class="bi bi-hand-thumbs-up"></i> <span>320</span></button>
-                <button class="action-btn comment-btn"><i class="bi bi-chat"></i> 45 bình luận</button>
-                <button class="action-btn share-btn"><i class="bi bi-share"></i> Chia sẻ</button>
-            </div>
+            </form>
         </div>
-        
-        <!-- Sample Post 3 -->
-        <div class="feed-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div class="feed-header">
-                    <div class="feed-avatar" style="background-color: #1E5C4A;">N</div>
-                    <div class="feed-meta">
-                        <h6>Nguyễn Lan</h6>
-                        <small>Hôm qua • Quận 7</small>
-                    </div>
-                </div>
-                <span class="badge bg-info text-white" style="font-size: 0.65rem; border-radius: 12px; padding: 0.35em 0.65em;">Mới tiếp nhận</span>
-            </div>
-            <div class="feed-title">Đề xuất lắp thêm đèn tín hiệu ngã tư Nguyễn Thị Thập</div>
-            <p class="feed-content">Lưu lượng xe cộ tại ngã tư này hiện tại quá đông vào giờ cao điểm, tình trạng kẹt xe kéo dài thường xuyên xảy ra. Mong phường xem xét lắp đèn tín hiệu thay vì để công an giao thông phải điều tiết thủ công mỗi ngày.</p>
-            <div class="feed-actions">
-                <button class="action-btn upvote-btn"><i class="bi bi-hand-thumbs-up"></i> <span>89</span></button>
-                <button class="action-btn comment-btn"><i class="bi bi-chat"></i> 12 bình luận</button>
-                <button class="action-btn share-btn"><i class="bi bi-share"></i> Chia sẻ</button>
-            </div>
-        </div>
-        
-        <div class="text-center mt-2 mb-4">
-            <button id="btnLoadMore" class="btn btn-sm" style="color: #133B2F; border: 1px solid rgba(19,59,47,0.2); background-color: white; font-size: 0.8rem;">Tải thêm <i class="bi bi-chevron-down ms-1"></i></button>
-        </div>
-    </div>
-
-    <!-- Widgets Column (Right) -->
-    <div class="col-lg-4">
-        
-        <!-- Mini Stats -->
-        <div class="widget-card d-flex justify-content-around text-center py-2">
-            <div>
-                <h6 class="fw-bold mb-0" style="color: #133B2F;">12.4K</h6>
-                <small class="text-muted" style="font-size: 0.7rem;">Thành viên</small>
-            </div>
-            <div style="width: 1px; background-color: rgba(19,59,47,0.1);"></div>
-            <div>
-                <h6 class="fw-bold mb-0" style="color: #133B2F;">450+</h6>
-                <small class="text-muted" style="font-size: 0.7rem;">Đã giải quyết</small>
-            </div>
-        </div>
-
-        <!-- Leaderboard -->
-        <div class="widget-card">
-            <h4 class="widget-title"><i class="bi bi-trophy text-warning me-2"></i>Bảng vàng đóng góp</h4>
-            <div class="leaderboard-item">
-                <div class="rank-badge rank-1">1</div>
-                <div class="ms-1">
-                    <div style="font-size: 0.8rem; font-weight: bold; color: #133B2F;">Trần Văn Bình</div>
-                    <div style="font-size: 0.65rem; color: #6b7280;">42 phản ánh hữu ích</div>
-                </div>
-            </div>
-            <div class="leaderboard-item">
-                <div class="rank-badge rank-2">2</div>
-                <div class="ms-1">
-                    <div style="font-size: 0.8rem; font-weight: bold; color: #133B2F;">Lê Thị Hoa</div>
-                    <div style="font-size: 0.65rem; color: #6b7280;">38 phản ánh hữu ích</div>
-                </div>
-            </div>
-            <div class="leaderboard-item">
-                <div class="rank-badge rank-3">3</div>
-                <div class="ms-1">
-                    <div style="font-size: 0.8rem; font-weight: bold; color: #133B2F;">Phạm Minh Tuấn</div>
-                    <div style="font-size: 0.65rem; color: #6b7280;">25 phản ánh hữu ích</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Trending Topics -->
-        <div class="widget-card">
-            <h4 class="widget-title"><i class="bi bi-hash text-primary me-2"></i>Chủ đề đang nóng</h4>
-            <div>
-                <span class="trend-tag">#GiaoThông</span>
-                <span class="trend-tag">#NgậpNước</span>
-                <span class="trend-tag">#TrậtTự</span>
-                <span class="trend-tag">#CôngViên</span>
-                <span class="trend-tag">#ChóThảRông</span>
-            </div>
-        </div>
-
     </div>
 </div>
-
-<a asp-controller="Issues" asp-action="Create" class="fab text-decoration-none" title="Tạo phản ánh ngay">
-    <i class="bi bi-plus-lg"></i>
-</a>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Filter tabs functionality
-            $('.filter-tab').click(function () {
-                $('.filter-tab').css({
-                    'background-color': 'white',
-                    'color': '#133B2F'
-                });
-                $(this).css({
-                    'background-color': '#133B2F',
-                    'color': 'white'
-                });
-            });
-
-            // Upvote functionality
-            $('.upvote-btn').click(function () {
-                let $icon = $(this).find('i');
-                let $span = $(this).find('span');
-                let count = parseInt($span.text());
+            // Xử lý nút Like bằng AJAX
+            $('.btn-like').click(function (e) {
+                e.preventDefault();
+                var btn = $(this);
+                var postId = btn.data('post-id');
+                var icon = btn.find('i');
                 
-                if ($icon.hasClass('bi-hand-thumbs-up')) {
-                    $icon.removeClass('bi-hand-thumbs-up').addClass('bi-hand-thumbs-up-fill text-success');
-                    $(this).css('color', '#133B2F');
-                    $span.text(count + 1);
-                } else {
-                    $icon.removeClass('bi-hand-thumbs-up-fill text-success').addClass('bi-hand-thumbs-up');
-                    $(this).css('color', '#6b7280');
-                    $span.text(count - 1);
-                }
-            });
-
-            // Comment functionality (simulate)
-            $('.comment-btn').click(function () {
-                alert("Đang tải dữ liệu bình luận...");
-            });
-
-            // Share functionality (simulate)
-            $('.share-btn').click(function () {
-                alert("Đã sao chép liên kết bài viết vào khay nhớ tạm!");
-            });
-
-            // Load more
-            $('#btnLoadMore').click(function () {
-                let $btn = $(this);
-                let originalText = $btn.html();
-                $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang tải...');
-                setTimeout(function () {
-                    $btn.html('Không còn phản ánh nào');
-                    $btn.prop('disabled', true);
-                }, 1000);
-            });
-            
-            // Search
-            $('#communitySearchBox').on('keypress', function (e) {
-                if (e.which === 13) {
-                    let val = $(this).val();
-                    if(val) {
-                        alert("Chức năng tìm kiếm sẽ hiển thị kết quả cho: " + val);
+                $.post('/Community/LikePost', { postId: postId }, function (res) {
+                    if (res.success) {
+                        btn.find('.like-count').text(res.likes);
+                        icon.removeClass('bi-heart').addClass('bi-heart-fill text-danger');
+                        btn.addClass('bounce-anim');
+                        setTimeout(() => btn.removeClass('bounce-anim'), 1000);
+                    } else {
+                        alert("Có lỗi xảy ra hoặc bạn chưa đăng nhập.");
                     }
-                }
+                });
             });
         });
     </script>
+    <style>
+        .bounce-anim i {
+            display: inline-block;
+            animation: bounce 0.3s;
+        }
+        @@keyframes bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        .transition-hover-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .transition-hover-item:hover {
+            background-color: var(--gray-50) !important;
+            padding-left: 8px !important;
+            color: var(--primary-600) !important;
+        }
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            color: var(--primary-500) !important;
+        }
+    </style>
 }
